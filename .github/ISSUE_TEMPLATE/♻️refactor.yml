@@ -1,0 +1,42 @@
+name: "♻️ REFACTOR"
+description: "코드 개선 템플릿"
+title: "[REFACTOR] "
+labels: ["refactor"]
+body:
+  - type: input
+    id: target
+    attributes:
+      label: "리팩토링 대상"
+      description: "어떤 파일이나 기능의 코드를 개선할 것인지 작성해주세요."
+      placeholder: "예: 'src/utils/parser.py'의 'parse_data' 함수"
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: "개선 이유"
+      description: "왜 이 코드를 리팩토링해야 하는지 설명해주세요. (가독성, 성능, 유지보수성 등)"
+      placeholder: "예: '가독성 향상', '성능 최적화', '중복 코드 제거'"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: "작업 상세 내용 (개선 방안)"
+      description: "어떻게 개선할 것인지 구체적인 방안을 작성해주세요."
+      placeholder: "예: '기존 for문을 list comprehension으로 변경'"
+  - type: textarea
+    id: todo
+    attributes:
+      label: "📝 Todo"
+      description: "작업 목록을 작성해주세요."
+      placeholder: |
+        - [ ] 대상 코드 분석
+        - [ ] 리팩토링 적용
+        - [ ] 기존 테스트 통과 확인
+  - type: input
+    id: related-issues
+    attributes:
+      label: "🔗 관련 이슈"
+      description: "관련된 이슈가 있다면 링크를 남겨주세요."
+      placeholder: "예: #1, #2"
