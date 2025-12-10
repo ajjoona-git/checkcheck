@@ -70,11 +70,13 @@ class ProductOption(models.Model):
         related_name="options",
     )
 
-    dcls_month = models.CharField(max_length=6, blank=True)  # 공시월 (옵션 기준)
-
     # 저축 금리 정보
     intr_rate_type = models.CharField(max_length=10, blank=True)     # 금리 유형 코드
     intr_rate_type_nm = models.CharField(max_length=20, blank=True)  # 금리 유형명 (단리/복리 등)
+
+    # 적금일 경우에만 의미 있는 필드 (정액/자유 적립 등)
+    rsrv_type = models.CharField(max_length=10, blank=True)          # 적립 유형 코드
+    rsrv_type_nm = models.CharField(max_length=20, blank=True)       # 적립 유형명
 
     save_trm = models.CharField(max_length=10, blank=True)   # 저축 기간 (개월)
     intr_rate = models.FloatField(null=True, blank=True)     # 기본 금리
