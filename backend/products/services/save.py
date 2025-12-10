@@ -122,16 +122,25 @@ def _save_page_to_db(product_type: str, base_list: list[dict], option_list: list
         ProductOption.objects.filter(product=product).delete()
 
         for opt in option_map.get((fin_co_no, fin_prdt_cd), []):
+            # 기본값은 공백 → 정기예금(DEPOSIT)일 때는 그냥 빈 값으로 남김
+            rsrv_type = ""
+            rsrv_type_nm = ""
+
+            # 적금(SAVING)일 때만 적립유형 세팅
+            if product.product_type == Product.ProductType.SAVING:
+                rsrv_type = opt.get("rsrv_type") or ""
+                rsrv_type_nm = opt.get("rsrv_type_nm") or ""
+
             ProductOption.objects.create(
                 product=product,
-                dcls_month=opt.get("dcls_month") or "",
                 intr_rate_type=opt.get("intr_rate_type") or "",
                 intr_rate_type_nm=opt.get("intr_rate_type_nm") or "",
+                rsrv_type=rsrv_type,
+                rsrv_type_nm=rsrv_type_nm,
                 save_trm=opt.get("save_trm") or "",
                 intr_rate=opt.get("intr_rate"),
                 intr_rate2=opt.get("intr_rate2"),
             )
-
 
 def sync_deposit_products():
     '''
