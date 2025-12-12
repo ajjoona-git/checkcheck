@@ -24,12 +24,8 @@ class CustomRegisterSerializer(RegisterSerializer):
         return cleaned_data
 
     def save(self, request):
-        """
-        회원가입시 nichname과 birth를 필수로 받기 때문에 이 값들이
-        DB에 까지 잘 반영되도록.
-        """
         user = super().save(request)
-        user.nickname = self.cleaned_data.get("nickname")
-        user.birth = self.cleaned_data.get("birth")
+        user.nickname = self.validated_data.get("nickname")
+        user.birth = self.validated_data.get("birth")
         user.save()
         return user
