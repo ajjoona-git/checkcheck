@@ -11,27 +11,30 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
-from dotenv import load_dotenv
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env 파일 로드
-load_dotenv(BASE_DIR / ".env")
+# environ 초기화
+env = environ.Env()
+
+# 개발 환경을 위해 기본 .env 파일 로드 (운영 환경에서는 .env.prod에 의해 덮어쓰기됨)
+environ.Env.read_env(BASE_DIR / ".env")
 
 # 환경 변수 → Django settings 변수로 매핑
-FSS_API_KEY = os.getenv("FSS_API_KEY")
+FSS_API_KEY = env("FSS_API_KEY")
 FSS_BASE_URL = "https://finlife.fss.or.kr/finlifeapi/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(2z-q#l%1dr9ahl2w@_%ad&%%!rpegtune$dv#+4g_5#7)^$=z'
+# 환경변수로 관리해야함!
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = []
 
