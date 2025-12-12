@@ -1,4 +1,9 @@
-Django==5.2.4
-djangorestframework==3.16.0
+Django==5.2.9
+djangorestframework==3.16.1
 requests==2.32.4
 python-dotenv
+dj-rest-auth==7.0.1
+django-allauth==64.0.0
+django-cors-headers==4.9.0
+django-environ
+Pillow==12.0.0
