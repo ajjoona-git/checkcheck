@@ -36,6 +36,8 @@ class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("등록되지 않은 이메일입니다.")
         return value
 
 
