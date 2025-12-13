@@ -6,9 +6,6 @@
       <label for="username">username: </label>
       <input type="text" id="username" v-model.trim="username" /> <br>
 
-      <label for="email">email: </label>
-      <input type="email" id="email" v-model.trim="email" /> <br>
-
       <label for="password">password: </label>
       <input type="password" id="password" v-model.trim="password" /> <br>
 
@@ -22,7 +19,6 @@
   import { useAccountStore } from '@/stores/accounts';
 
   const username = ref(null)
-  const email = ref(null)
   const password = ref(null)
 
   const accountStore = useAccountStore()
@@ -30,7 +26,6 @@
   const logIn = function () {
     const payload = {
       username: username.value,
-      email: email.value,
       password: password.value,
     }
     accountStore.logIn(payload)
