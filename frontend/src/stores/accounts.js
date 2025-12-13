@@ -50,6 +50,7 @@ export const useAccountStore = defineStore('account', () => {
       url: `${API_URL}/accounts/logout/`,
     })
       .then((res) => {
+        console.log('로그아웃이 완료되었습니다.')
         token.value = null
         router.push({ name: 'login'})
       })
