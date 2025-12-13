@@ -2,6 +2,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth.password_validation import validate_password
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import setup_user_email
+
 
 User = get_user_model()
 
@@ -15,20 +18,25 @@ class CustomRegisterSerializer(RegisterSerializer):
     birth = serializers.DateField(required=True)
 
     def get_cleaned_data(self):
-        cleaned_data = super().get_cleaned_data()
-        cleaned_data.update(
-            {
-                "nickname": self.validated_data.get("nickname", ""),
-                "birth": self.validated_data.get("birth", None),
-            }
-        )
-        return cleaned_data
+        data = super().get_cleaned_data()
+        data["nickname"] = self.validated_data.get("nickname")
+        data["birth"] = self.validated_data.get("birth")
+        return data
 
     def save(self, request):
-        user = super().save(request)
-        user.nickname = self.validated_data.get("nickname")
-        user.birth = self.validated_data.get("birth")
+        adapter = get_adapter()
+        user = adapter.new_user(request)
+        # allauth가 기본 필드(username/email/password 등) 세팅하도록 하되
+        # DB 저장은 아직 하지 않도록(commit=False)
+        self.cleaned_data = self.get_cleaned_data()
+        adapter.save_user(request, user, self, commit=False)
+        # 여기서 NOT NULL 커스텀 필드 먼저 세팅
+        user.nickname = self.cleaned_data.get("nickname")
+        user.birth = self.cleaned_data.get("birth")
+        # 이제 저장하면 NOT NULL 위반 없음
         user.save()
+        # 이메일 관련 설정(올어스 내부 로직)
+        setup_user_email(request, user, [])
         return user
 
 
