@@ -27,13 +27,13 @@ export const useAccountStore = defineStore('account', () => {
   }
 
   const logIn = function (payload) {
-    const { username, password } = payload
+    const { username, email, password } = payload
 
     axios({
       method: 'post',
       url: `${API_URL}/accounts/login/`,
       data: {
-        username, password
+        username, email, password
       }
     })
       .then(res => {
