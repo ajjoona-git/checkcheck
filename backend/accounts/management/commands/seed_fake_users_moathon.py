@@ -67,12 +67,10 @@ class Command(BaseCommand):
         users = []
         used_nickname = set()
 
-        def unique_nickname():
-            while True:
-                nick = f"nick{random.randint(10_000_000, 99_999_999)}"
-                if nick not in used_nickname:
-                    used_nickname.add(nick)
-                    return nick
+        def unique_nickname(i: int) -> str:
+            # seed 마커를 앞에 붙여서 이번 시드로 만든 유저를 식별 가능하게 함
+            # 예: seed42_nick12345678
+            return f"seed{seed}_nick{random.randint(10_000_000, 99_999_999)}_{i}"
 
         # 나이 분포: 20~30대 위주 + 40~50대 일부
         def sample_birth_date():
@@ -139,7 +137,7 @@ class Command(BaseCommand):
                 n += 1
             used_usernames.add(username)
 
-            email = f"{username}@example.com"
+            email = faker.free_email()
             birth = sample_birth_date()
 
             salary = sample_salary_won()
@@ -161,7 +159,7 @@ class Command(BaseCommand):
                     is_superuser=False,
                     date_joined=joined,
 
-                    nickname=unique_nickname(),
+                    nickname=unique_nickname(i),
                     birth=birth,
                     gender=random.choice(gender_choices),
                     credit_score=credit,
@@ -178,7 +176,7 @@ class Command(BaseCommand):
         # 방금 만든 유저만 다시 로드(필요 필드만)
         user_rows = list(
             User.objects
-            .filter(username__startswith=f"fake_{seed}_")
+            .filter(nickname__startswith=f"seed{seed}_nick")
             .values("id", "salary", "assets", "average_monthly_spend")
         )
         self.stdout.write(self.style.SUCCESS(f"Users created: {len(user_rows)}"))
