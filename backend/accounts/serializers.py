@@ -5,7 +5,6 @@ from django.contrib.auth.password_validation import validate_password
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
 
-
 User = get_user_model()
 
 class CustomRegisterSerializer(RegisterSerializer):
