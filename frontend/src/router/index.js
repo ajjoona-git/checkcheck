@@ -1,4 +1,5 @@
 import LoginView from '@/views/auth/LoginView.vue'
+import OnboardingView from '@/views/auth/OnboardingView.vue'
 import SignupView from '@/views/auth/SignupView.vue'
 import HomeView from '@/views/HomeView.vue'
 import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
@@ -24,6 +25,11 @@ const router = createRouter({
       path: '/signup',
       name: 'signup',
       component: SignupView,
+    },
+    {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: OnboardingView,
     },
     {
       path: '/moathons',
