@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import (
-    PasswordResetRequestSerializer,
+    PasswordResetSerializer,
     UserPasswordResetConfirmSerializer,
 )
 
@@ -22,7 +22,7 @@ User = get_user_model()
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def find_password(request):
-    serializer = PasswordResetRequestSerializer(data=request.data)
+    serializer = PasswordResetSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     email = serializer.validated_data["email"]

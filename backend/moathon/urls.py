@@ -21,6 +21,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('dj_rest_auth.urls')),
+    path('accounts/', include('accounts.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
