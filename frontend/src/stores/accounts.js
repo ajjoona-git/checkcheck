@@ -22,6 +22,7 @@ export const useAccountStore = defineStore('account', () => {
         console.log('회원가입이 완료되었습니다.')
         const password = password1
         logIn({ username, email, password })
+        router.replace({ name: 'onboarding' })
       })
       .catch(err => console.log(err))
   }
