@@ -21,8 +21,8 @@ class Command(BaseCommand):
     help = "Seed fake Users and Moathon rows (real ProductOption ids only)."
 
     def add_arguments(self, parser):
-        parser.add_argument("--users", type=int, default=15000)
-        parser.add_argument("--moathons", type=int, default=30000)
+        parser.add_argument("--users", type=int, default=20000)
+        parser.add_argument("--moathons", type=int, default=40000)
         parser.add_argument("--seed", type=int, default=42)
         parser.add_argument("--password", type=str, default="fakePw!234")  # 로그인 안 할 거라서 동일비번으로 만듬 
 
@@ -43,6 +43,14 @@ class Command(BaseCommand):
         if not options:
             self.stdout.write(self.style.ERROR("ProductOption 데이터가 없습니다. 먼저 금융상품 데이터를 적재하세요."))
             return
+        
+        # 금리 대표값(옵션 선택 편향/상품 인기도 계산에 사용)
+        def option_rate(opt: ProductOption) -> float:
+            v = opt.intr_rate2 if opt.intr_rate2 is not None else opt.intr_rate
+            try:
+                return float(v or 0.0)
+            except Exception:
+                return 0.0
 
         # 타입/기간 인덱싱 (기간은 save_trm에서 int 파싱 가능한 것만)
         by_type = {"DEPOSIT": [], "SAVING": []}
@@ -62,6 +70,65 @@ class Command(BaseCommand):
         if not by_type["DEPOSIT"] and not by_type["SAVING"]:
             self.stdout.write(self.style.ERROR("DEPOSIT/SAVING 타입의 ProductOption을 찾지 못했습니다."))
             return
+
+        # 상품 단위 인기도 가중치 생성
+        opts_by_product = defaultdict(list)
+        opts_by_product_term = defaultdict(lambda: defaultdict(list))
+        product_best_rate = defaultdict(float)  # 상품별 대표 금리(최고금리)
+        product_type = {}
+        product_bank = {}
+
+        for o in options:
+            pid = o.product_id
+            p = o.product
+            ptype = p.product_type
+            if ptype not in ("DEPOSIT", "SAVING"):
+                continue
+
+            product_type[pid] = ptype
+            product_bank[pid] = p.bank_id
+
+            r = option_rate(o)
+            if r > product_best_rate[pid]:
+                product_best_rate[pid] = r
+
+            opts_by_product[pid].append(o)
+            try:
+                term = int(str(o.save_trm).strip())
+                opts_by_product_term[pid][term].append(o)
+            except ValueError:
+                pass
+
+        # 쏠림 강도(값이 클수록 상위 상품/은행에 더 몰림)
+        ALPHA_PROD = 1.25    # 상품 쏠림 (1.15~1.35 추천)
+        ALPHA_BANK = 1.05    # 은행 쏠림 (약하게)
+        BANK_EFFECT = 0.25   # 은행 선호 영향 (0~1, 0.2~0.35 추천)
+
+        bank_ids = sorted(set(product_bank.values()))
+        bank_weight = {bid: 1.0 / ((i + 1) ** ALPHA_BANK) for i, bid in enumerate(bank_ids, start=0)}
+
+        product_weight = {}
+        for ptype in ("DEPOSIT", "SAVING"):
+            pids = [pid for pid, t in product_type.items() if t == ptype]
+            # 대표금리 높은 상품일수록 랭크 상위
+            pids.sort(key=lambda pid: product_best_rate[pid], reverse=True)
+
+            for rank, pid in enumerate(pids, start=1):
+                w = 1.0 / (rank ** ALPHA_PROD)
+                bw = bank_weight.get(product_bank.get(pid), 1.0)
+                w *= (bw ** BANK_EFFECT)
+                product_weight[pid] = w
+
+        products_by_type = {"DEPOSIT": [], "SAVING": []}
+        products_by_type_term = {"DEPOSIT": defaultdict(list), "SAVING": defaultdict(list)}
+
+        for pid in product_weight.keys():
+            ptype = product_type.get(pid)
+            if ptype not in products_by_type:
+                continue
+            products_by_type[ptype].append(pid)
+            for term in opts_by_product_term[pid].keys():
+                products_by_type_term[ptype][term].append(pid)
 
         # 2) User 생성 
         users = []
@@ -224,12 +291,6 @@ class Command(BaseCommand):
             # SHORT
             return random.choices(["DEPOSIT", "SAVING"], weights=[55, 45])[0]
 
-        def option_rate(opt: ProductOption) -> float:
-            v = opt.intr_rate2 if opt.intr_rate2 is not None else opt.intr_rate
-            try:
-                return float(v or 0.0)
-            except Exception:
-                return 0.0
 
         def sample_term_months(ptype: str):
             available_terms = list(by_type_term[ptype].keys())
@@ -244,20 +305,29 @@ class Command(BaseCommand):
             return random.choice(available_terms)
 
         def pick_option(ptype: str, term: int, purpose: str, used_option_ids: set):
-            pool = by_type_term[ptype].get(term) or by_type[ptype]
-            candidates = [o for o in pool if o.id not in used_option_ids]
-            if candidates:
-                # YIELD: 금리 상위 쪽으로 편향
-                if purpose == "YIELD":
-                    candidates.sort(key=option_rate, reverse=True)
-                    top = candidates[: max(30, len(candidates)//20)]
-                    opt = random.choice(top)
-                else:
-                    opt = random.choice(candidates)
+            prod_pool = products_by_type_term[ptype].get(term) or products_by_type[ptype]
+            if not prod_pool:
+                pool = by_type_term[ptype].get(term) or by_type[ptype]
+                opt = random.choice(pool)
                 used_option_ids.add(opt.id)
                 return opt
-            # 옵션 풀이 너무 작으면 중복 허용(최후)
-            opt = random.choice(pool)
+
+            weights_ = [product_weight.get(pid, 1.0) for pid in prod_pool]
+            pid = random.choices(prod_pool, weights=weights_, k=1)[0]
+
+            cand = opts_by_product_term[pid].get(term) or opts_by_product[pid]
+
+            cand2 = [o for o in cand if o.id not in used_option_ids]
+            if cand2:
+                cand = cand2
+
+            if purpose == "YIELD":
+                cand = sorted(cand, key=option_rate, reverse=True)
+                top = cand[: max(10, len(cand) // 10)]  # 상위 10% 또는 최소 10개
+                opt = random.choice(top)
+            else:
+                opt = random.choice(cand)
+
             used_option_ids.add(opt.id)
             return opt
 
@@ -276,15 +346,12 @@ class Command(BaseCommand):
                 start = int(assets * random.uniform(0.10, 0.70)) if assets > 0 else random.randint(3_000_000, 30_000_000)
                 expected = int(start * r * (term / 12))
                 target = start + max(50_000, expected)
-
                 if purpose == "SAFE":
                     target = int(start * random.uniform(1.00, 1.03))
-
             else:
                 start = int(assets * random.uniform(0.00, 0.10)) if assets > 0 else 0
                 monthly = int(max(100_000, monthly_saving))
-                monthly = min(monthly, 3_000_000)  # 월 300만원 상한
-
+                monthly = min(monthly, 3_000_000)
                 target = start + monthly * term
                 if purpose == "GOAL":
                     target = int(target * random.uniform(1.05, 1.25))
@@ -351,7 +418,7 @@ class Command(BaseCommand):
                 moathons.append(
                     Moathon(
                         user_id=urow["id"],
-                        product_option_id=opt.id,   # 반드시 DB에 존재하는 ProductOption id로 생성하기 
+                        product_option_id=opt.id,  # 반드시 DB에 존재하는 ProductOption id
                         title=title,
                         start_amount=start_amt,
                         target_amount=target_amt,
