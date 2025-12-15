@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <nav class="navbar navbar-expand-md bg-body-tertiary">
     <div class="container-fluid">
       <RouterLink class="navbar-brand" :to="{ name: 'home' }">
         <img :src="logo" alt="Moathon Logo" class="logo" />
@@ -44,8 +44,5 @@
 </script>
 
 <style scoped>
-.logo {
-  height: 40px;
-  width: auto;
-}
+
 </style>
