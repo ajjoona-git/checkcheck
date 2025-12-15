@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 export const useAccountStore = defineStore('account', () => {
   const router = useRouter()
@@ -61,12 +61,29 @@ export const useAccountStore = defineStore('account', () => {
     return token.value ? true : false
   })
 
+  const updateProfile = function (payload) {
+    axios({
+      method: 'patch',
+      url: `${API_URL}/accounts/user/`,
+      data: payload,
+      headers: {
+        Authorization: `Token ${token.value}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then(res => {
+        console.log('프로필 정보가 저장되었습니다.', res.data)
+      })
+      .catch(err => console.log(err))
+  }
+
   return { 
     API_URL,
     token,
     signUp,
     logIn,
     logOut,
-    isAuthenticated
+    isAuthenticated,
+    updateProfile,
    }
 })
