@@ -57,16 +57,11 @@ export const useAccountStore = defineStore('account', () => {
       .catch((err) => console.log(err))
   }
 
-  const isAuthenticated = computed(() => {
-    return token.value ? true : false
-  })
-
   return { 
     API_URL,
     token,
     signUp,
     logIn,
     logOut,
-    isAuthenticated
    }
 })
