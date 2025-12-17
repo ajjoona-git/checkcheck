@@ -1,0 +1,209 @@
+:root {
+  /* Brand Colors */
+  --moa-blue: #205EA6;   /* 로고 텍스트 색상 (Primary) */
+  --moa-blue-dark: #0d3f79;   /* 로고 텍스트 색상 (Primary) */
+  --moa-blue-light: #8498af;   /* 로고 텍스트 색상 (Primary) */
+  --moa-gold: #FFC107;   /* 로고 동전 색상 (Secondary) */
+  --moa-gold-dark: #ac8206;   /* 로고 동전 색상 (Secondary) */
+  --moa-gold-light: #f1db96e7;   /* 로고 동전 색상 (Secondary) */
+  --moa-dark: #343a40;
+  --moa-gray: #f8f9fa;
+  
+  /* Bootstrap Variable Overrides */
+  --bs-primary: var(--moa-blue);
+  --bs-primary-rgb: 32, 94, 166;
+  
+  --bs-secondary: var(--moa-gold);
+  --bs-secondary-rgb: 255, 193, 7;
+  
+  --bs-body-bg: var(--moa-gray);
+  --bs-body-font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+/* 2. 기본 요소 스타일링 */
+body {
+  font-family: var(--bs-body-font-family);
+  color: #333;
+  word-break: keep-all;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--moa-blue);
+}
+
+/* 3. 공통 UI 컴포넌트 커스텀 */
+
+/* [카드] */
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  font-weight: 700;
+  padding: 1.2rem;
+}
+
+/* [버튼] */
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--moa-blue);
+  border-color: var(--moa-blue);
+}
+
+.btn-primary:hover {
+  background-color: #1a4c8a;
+  border-color: #1a4c8a;
+}
+
+.btn-secondary {
+  background-color: var(--moa-gold);
+  border-color: var(--moa-gold);
+  color: #fff;
+}
+
+.btn-outline-primary {
+  color: var(--moa-blue);
+  border-color: var(--moa-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--moa-blue);
+  color: #fff;
+}
+
+/* [입력 폼] */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0.8rem;
+}
+
+.form-control:focus {
+  border-color: var(--moa-blue);
+  box-shadow: 0 0 0 0.25rem rgba(32, 94, 166, 0.25);
+}
+
+/* 4. 특수 컴포넌트 */
+
+/* [뱃지] */
+.badge-moathon {
+  background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+  color: white;
+  border-radius: 50px;
+  padding: 0.5em 0.8em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* [트랙 진행바] */
+.progress-track {
+  height: 20px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-track-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--moa-blue) 0%, #4facfe 100%);
+  transition: width 0.6s ease;
+}
+
+/* [네비게이션] */
+.navbar {
+  background-color: var(--moa-gold-light) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 0.8rem 1rem;
+}
+
+.navbar-collapse {
+  justify-content: flex-end;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 700;
+  color: #555;
+  margin: 0 8px;
+  transition: color 0.2s;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--moa-blue);
+}
+
+.navbar-nav .nav-link.router-link-active {
+  color: var(--moa-blue);
+}
+
+@media (min-width: 768px) {
+  .navbar-nav .nav-link {
+    position: relative;
+    border-radius: 4px;
+  }
+
+  .navbar-nav .nav-link.router-link-active::after {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 3px;
+    background-color: var(--moa-blue);
+    border-radius: 2px;
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media (max-width: 767.98px) {
+  .navbar-nav {
+    padding: 1rem 0 0;
+  }
+  
+  .navbar-nav .nav-link {
+    margin: 4px 0;
+    padding-left: 1rem !important; 
+    border-left: 4px solid transparent; 
+    border-radius: 2px;
+  }
+
+  .navbar-nav .nav-link.router-link-active {
+    border-left-color: var(--moa-blue); 
+    background-color: transparent;
+  }
+}
+
+/* 로그아웃 버튼 초기화 */
+.navbar-nav input[type="submit"].nav-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-brand img {
+  height: 40px;
+  width: auto;
+}
