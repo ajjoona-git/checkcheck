@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from datetime import date, timedelta
+
 # Create your models here.
 class User(AbstractUser):
     nickname = models.CharField(max_length=20, unique=True) # 필수: 닉네임
@@ -55,6 +57,10 @@ class Moathon(models.Model):
     target_amount = models.PositiveBigIntegerField()      # 목표 금액(원)
     start_amount = models.PositiveBigIntegerField()       # 시작 금액(원)
     term_months = models.PositiveSmallIntegerField()      # 목표 기간(개월)
+
+    start_date = models.DateField(auto_now_add=True)      # 시작일 (자동 생성)
+    end_date = models.DateField()                         # 만기일 (ProductOption의 기간을 더해서 계산)
+
     PURPOSE = (
         ("GOAL", "목돈 마련"),
         ("SHORT", "단기 여유자금"),
@@ -64,6 +70,8 @@ class Moathon(models.Model):
     )
     purpose = models.CharField(max_length=10, choices=PURPOSE)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -91,6 +99,18 @@ class Moathon(models.Model):
         return base if max_n == 0 else f"{base}{max_n + 1}"
 
     def save(self, *args, **kwargs):
-        if not self.pk and not (self.title or "").strip():
-            self.title = self._next_default_title()
+        if not self.pk:
+            if not (self.title or "").strip():
+                self.title = self._next_default_title()
+            
+            if self.product_option and self.product_option.save_trm:
+                try:
+                    months = int(self.product_option.save_trm)
+                except (ValueError, TypeError):
+                    months = 12
+                days = months * 30
+                self.end_date = date.today() + timedelta(days=days)
+            else:
+                self.end_date = date.today() + timedelta(days=365)
+
         super().save(*args, **kwargs)

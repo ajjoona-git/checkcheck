@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from datetime import timedelta
+from datetime import timedelta, date
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
@@ -389,8 +389,9 @@ class Command(BaseCommand):
                         max_n = max(max_n, int(suf))
             return f"{base}{max_n + 1}"
 
-        # 5) Moathon bulk 생성 (save() 미호출이므로 title 직접 생성)
+        # 5) Moathon bulk 생성 (save() 미호출이므로 title, end_date 직접 생성)
         moathons = []
+        today = timezone.now().date()
         for urow, k in zip(user_rows, counts):
             used_option_ids = set()
             used_titles = set()
@@ -414,6 +415,7 @@ class Command(BaseCommand):
                     title = next_users_moathon_title(used_titles)
 
                 used_titles.add(title)
+                calc_end_date = today + timedelta(days=term * 30)
 
                 moathons.append(
                     Moathon(
@@ -424,6 +426,7 @@ class Command(BaseCommand):
                         target_amount=target_amt,
                         term_months=term,
                         purpose=purpose,
+                        end_date=calc_end_date,
                     )
                 )
 
