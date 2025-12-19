@@ -23,6 +23,12 @@ env = environ.Env()
 # 개발 환경을 위해 기본 .env 파일 로드 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
+# GMS 환경 변수
+GMS_URL = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
+GMS_MODEL = "gpt-5-mini"
+GMS_TIMEOUT = 30
+
+
 # 환경 변수 → Django settings 변수로 매핑
 FSS_API_KEY = env("FSS_API_KEY")
 FSS_BASE_URL = "https://finlife.fss.or.kr/finlifeapi/"
