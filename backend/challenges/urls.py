@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path('', views.moathon_list),
     path('<int:moathon_pk>/', views.moathon_detail),
+    path('create/', views.moathon_create),
 ]

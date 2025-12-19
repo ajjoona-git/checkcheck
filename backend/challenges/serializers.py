@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Moathon
+from products.models import ProductOption
 from products.serializers import ProductOptionSerializer
 from datetime import date
 
@@ -10,14 +11,14 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
     # 뱃지 로직이 있다면 source='user.badge' 등으로 추가
     
     # Nested Serializer: ProductOption의 상세 정보를 한 번에 보여줌
-    product_option = ProductOptionSerializer(read_only=True) # products 앱의 Serializer 필요
+    product_option = ProductOptionSerializer(read_only=True)
     progress_rate = serializers.SerializerMethodField()
 
     class Meta:
         model = Moathon
         fields = [
             'id', 'title', 'purpose', 'progress_rate', 'target_amount', 'start_date', 'end_date',
-            'product_option', # 여기에 intr_rate, intr_rate_type 등 포함됨
+            'product_option',
             'nickname', 'profile_image'
         ]
 
@@ -51,3 +52,14 @@ class MoathonListSerializer(serializers.ModelSerializer):
         
         rate = (elapsed_days / total_days) * 100
         return min(int(rate), 100)
+
+# 모아톤 생성하기
+class MoathonCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Moathon
+        fields = ['title', 'target_amount', 'start_amount', 'purpose', 'product_option']
+
+    def validate(self, data):
+        if data['start_amount'] > data['target_amount']:
+            raise serializers.ValidationError("시작 금액이 목표 금액보다 클 수 없습니다.")
+        return data
