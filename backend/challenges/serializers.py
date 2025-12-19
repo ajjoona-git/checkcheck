@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import Moathon
+from .models import Moathon
 from products.serializers import ProductOptionSerializer
 from datetime import date
 

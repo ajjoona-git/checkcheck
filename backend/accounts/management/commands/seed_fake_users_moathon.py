@@ -7,7 +7,8 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.utils import timezone
 from faker import Faker
-from accounts.models import User, Moathon
+from accounts.models import User
+from challenges.models import Moathon
 from products.models import ProductOption
 
 # 하한과 상한을 기반으로 데이터 품질, 현실성 반영 

@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
-from accounts.models import Moathon
+from .models import Moathon
 from products.models import ProductOption
-from .serializers import MoathonDetailSerializer, MoathonListSerializer, MoathonInitialSerializer
+from .serializers import MoathonDetailSerializer, MoathonListSerializer
 from datetime import timedelta, date
 
 from rest_framework.decorators import api_view, permission_classes
