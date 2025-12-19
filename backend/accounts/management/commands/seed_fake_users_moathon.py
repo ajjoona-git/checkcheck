@@ -6,13 +6,11 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.utils import timezone
-
 from faker import Faker
-
 from accounts.models import User, Moathon
 from products.models import ProductOption
 
-
+# 하한과 상한을 기반으로 데이터 품질, 현실성 반영 
 def clamp_int(x: float, lo: int, hi: int) -> int:
     return int(max(lo, min(hi, round(x))))
 
@@ -20,12 +18,14 @@ def clamp_int(x: float, lo: int, hi: int) -> int:
 class Command(BaseCommand):
     help = "Seed fake Users and Moathon rows (real ProductOption ids only)."
 
+    # 명령어 실행시 옵션 
     def add_arguments(self, parser):
         parser.add_argument("--users", type=int, default=20000)
         parser.add_argument("--moathons", type=int, default=40000)
         parser.add_argument("--seed", type=int, default=42)
         parser.add_argument("--password", type=str, default="fakePw!234")  # 로그인 안 할 거라서 동일비번으로 만듬 
 
+    # 실제 실행 로직 
     def handle(self, *args, **opts):
         n_users = opts["users"]
         n_moathons = opts["moathons"]
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         faker = Faker("ko_KR")
         Faker.seed(seed)
 
-        # 1) ProductOption 로드 (실제 존재 id만 사용하기 위해서)
+        # 1) ProductOption 로드 (실제 존재 id만 사용)
         options = list(
             ProductOption.objects.select_related("product", "product__bank").all()
         )
@@ -44,7 +44,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("ProductOption 데이터가 없습니다. 먼저 금융상품 데이터를 적재하세요."))
             return
         
-        # 금리 대표값(옵션 선택 편향/상품 인기도 계산에 사용)
+        # 옵션을 비교할 때 최고 우대금리 존재하면 최고 우대금리 아니면 기본 금리 
         def option_rate(opt: ProductOption) -> float:
             v = opt.intr_rate2 if opt.intr_rate2 is not None else opt.intr_rate
             try:
@@ -71,7 +71,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("DEPOSIT/SAVING 타입의 ProductOption을 찾지 못했습니다."))
             return
 
-        # 상품 단위 인기도 가중치 생성
+        # 옵션을 상품 기준으로 모아두는 인덱스(상품을 고르고 -> 존재하는 옵션 고르기 위함)
         opts_by_product = defaultdict(list)
         opts_by_product_term = defaultdict(lambda: defaultdict(list))
         product_best_rate = defaultdict(float)  # 상품별 대표 금리(최고금리)
@@ -99,10 +99,10 @@ class Command(BaseCommand):
             except ValueError:
                 pass
 
-        # 쏠림 강도(값이 클수록 상위 상품/은행에 더 몰림)
-        ALPHA_PROD = 1.25    # 상품 쏠림 (1.15~1.35 추천)
-        ALPHA_BANK = 1.05    # 은행 쏠림 (약하게)
-        BANK_EFFECT = 0.25   # 은행 선호 영향 (0~1, 0.2~0.35 추천)
+        # 특정 상품, 은행으로 가입이 몰리는 현상 반영 (숫자가 클수록 쏠림 커짐)
+        ALPHA_PROD = 1.25    # 상품 쏠림 
+        ALPHA_BANK = 1.05    # 은행 쏠림 
+        BANK_EFFECT = 0.25   # 은행 선호 영향 
 
         bank_ids = sorted(set(product_bank.values()))
         bank_weight = {bid: 1.0 / ((i + 1) ** ALPHA_BANK) for i, bid in enumerate(bank_ids, start=0)}
@@ -132,19 +132,15 @@ class Command(BaseCommand):
 
         # 2) User 생성 
         users = []
-        used_nickname = set()
 
+        # 닉네임 유니크 보장
         def unique_nickname(i: int) -> str:
-            # seed 마커를 앞에 붙여서 이번 시드로 만든 유저를 식별 가능하게 함
-            # 예: seed42_nick12345678
             return f"seed{seed}_nick{random.randint(10_000_000, 99_999_999)}_{i}"
 
         # 나이 분포: 20~30대 위주 + 40~50대 일부
         def sample_birth_date():
-            # 가중치: 20s 45%, 30s 35%, 40s 15%, 50s 5%
             decade = random.choices([20, 30, 40, 50], weights=[45, 35, 15, 5])[0]
             age = random.randint(decade, decade + 9)
-            # 오늘 기준 역산
             today = timezone.now().date()
             year = today.year - age
             # 날짜는 faker로 생성하되 연도만 맞춤
@@ -155,7 +151,7 @@ class Command(BaseCommand):
         def sample_credit_score():
             return clamp_int(random.gauss(800, 70), 500, 950)
 
-        # 연봉(원): 평균 4,500만 근처 (폭 넓게)
+        # 연봉(원): 평균 4,500만 근처 
         def sample_salary_won():
             return clamp_int(random.gauss(45_000_000, 18_000_000), 18_000_000, 150_000_000)
 
@@ -191,7 +187,7 @@ class Command(BaseCommand):
         )
 
         for i in range(n_users):
-            username = f"fake_{seed}_{i}"  # 유니크 보장
+            username = f"fake_{seed}_{i}"  
             first = faker.first_name()
             last = faker.last_name()
             base_username = f"{last}{first}"   # 김순옥
@@ -332,38 +328,124 @@ class Command(BaseCommand):
             return opt
 
         def amounts_for(user_row: dict, opt: ProductOption, ptype: str, purpose: str, term: int):
-            salary = int(user_row["salary"] or 0)
-            assets = int(user_row["assets"] or 0)
-            spend = int(user_row["average_monthly_spend"] or 0)
+            import math
 
-            monthly_income = salary / 12 if salary else 0
-            monthly_saving = max(0, monthly_income - spend) * random.uniform(0.5, 0.9)
+            salary = int(user_row.get("salary") or 0)
+            assets = int(user_row.get("assets") or 0)
+            spend  = int(user_row.get("average_monthly_spend") or 0)
 
-            r = option_rate(opt) / 100.0
-            max_limit = opt.product.max_limit  # 원(가정)
+            monthly_income = salary / 12 if salary else 0.0
+            disposable = max(0.0, monthly_income - spend)  # 월 가처분
 
+            r = option_rate(opt) / 100.0  # 연 이율
+            max_limit = opt.product.max_limit
+            if max_limit is not None:
+                try:
+                    max_limit = int(max_limit)
+                    if max_limit <= 0:
+                        max_limit = None
+                except Exception:
+                    max_limit = None
+
+            # 목적별 목표 “도전 정도” (너무 뻥튀기 방지)
+            goal_factor = {
+                "SAFE":  (0.98, 1.02),
+                "SHORT": (0.98, 1.05),
+                "HABIT": (0.97, 1.04),
+                "GOAL":  (1.00, 1.10),
+                "YIELD": (1.00, 1.06),
+            }
+            lo_f, hi_f = goal_factor.get(purpose, (1.0, 1.0))
+            f = random.uniform(lo_f, hi_f)
+
+            # 반올림/올림 유틸
+            def round_to(x: int, base: int) -> int:
+                return int(round(x / base) * base)
+
+            def ceil_to(x: int, base: int) -> int:
+                return int(math.ceil(x / base) * base)
+
+            # ----- 금액 생성 -----
             if ptype == "DEPOSIT":
-                start = int(assets * random.uniform(0.10, 0.70)) if assets > 0 else random.randint(3_000_000, 30_000_000)
-                expected = int(start * r * (term / 12))
-                target = start + max(50_000, expected)
-                if purpose == "SAFE":
-                    target = int(start * random.uniform(1.00, 1.03))
-            else:
-                start = int(assets * random.uniform(0.00, 0.10)) if assets > 0 else 0
-                monthly = int(max(100_000, monthly_saving))
-                monthly = min(monthly, 3_000_000)
-                target = start + monthly * term
-                if purpose == "GOAL":
-                    target = int(target * random.uniform(1.05, 1.25))
-                if purpose == "HABIT":
-                    target = int(target * random.uniform(0.95, 1.05))
+                hi = assets if assets > 0 else 30_000_000
+                if max_limit is not None:
+                    hi = min(hi, max_limit)
 
-            if max_limit:
+                lo = 1_000_000 if hi >= 1_000_000 else max(0, hi)
+
+                # hi가 lo보다 작아지는 극단 케이스 방지
+                if hi < lo:
+                    hi = lo
+
+                start = int(random.uniform(lo, max(lo, hi * 0.7)))  # 자산/한도 기반
+
+                expected = start * (1 + r * (term / 12))            # (단순) 만기 예상
+                target = int(expected * f)
+
+                # 너무 비슷하면 최소 증가폭 보장 (절대값 + 비율 혼합)
+                min_gain = max(50_000, int(start * 0.002))
+                target = max(target, start + min_gain)
+
+            else:  # SAVING
+                # 월납입: 가처분 기반 (최저 5만) + 상한 300만
+                monthly = int(min(disposable * random.uniform(0.25, 0.8), 3_000_000))
+                monthly = max(50_000, monthly)
+
+                # start(목돈): 기존 monthly*6 캡은 0~30만 쏠림이 심함 → assets 기반으로 별도 샘플링
+                if assets > 0:
+                    start = int(assets * random.uniform(0.0, 0.08))  # 0~8% 정도
+                    start = min(start, 30_000_000)                   # 과도 방지
+                else:
+                    start = 0
+
+                # 한도 처리: monthly=0 되는 버그성 케이스 방지
+                if max_limit is not None:
+                    # start + monthly*term <= max_limit 만족하도록 start를 먼저 줄임
+                    max_start = max(0, max_limit - monthly * term)
+                    start = min(start, max_start)
+
+                    # room이 부족해서 monthly_cap이 0이 될 상황이면 start를 더 줄여 room 확보
+                    room = max(0, max_limit - start)
+                    monthly_cap = room // max(1, term)
+
+                    if monthly_cap < 50_000:
+                        # 최소 월납입 5만을 확보하도록 start를 재조정
+                        start = max(0, max_limit - 50_000 * term)
+                        room = max(0, max_limit - start)
+                        monthly_cap = room // max(1, term)
+
+                    monthly = min(monthly, monthly_cap)
+                    monthly = max(50_000, monthly)  # 최종 0 방지
+
+                principal = start + monthly * term
+                avg_balance = start + monthly * (term - 1) / 2
+                interest = avg_balance * r * (term / 12)
+                expected = principal + interest
+
+                target = int(expected * f)
+                target = min(target, int(expected * 1.12))
+
+                # 핵심: 1%만 두면 1만원 반올림에서 증가분이 사라짐 → 절대 최소 증가폭 보장
+                min_gain = max(20_000, int(principal * 0.01))  # 최소 2만원 또는 1%
+                target = max(target, principal + min_gain)
+
+            # ----- 최종 정리(반올림/한도/안전장치) -----
+            # start는 반올림, target은 올림(증가분 소실 방지)
+            start = round_to(start, 10_000)
+            target = ceil_to(target, 10_000)
+
+            if max_limit is not None:
                 start = min(start, max_limit)
                 target = min(target, max_limit)
 
-            if target < start:
-                target = start
+            # 최후 안전장치: target이 start보다 작거나 같으면 +1만원 시도
+            if target <= start:
+                if max_limit is None:
+                    target = start + 10_000
+                else:
+                    target = min(max_limit, start + 10_000)
+                    # max_limit이 start와 같아 올릴 수 없는 경우는 그대로 둠(상품 한도 때문)
+
             return start, target
 
         # 타이틀: 30% 커스텀, 70% user's moathon
