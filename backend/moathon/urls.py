@@ -23,6 +23,7 @@ urlpatterns = [
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/', include('accounts.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
+    path('moathons/', include('challenges.urls')),
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
