@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'products',
     'recommendations',
     'challenges',
+    'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -75,6 +76,7 @@ SITE_ID = 1
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # 개발자 테스트용 (Swagger)
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -177,6 +179,18 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 REST_AUTH = {
     "REGISTER_SERIALIZER": "accounts.serializers.CustomRegisterSerializer",
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Enter your token with the Bearer prefix, e.g. "Bearer your_token_here"'
+        }
+    },
+    'USE_SESSION_AUTH': True,
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
