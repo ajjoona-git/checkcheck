@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'products',
     'recommendations',
     'challenges',
-    'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -181,16 +180,13 @@ REST_AUTH = {
     "REGISTER_SERIALIZER": "accounts.serializers.CustomRegisterSerializer",
 }
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'Enter your token with the Bearer prefix, e.g. "Bearer your_token_here"'
-        }
-    },
-    'USE_SESSION_AUTH': True,
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Moathon API',
+    'DESCRIPTION': '모아톤 서비스 API 문서',
+    'VERSION': '1.0.0',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'tokenAuth': []}], 
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
