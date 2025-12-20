@@ -63,3 +63,9 @@ class MoathonCreateSerializer(serializers.ModelSerializer):
         if data['start_amount'] > data['target_amount']:
             raise serializers.ValidationError("시작 금액이 목표 금액보다 클 수 없습니다.")
         return data
+    
+# 모아톤 수정하기
+class MoathonUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Moathon
+        fields = ['title', 'target_amount', 'purpose']
