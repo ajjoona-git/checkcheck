@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.db.models import Prefetch
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -6,14 +6,19 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
+from challenges.models import Moathon
 
 from .serializers import (
     PasswordResetSerializer,
     UserPasswordResetConfirmSerializer,
+    MoathonListWithRatesSerializer,
+    ProfileUpdateSerializer,
+    OnboardingPutSerializer,
 )
 
 User = get_user_model()
@@ -103,5 +108,107 @@ def reset_password(request):
 
     return Response(
         {"detail": "비밀번호가 성공적으로 변경되었습니다."},
+        status=status.HTTP_200_OK,
+    )
+
+# 프로필 조회
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    # 역참조 related_name이 users_moathon 이므로 Prefetch 대상도 그 이름을 써야 함
+    user = (
+        User.objects
+        .prefetch_related(
+            Prefetch(
+                "users_moathon",
+                queryset=(
+                    Moathon.objects
+                    .select_related(
+                        "user",
+                        "product_option",
+                        "product_option__product",
+                        "product_option__product__bank",
+                    )
+                    .order_by("-created_at")
+                ),
+            )
+        )
+        .get(pk=request.user.pk)
+    )
+
+    moathons_qs = user.users_moathon.all()
+    moathons_data = MoathonListWithRatesSerializer(moathons_qs, many=True).data
+
+
+    data = {
+        "profile_image": user.profile_image,
+        "email": user.email,
+        "nickname": user.nickname,
+        "birth": user.birth,
+        "gender": user.gender,
+        "credit_score": user.credit_score,
+        "assets": user.assets,
+        "salary": user.salary,
+        "average_monthly_spend": user.average_monthly_spend,
+        "tender": user.tender,
+        "moathons": moathons_data,
+    }
+    return Response(data)
+    
+# 프로필 수정 
+@api_view(["PATCH", "PUT"])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def profile_update(request):
+    user = request.user
+    # PATCH면 TRUE / PUT면 FALSE
+    partial = (request.method == "PATCH")
+
+    serializer = ProfileUpdateSerializer(user, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    # 응답에서 이미지 URL은 절대경로로 주는 게 FE에서 편함
+    data = serializer.data
+    if getattr(user, "profile_image", None):
+        try:
+            data["profile_image"] = request.build_absolute_uri(user.profile_image.url)
+        except Exception:
+            pass
+
+    return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def onboarding(request):
+    user = request.user
+
+    required_fields = [
+        "gender",
+        "credit_score",
+        "assets",
+        "salary",
+        "average_monthly_spend",
+        "tender",
+    ]
+    missing = [f for f in required_fields if f not in request.data]
+    if missing:
+        return Response(
+            {
+                "detail": "온보딩 제출은 필수 항목을 모두 포함해야 합니다.",
+                "missing_fields": missing,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    serializer = OnboardingPutSerializer(user, data=request.data, partial=False)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    # 최소 응답(저장 성공 + 완료 여부). 원하면 serializer.data 전체를 내려도 됨.
+    return Response(
+        {"onboarding_completed": True},
         status=status.HTTP_200_OK,
     )
