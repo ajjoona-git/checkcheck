@@ -27,6 +27,7 @@ urlpatterns = [
     path('moathons/', include('challenges.urls')),
     path('products/', include('products.urls')),
     path('recommendations/', include('recommendations.urls')),
+    path('visualizations/', include('visualizations.urls')),
 ]
 
 if settings.DEBUG:
