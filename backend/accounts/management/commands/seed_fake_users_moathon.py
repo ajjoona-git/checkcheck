@@ -1,12 +1,14 @@
 import random
 from collections import defaultdict
-from datetime import timedelta
+from datetime import timedelta, date
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.utils import timezone
 from faker import Faker
-from accounts.models import User, Moathon
+from accounts.models import User
+from challenges.models import Moathon
 from products.models import ProductOption
 
 # 하한과 상한을 기반으로 데이터 품질, 현실성 반영 
@@ -227,7 +229,7 @@ class Command(BaseCommand):
                     credit_score=credit,
                     assets=assets,                      # 원
                     salary=salary,                      # 원
-                    average_monthly_spend=spend,         # 원
+                    average_monthly_spend=spend,        # 원
                     tender=tender,
                 )
             )
@@ -470,8 +472,9 @@ class Command(BaseCommand):
                         max_n = max(max_n, int(suf))
             return f"{base}{max_n + 1}"
 
-        # 5) Moathon bulk 생성 (save() 미호출이므로 title 직접 생성)
+        # 5) Moathon bulk 생성 (save() 미호출이므로 title, start_date, end_date 직접 생성)
         moathons = []
+        today = timezone.now().date()
         for urow, k in zip(user_rows, counts):
             used_option_ids = set()
             used_titles = set()
@@ -495,6 +498,10 @@ class Command(BaseCommand):
                     title = next_users_moathon_title(used_titles)
 
                 used_titles.add(title)
+                
+                days_ago = random.randint(0, 365) # 0일(오늘) ~ 365일 전 사이
+                rand_start_date = today - timedelta(days=days_ago)
+                calc_end_date = rand_start_date + timedelta(days=term * 30)
 
                 moathons.append(
                     Moathon(
@@ -505,6 +512,8 @@ class Command(BaseCommand):
                         target_amount=target_amt,
                         term_months=term,
                         purpose=purpose,
+                        start_date=rand_start_date, # 랜덤 시작일
+                        end_date=calc_end_date,     # 시작일 기준 종료일
                     )
                 )
 

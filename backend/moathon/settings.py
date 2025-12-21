@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'recommendations',
+    'challenges',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -74,6 +75,7 @@ SITE_ID = 1
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # 개발자 테스트용 (Swagger)
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -176,6 +178,15 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 REST_AUTH = {
     "REGISTER_SERIALIZER": "accounts.serializers.CustomRegisterSerializer",
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Moathon API',
+    'DESCRIPTION': '모아톤 서비스 API 문서',
+    'VERSION': '1.0.0',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'tokenAuth': []}], 
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
