@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from django.shortcuts import render, get_object_or_404
 from .models import Product, ProductOption
@@ -14,7 +15,7 @@ def product_list(request):
     
     GET /products/
     """
-    products = Product.objects.all()
+    products = Product.objects.filter(is_active=True)
 
     bank_name = request.query_params.get('bank')       # 은행명 (UI: 은행 선택)
     product_type = request.query_params.get('type')    # 상품 유형 (UI: 예금/적금 탭)
@@ -29,5 +30,25 @@ def product_list(request):
     if save_trm and save_trm != '전체기간':
         products = products.filter(options__save_trm=save_trm).distinct()
     
+    paginator = PageNumberPagination()
+    paginator.page_size = 50
+    result_page = paginator.paginate_queryset(products, request)
+
+    if result_page is not None:
+        serializer = ProductListSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
     serializer = ProductListSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def product_detail(request, product_id):
+    """
+    금융 상품 상세 조회 API
+    
+    GET /products/<int:product_id>/
+    """
+    product = get_object_or_404(Product, pk=product_id)
+    serializer = ProductListSerializer(product)
     return Response(serializer.data)

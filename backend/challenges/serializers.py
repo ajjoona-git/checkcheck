@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Moathon
-from products.models import ProductOptionSimpleSerializer
-from products.serializers import ProductOptionSerializer
+from products.models import ProductOption
+from products.serializers import ProductOptionSimpleSerializer
 from datetime import date
 
 # 단일 모아톤 조회
@@ -10,7 +10,6 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(source='user.profile_image', read_only=True)
     # 뱃지 로직이 있다면 source='user.badge' 등으로 추가
     
-    # Nested Serializer: ProductOptionSimpleSerializer의 상세 정보를 한 번에 보여줌
     product_option = ProductOptionSimpleSerializer(read_only=True)
     progress_rate = serializers.SerializerMethodField()
 
