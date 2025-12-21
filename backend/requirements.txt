@@ -16,3 +16,4 @@ scikit-learn==1.8.0
 optuna==4.6.0
 xgboost==3.1.2
 joblib==1.5.2
+openpyxl==3.1.5
