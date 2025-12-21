@@ -20,7 +20,7 @@ class Moathon(models.Model):
     start_amount = models.PositiveBigIntegerField()       # 시작 금액(원)
     term_months = models.PositiveSmallIntegerField()      # 목표 기간(개월)
 
-    start_date = models.DateField(auto_now_add=True)      # 시작일 (자동 생성)
+    start_date = models.DateField(default=date.today)     # 시작일 (오늘 날짜로 자동 생성)
     end_date = models.DateField()                         # 만기일 (ProductOption의 기간을 더해서 계산)
 
     PURPOSE = (
@@ -62,14 +62,17 @@ class Moathon(models.Model):
             if not (self.title or "").strip():
                 self.title = self._next_default_title()
             
+            if not self.start_date:
+                self.start_date = date.today()
+            
             if self.product_option and self.product_option.save_trm:
                 try:
                     months = int(self.product_option.save_trm)
                 except (ValueError, TypeError):
                     months = 12
                 days = months * 30
-                self.end_date = date.today() + timedelta(days=days)
+                self.end_date = self.start_date + timedelta(days=days)
             else:
-                self.end_date = date.today() + timedelta(days=365)
+                self.end_date = self.start_date + timedelta(days=365)
 
         super().save(*args, **kwargs)

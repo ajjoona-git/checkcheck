@@ -229,7 +229,7 @@ class Command(BaseCommand):
                     credit_score=credit,
                     assets=assets,                      # 원
                     salary=salary,                      # 원
-                    average_monthly_spend=spend,         # 원
+                    average_monthly_spend=spend,        # 원
                     tender=tender,
                 )
             )
@@ -472,7 +472,7 @@ class Command(BaseCommand):
                         max_n = max(max_n, int(suf))
             return f"{base}{max_n + 1}"
 
-        # 5) Moathon bulk 생성 (save() 미호출이므로 title, end_date 직접 생성)
+        # 5) Moathon bulk 생성 (save() 미호출이므로 title, start_date, end_date 직접 생성)
         moathons = []
         today = timezone.now().date()
         for urow, k in zip(user_rows, counts):
@@ -498,7 +498,10 @@ class Command(BaseCommand):
                     title = next_users_moathon_title(used_titles)
 
                 used_titles.add(title)
-                calc_end_date = today + timedelta(days=term * 30)
+                
+                days_ago = random.randint(0, 365) # 0일(오늘) ~ 365일 전 사이
+                rand_start_date = today - timedelta(days=days_ago)
+                calc_end_date = rand_start_date + timedelta(days=term * 30)
 
                 moathons.append(
                     Moathon(
@@ -509,7 +512,8 @@ class Command(BaseCommand):
                         target_amount=target_amt,
                         term_months=term,
                         purpose=purpose,
-                        end_date=calc_end_date,
+                        start_date=rand_start_date, # 랜덤 시작일
+                        end_date=calc_end_date,     # 시작일 기준 종료일
                     )
                 )
 
