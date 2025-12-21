@@ -1,16 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .models import Moathon
+from .models import Moathon, MoathonComment
 from .serializers import (
     MoathonDetailSerializer, 
     MoathonListSerializer, 
     MoathonCreateSerializer,
     MoathonUpdateSerializer,
+    MoathonCommentSerializer,
+    MoathonCommentWriteSerializer,
 )
 
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -104,3 +106,77 @@ def moathon_create(request):
         response_serializer = MoathonDetailSerializer(moathon)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     
+# 댓글 목록 조회 
+@extend_schema(
+    methods=["GET"],
+    responses=MoathonCommentSerializer,
+    summary="모아톤 댓글 목록 조회"
+)
+@extend_schema(
+    methods=["POST"],
+    request=MoathonCommentWriteSerializer,
+    responses=MoathonCommentSerializer,
+    summary="모아톤 댓글 작성"
+)
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def moathon_comment_list_create(request, moathon_pk):
+    moathon = get_object_or_404(Moathon, pk=moathon_pk)
+
+    if request.method == "GET":
+        qs = (
+            MoathonComment.objects
+            .filter(moathon=moathon)
+            .select_related("user")
+            .order_by("-created_at", "-id")
+        )
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 50
+        page = paginator.paginate_queryset(qs, request)
+
+        serializer = MoathonCommentSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    write_serializer = MoathonCommentWriteSerializer(data=request.data)
+    if write_serializer.is_valid(raise_exception=True):
+        comment = write_serializer.save(user=request.user, moathon=moathon)
+        return Response(MoathonCommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    methods=["PATCH"],
+    request=MoathonCommentWriteSerializer,
+    responses=MoathonCommentSerializer,
+    summary="모아톤 댓글 수정"
+)
+@extend_schema(
+    methods=["DELETE"],
+    summary="모아톤 댓글 삭제"
+)
+@api_view(["PATCH", "DELETE"])
+@permission_classes([IsAuthenticated])
+def moathon_comment_detail(request, comment_pk):
+    comment = get_object_or_404(
+        MoathonComment.objects.select_related("user", "moathon"),
+        pk=comment_pk
+    )
+
+    if comment.user != request.user:
+        return Response(
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if request.method == "PATCH":
+        if "content" not in request.data:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        write_serializer = MoathonCommentWriteSerializer(comment, data=request.data, partial=True)
+        if write_serializer.is_valid(raise_exception=True):
+            updated = write_serializer.save()
+            return Response(MoathonCommentSerializer(updated).data, status=status.HTTP_200_OK)
+
+    comment.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
