@@ -1,6 +1,8 @@
+import VideoDetail from '@/components/video/VideoDetail.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import OnboardingView from '@/views/auth/OnboardingView.vue'
 import SignupView from '@/views/auth/SignupView.vue'
+import VideoSearchView from '@/views/finance/VideoSearchView.vue'
 import HomeView from '@/views/HomeView.vue'
 import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
 import MoathonDetailView from '@/views/moathon/MoathonDetailView.vue'
@@ -55,6 +57,21 @@ const router = createRouter({
       path: '/mypage',
       name: 'mypage',
       component: MyPageView,
+    },
+    {
+      path: '/video',
+      children: [
+        {
+          path: 'search',
+          name: 'videoSearch',
+          component: VideoSearchView,
+        },
+        {
+          path: ':id',
+          name: 'videoDetail',
+          component: VideoDetail,
+        },
+      ]
     },
   ],
 })
