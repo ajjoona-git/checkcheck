@@ -13,6 +13,7 @@
         <div class="navbar-nav">
           <RouterLink class="nav-link" :to="{ name: 'home' }">HOME</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'explore' }">EXPLORE</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">종목 검색</RouterLink>
           
           <template v-if="!accountStore.isAuthenticated">
             <RouterLink class="nav-link" :to="{ name: 'login' }">LOGIN</RouterLink>
