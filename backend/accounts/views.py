@@ -21,9 +21,30 @@ from .serializers import (
     OnboardingPutSerializer,
 )
 
+from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+
 User = get_user_model()
 
 # 비밀번호 잃어버렸을 때, 이메일로 재설정 연결 
+@extend_schema(
+    tags=["Accounts"],
+    summary="비밀번호 재설정 메일 발송",
+    request=PasswordResetSerializer,
+    responses={200: OpenApiTypes.OBJECT},
+    examples=[
+        OpenApiExample(
+            "요청 예시",
+            value={"email": "user@example.com"},
+            request_only=True,
+        ),
+        OpenApiExample(
+            "응답 예시",
+            value={"detail": "비밀번호 재설정 메일이 발송되었다면, 입력하신 이메일에서 확인하실 수 있습니다."},
+            response_only=True,
+        ),
+    ],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def find_password(request):
@@ -69,6 +90,29 @@ def find_password(request):
     )
 
 # 비밀번호 재설정
+@extend_schema(
+    tags=["Accounts"],
+    summary="비밀번호 재설정",
+    request=OpenApiTypes.OBJECT,
+    responses={200: OpenApiTypes.OBJECT},
+    examples=[
+        OpenApiExample(
+            "요청 예시",
+            value={
+                "uid": "Mg",
+                "token": "set-password-token",
+                "new_password": "NewPw!234",
+                "new_password2": "NewPw!234",
+            },
+            request_only=True,
+        ),
+        OpenApiExample(
+            "응답 예시",
+            value={"detail": "비밀번호가 성공적으로 변경되었습니다."},
+            response_only=True,
+        ),
+    ],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def reset_password(request):
@@ -112,6 +156,11 @@ def reset_password(request):
     )
 
 # 프로필 조회
+@extend_schema(
+    tags=["Accounts"],
+    summary="프로필 조회",
+    responses={200: OpenApiTypes.OBJECT},
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def profile(request):
@@ -139,9 +188,15 @@ def profile(request):
     moathons_qs = user.users_moathon.all()
     moathons_data = MoathonListWithRatesSerializer(moathons_qs, many=True).data
 
+    profile_image_url = None
+    if getattr(user, "profile_image", None) and user.profile_image:
+        try:
+            profile_image_url = request.build_absolute_uri(user.profile_image.url)
+        except Exception:
+            profile_image_url = None
 
     data = {
-        "profile_image": user.profile_image,
+        "profile_image": profile_image_url,
         "email": user.email,
         "nickname": user.nickname,
         "birth": user.birth,
@@ -156,6 +211,12 @@ def profile(request):
     return Response(data)
     
 # 프로필 수정 
+@extend_schema(
+    tags=["Accounts"],
+    summary="프로필 수정(PATCH/PUT)",
+    request=ProfileUpdateSerializer,
+    responses={200: OpenApiTypes.OBJECT},
+)
 @api_view(["PATCH", "PUT"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
@@ -179,6 +240,31 @@ def profile_update(request):
     return Response(data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Accounts"],
+    summary="온보딩 최종 제출(PUT)",
+    request=OnboardingPutSerializer,
+    responses={200: OpenApiTypes.OBJECT},
+    examples=[
+        OpenApiExample(
+            "요청 예시",
+            value={
+                "gender": "M",
+                "credit_score": 850,
+                "assets": 12000000,
+                "salary": 3200000,
+                "average_monthly_spend": 1400000,
+                "tender": "SAFE",
+            },
+            request_only=True,
+        ),
+        OpenApiExample(
+            "응답 예시",
+            value={"onboarding_completed": True},
+            response_only=True,
+        ),
+    ],
+)
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])

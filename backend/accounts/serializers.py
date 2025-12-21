@@ -71,7 +71,7 @@ class UserPasswordResetConfirmSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
-        new_password = validated_data.get['new_password']
+        new_password = validated_data.get("new_password")
         instance.set_password(new_password)
         instance.save()
         return instance
