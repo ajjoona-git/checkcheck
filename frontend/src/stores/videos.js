@@ -33,4 +33,4 @@ export const useVideoStore = defineStore('video', () => {
     videos,
     getVideos,
   }
-}, { persist: true })
+})
