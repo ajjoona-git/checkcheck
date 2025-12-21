@@ -9,6 +9,9 @@ from .serializers import RecommendationPreviewSerializer
 from .services.stage1_inference import stage1_recommend_topk_products
 from .services.stage2_openai import pick_final_option_from_top10
 
+from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+
 # 선택된 상품의 디테일한 옵션 생성
 def _build_final_option_detail(option_id: int) -> Dict[str, Any]:
     opt = (
@@ -39,7 +42,68 @@ def _build_final_option_detail(option_id: int) -> Dict[str, Any]:
         "mtrt_int": p.mtrt_int, # 만기 후 이자율 
     }
 
-
+@extend_schema(
+    tags=["Recommendations"],
+    summary="금융상품 추천 (Stage1 XGB + Stage2 LLM)",
+    description=(
+        "사용자 목표/기간/성향을 입력받아 "
+        "Stage1(XGB)로 Top-K 상품을 추린 뒤, "
+        "Stage2(LLM)로 최종 ProductOption 1개를 선택합니다."
+    ),
+    request=RecommendationPreviewSerializer,
+    responses={200: OpenApiTypes.OBJECT},
+    examples=[
+        OpenApiExample(
+            "요청 예시",
+            value={
+                "target_amount": 10000000,
+                "start_amount": 2000000,
+                "term_months": 12,
+                "purpose": "GOAL",
+                "top_k": 10,
+                "per_product_candidates": 3,
+            },
+            request_only=True,
+        ),
+        OpenApiExample(
+            "응답 예시(구조)",
+            value={
+                "final_recommendation": {
+                    "product_id": 123,
+                    "option_id": 456,
+                    "reasons": ["..."],
+                    "warnings": ["..."],
+                    "used_fallback": False,
+                    "option_detail": {
+                        "option_id": 456,
+                        "product_id": 123,
+                        "product_name": "상품명",
+                        "bank_name": "은행명",
+                        "product_type": "SAVING",
+                        "join_deny": 1,
+                        "max_limit": 100000000,
+                        "save_trm": "12",
+                        "intr_rate": 3.2,
+                        "intr_rate2": 3.8,
+                        "rsrv_type_nm": "정액적립식",
+                        "intr_rate_type_nm": "단리",
+                        "spcl_cnd": "우대조건 ...",
+                        "etc_note": "기타유의사항 ...",
+                        "mtrt_int": "만기 후 이자율 ...",
+                    },
+                },
+                "confirm_payload": {
+                    "product_option_id": 456,
+                    "target_amount": 10000000,
+                    "start_amount": 2000000,
+                    "term_months": 12,
+                    "purpose": "GOAL",
+                },
+            },
+            response_only=True,
+        ),
+    ],
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def recommend_product(request):

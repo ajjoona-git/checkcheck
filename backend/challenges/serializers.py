@@ -36,11 +36,13 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
 # 전체 모아톤 조회
 class MoathonListSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source='user.nickname', read_only=True)
+    bank = serializers.CharField(source='product_option.product.bank.kor_co_nm', read_only=True)
+    product_name = serializers.CharField(source='product_option.product.fin_prdt_nm', read_only=True)
     progress_rate = serializers.SerializerMethodField()    
 
     class Meta:
         model = Moathon
-        fields = ['id', 'title', 'nickname', 'purpose', 'progress_rate', 'target_amount']
+        fields = ['id', 'title', 'nickname', 'bank', 'product_name', 'progress_rate']
 
     def get_progress_rate(self, obj):
         # 공식: (오늘 - 시작일) / (종료일 - 시작일) * 100
