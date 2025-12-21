@@ -2,11 +2,19 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from django.shortcuts import render, get_object_or_404
 from .models import Product, ProductOption
 from .serializers import ProductListSerializer
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name='bank', description='은행명 (예: 우리은행)', required=False, type=str),
+        OpenApiParameter(name='type', description='상품 유형 (예: DEPOSIT, SAVING)', required=False, type=str),
+        OpenApiParameter(name='period', description='예치 기간 (예: 12)', required=False, type=int),
+    ]
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
