@@ -15,3 +15,17 @@ class ProductOptionSimpleSerializer(serializers.ModelSerializer):
             'bank_name',     # 은행명
             'product_type',  # 예금/적금 구분
         ]
+        
+# 금융 상품 전체 조회
+class ProductListSerializer(serializers.ModelSerializer):
+    class ProductOptionSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = ProductOption
+            fields = '__all__'
+
+    options = ProductOptionSerializer(many=True, read_only=True)
+    bank_name = serializers.CharField(source='bank.kor_co_nm', read_only=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
