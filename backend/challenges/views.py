@@ -156,7 +156,7 @@ def moathon_comment_list_create(request, moathon_pk):
 )
 @api_view(["PATCH", "DELETE"])
 @permission_classes([IsAuthenticated])
-def moathon_comment_detail(request, comment_pk):
+def moathon_comment_detail(request, moathon_pk, comment_pk):
     comment = get_object_or_404(
         MoathonComment.objects.select_related("user", "moathon"),
         pk=comment_pk
