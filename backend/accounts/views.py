@@ -184,7 +184,11 @@ def profile(request):
                     )
                     .order_by("-created_at")
                 ),
-            )
+            ),
+            Prefetch(
+                "badges",  # UserBadge.user related_name='badges' 
+                queryset=UserBadge.objects.select_related("badge", "moathon"),
+            ),
         )
         .get(pk=request.user.pk)
     )
@@ -199,6 +203,33 @@ def profile(request):
         except Exception:
             profile_image_url = None
 
+    # 팔로워/팔로잉 수
+    follower_count = UserFollow.objects.filter(following=user).count()
+    following_count = UserFollow.objects.filter(follower=user).count()
+
+    # 뱃지 도감
+    all_badges = Badge.objects.all()
+
+    obtained_stats = (
+        user.badges  # Prefetch로 로드된 UserBadge related manager
+        .values("badge")
+        .annotate(count=Count("id"))
+    )
+    obtained_map = {item["badge"]: item["count"] for item in obtained_stats}
+
+    badges_collection = []
+    for badge in all_badges:
+        cnt = obtained_map.get(badge.id, 0)
+        badges_collection.append({
+            "id": badge.id,
+            "type": badge.type,
+            "name": badge.name,
+            "description": badge.description,
+            "url": badge.badge_url,
+            "is_obtained": cnt > 0,
+            "quantity": cnt,
+        })
+
     data = {
         "profile_image": profile_image_url,
         "email": user.email,
@@ -210,6 +241,10 @@ def profile(request):
         "salary": user.salary,
         "average_monthly_spend": user.average_monthly_spend,
         "tender": user.tender,
+        "follower_count": follower_count,
+        "following_count": following_count,
+        "badge_collection": badges_collection,
+
         "moathons": moathons_data,
     }
     return Response(data)

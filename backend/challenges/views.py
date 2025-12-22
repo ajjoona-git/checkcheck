@@ -62,7 +62,7 @@ def moathon_detail(request, moathon_pk):
     moathon = get_object_or_404(Moathon, pk=moathon_pk)
 
     if request.method == 'GET':
-        serializer = MoathonDetailSerializer(moathon)
+        serializer = MoathonDetailSerializer(moathon, context={"request": request})
         return Response(serializer.data)
     
     if moathon.user != request.user:
@@ -75,7 +75,7 @@ def moathon_detail(request, moathon_pk):
         serializer = MoathonUpdateSerializer(moathon, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             updated_moathon = serializer.save()
-            return Response(MoathonDetailSerializer(updated_moathon).data)
+            return Response(MoathonDetailSerializer(updated_moathon, context={"request": request}).data)
         
     elif request.method == 'DELETE':
         moathon.delete()
