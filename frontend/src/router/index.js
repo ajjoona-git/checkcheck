@@ -44,12 +44,12 @@ const router = createRouter({
       children: [
         {
           path: 'create',
-          name: 'create',
+          name: 'moathonCreate',
           component: MoathonCreateView,
         },
         {
           path: ':id',
-          name: 'detail',
+          name: 'moathonDetail',
           component: MoathonDetailView,
         },
       ]

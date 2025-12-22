@@ -22,7 +22,7 @@
           </template>
           
           <template v-else>
-            <RouterLink class="nav-link" :to="{ name: 'create' }">CREATE</RouterLink>
+            <RouterLink class="nav-link" :to="{ name: 'moathonCreate' }">CREATE</RouterLink>
             <RouterLink class="nav-link" :to="{ name: 'mypage' }">MY PAGE</RouterLink>
             <form @submit.prevent="logOut">
               <input type="submit" class="nav-link" value="LOGOUT">
