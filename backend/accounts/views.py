@@ -1,4 +1,4 @@
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -12,6 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from challenges.models import Moathon
+from .models import Badge, UserBadge
 
 from .serializers import (
     PasswordResetSerializer,
@@ -26,7 +27,7 @@ from drf_spectacular.types import OpenApiTypes
 
 User = get_user_model()
 
-# 비밀번호 잃어버렸을 때, 이메일로 재설정 연결 
+# 비밀번호 잃어버렸을 때, 이메일로 재설정 연결
 @extend_schema(
     tags=["Accounts"],
     summary="비밀번호 재설정 메일 발송",
@@ -141,7 +142,7 @@ def reset_password(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # 비밀번호 검증 + 저장 
+    # 비밀번호 검증 + 저장
     serializer = UserPasswordResetConfirmSerializer(
         instance=user,
         data=request.data,
@@ -209,8 +210,8 @@ def profile(request):
         "moathons": moathons_data,
     }
     return Response(data)
-    
-# 프로필 수정 
+
+# 프로필 수정
 @extend_schema(
     tags=["Accounts"],
     summary="프로필 수정(PATCH/PUT)",
@@ -298,3 +299,37 @@ def onboarding(request):
         {"onboarding_completed": True},
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def badge_collection(request):
+    user = request.user
+
+    # 1. 모든 뱃지 마스터 정보 가져오기 (badge_url 필드가므로 'url'을 맞추어 사용)
+    all_badges = Badge.objects.all()
+
+    # 2. 유저가 획득한 뱃지 정보 가져오기, 뱃지 ID별로 그룹화하여 개수 세기
+    obtained_stats = UserBadge.objects.filter(user=user).values('badge').annotate(count=Count('id'))
+
+    # 딕셔너리로 변환하여 매핑 { badge_id: count }
+    obtained_map = {item['badge']: item['count'] for item in obtained_stats}
+
+    # 3. 데이터 조합
+    collection_data = []
+    for badge in all_badges:
+        count = obtained_map.get(badge.id, 0)
+
+        collection_data.append({
+            "id": badge.id,
+            "type": badge.type,
+            "name": badge.name,
+            "description": badge.description,
+            "url": badge.badge_url,  # 수정: badge_url로 변경
+            "is_obtained": count > 0, # 획득 여부
+            "quantity": count,        # 획득 횟수
+        })
+
+    return Response({
+        "collection": collection_data
+    })

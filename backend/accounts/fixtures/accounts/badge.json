@@ -1,0 +1,132 @@
+[
+    {
+        "model": "accounts.badge",
+        "pk": 1,
+        "fields": {
+            "type": "track",
+            "name": "첫 번째 출발점",
+            "description": "순조로운 출발입니다. 목표 1/4지점에 도달하셨습니다.",
+            "badge_url": "frontend/src/assets/badges/badge_track_25.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 2,
+        "fields": {
+            "type": "track",
+            "name": "반환점 터치",
+            "description": "이제 돌아갈 수 없어요. 절반 지점에 도달하셨습니다.",
+            "badge_url": "frontend/src/assets/badges/badge_track_50.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 3,
+        "fields": {
+            "type": "track",
+            "name": "막판 스퍼트!",
+            "description": "고지가 코앞입니다. 마지막 힘을 내세요! 목표 3/4지점에 도달하셨습니다.",
+            "badge_url": "frontend/src/assets/badges/badge_track_75.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 4,
+        "fields": {
+            "type": "track",
+            "name": "완주 트로피",
+            "description": "축하합니다! 목표를 완벽하게 달성했어요.",
+            "badge_url": "frontend/src/assets/badges/badge_track_100.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 5,
+        "fields": {
+            "type": "achieve",
+            "name": "시작이 반",
+            "description": "모아톤 가입을 환영합니다.",
+            "badge_url": "frontend/src/assets/badges/badge_achieve_start.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 6,
+        "fields": {
+            "type": "achieve",
+            "name": "티끌 모아 태산",
+            "description": "첫 번째 모아톤을 시작(생성)했어요.",
+            "badge_url": "frontend/src/assets/badges/badge_achieve_deposit.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 7,
+        "fields": {
+            "type": "achieve",
+            "name": "작심삼일 탈출",
+            "description": "모아톤을 3일 이상 유지했어요.",
+            "badge_url": "frontend/src/assets/badges/badge_achieve_3days.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 8,
+        "fields": {
+            "type": "achieve",
+            "name": "프로 완주러",
+            "description": "모아톤을 3회 이상 성공시켰어요.",
+            "badge_url": "frontend/src/assets/badges/badge_achieve_3moathons.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 9,
+        "fields": {
+            "type": "achieve",
+            "name": "억만장자의 꿈",
+            "description": "목표 저축 금액을 초과해 1000만 원을 넘었어요.",
+            "badge_url": "frontend/src/assets/badges/badge_achieve_billionaire.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 10,
+        "fields": {
+            "type": "social",
+            "name": "응원 단장",
+            "description": "다른 사람의 모아톤에 '좋아요'를 10회 눌렀어요.",
+            "badge_url": "frontend/src/assets/badges/badge_social_cheerleader.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 11,
+        "fields": {
+            "type": "social",
+            "name": "소통 요정",
+            "description": "응원 댓글을 5개 이상 남겼어요.",
+            "badge_url": "frontend/src/assets/badges/badge_social_comments.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 12,
+        "fields": {
+            "type": "social",
+            "name": "인기 스타",
+            "description": "내 모아톤에 '좋아요'를 20개 받았어요.",
+            "badge_url": "frontend/src/assets/badges/badge_social_beloved.png"
+        }
+    },
+    {
+        "model": "accounts.badge",
+        "pk": 13,
+        "fields": {
+            "type": "social",
+            "name": "팔로팔로미",
+            "description": "팔로워가 10명을 넘었어요.",
+            "badge_url": "frontend/src/assets/badges/badge_social_followers.png"
+        }
+    }
+]
