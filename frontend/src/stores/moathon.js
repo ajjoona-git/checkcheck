@@ -1,11 +1,18 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useAccountStore } from '@/stores/accounts'
+import { useRouter } from 'vue-router'
 
 export const useMoathonStore = defineStore('moathon', () => {
+  const accountStore = useAccountStore()
+  const router = useRouter()
   const API_URL = import.meta.env.VITE_API_URL
 
-  const moathons = ref([])         // 화면에 보여줄 모아톤 리스트 (누적됨)
+  const moathons = ref([])
+  const recommendationResult = ref(null) // 추천된 상품 목록 저장
+  const isRecommending = ref(false)   // 추천 로딩 상태
+
   const count = ref(0)             // 전체 개수
   const currentPage = ref(1)      // 현재 페이지 번호
   const itemsPerPage = 24         // 페이지당 개수 설정
@@ -34,12 +41,56 @@ export const useMoathonStore = defineStore('moathon', () => {
     }
   }
 
+  const createMoathon = async (payload) => {
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `${API_URL}/moathons/create/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${accountStore.token}`,
+        }
+      })
+      router.push({ name: 'moathonDetail', params: { id: response.data.id } })
+      return response.data
+    } catch (error) {
+      console.error('모아톤 생성 실패:', error)
+      throw error
+    }
+  }
+
+  const recommendProduct = async (payload) => {
+    isRecommending.value = true
+    recommendationResult.value = null
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `${API_URL}/recommendations/recommend_product/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${accountStore.token}`
+        }
+      })
+      recommendationResult.value = response.data
+      return response.data
+    } catch (error) {
+      console.error('추천 요청 실패:', error)
+      throw error
+    } finally {
+      isRecommending.value = false
+    }
+  }
+
   return { 
     moathons, 
     count, 
     currentPage, 
     itemsPerPage,
     totalPages, 
+    recommendationResult,
+    isRecommending,
     fetchMoathons,
+    createMoathon,
+    recommendProduct,
    }
 })

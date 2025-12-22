@@ -6,6 +6,8 @@ import { useRouter } from 'vue-router'
 export const useAccountStore = defineStore('account', () => {
   const router = useRouter()
   const API_URL = import.meta.env.VITE_API_URL
+
+  const user = ref(null)
   const token = ref(null)
 
   const signUp = function (payload) {
@@ -37,11 +39,33 @@ export const useAccountStore = defineStore('account', () => {
         username, email, password
       }
     })
-      .then(res => {
+      .then(async res => {
         console.log('로그인이 완료되었습니다.')
         token.value = res.data.key
+        await getProfile()
       })
       .catch(err => console.log(err))
+  }
+
+  const getProfile = async () => {
+    if (!token.value) return
+
+    try {
+      const response = await axios({
+        method: 'get',
+        url: `${API_URL}/accounts/profile/`,
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      })
+      
+      user.value = response.data
+      console.log('유저 정보 로드 완료:', user.value)
+      return response.data
+    } catch (error) {
+      console.error('유저 정보 로드 실패:', error)
+      throw error
+    }
   }
 
   const logOut = function () {
@@ -53,6 +77,7 @@ export const useAccountStore = defineStore('account', () => {
       .then((res) => {
         console.log('로그아웃이 완료되었습니다.')
         token.value = null
+        user.value = null
         router.push({ name: 'login'})
       })
       .catch((err) => console.log(err))
@@ -64,7 +89,7 @@ export const useAccountStore = defineStore('account', () => {
 
   const updateProfile = function (payload) {
     return axios({
-      method: 'patch',
+      method: 'put',
       url: `${API_URL}/accounts/onboarding/`,
       data: payload,
       headers: {
@@ -82,14 +107,16 @@ export const useAccountStore = defineStore('account', () => {
   return { 
     API_URL,
     token,
+    user,
     signUp,
     logIn,
     logOut,
+    getProfile,
     isAuthenticated,
     updateProfile,
    }
 }, {
   persist: {
-    paths: ['token']
+    paths: ['token', 'user']
   }
 })
