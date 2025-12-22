@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Moathon
-from products.models import ProductOption
+from .models import Moathon, MoathonComment
 from products.serializers import ProductOptionSimpleSerializer
 from datetime import date
 
@@ -70,3 +69,26 @@ class MoathonUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Moathon
         fields = ['title', 'target_amount', 'purpose']
+
+# 모아톤 댓글 
+class MoathonCommentSerializer(serializers.ModelSerializer):
+    nickname = serializers.CharField(source="user.nickname", read_only=True)
+
+    class Meta:
+        model = MoathonComment
+        fields = ["id", "moathon", "content", "nickname", "created_at", "updated_at"]
+        read_only_fields = ["id", "moathon", "nickname", "created_at", "updated_at"]
+
+# 댓글 작성/수정
+class MoathonCommentWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MoathonComment
+        fields = ["content"]
+
+    def validate_content(self, value):
+        value = (value or "").strip()
+        if not value:
+            raise serializers.ValidationError("댓글 내용은 비어 있을 수 없습니다.")
+        if len(value) > 500:
+            raise serializers.ValidationError("댓글은 최대 500자까지 작성할 수 있습니다.")
+        return value
