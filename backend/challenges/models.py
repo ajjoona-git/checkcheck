@@ -40,10 +40,9 @@ class Moathon(models.Model):
             models.UniqueConstraint(fields=["user", "title"], name="uniq_moathon_title_per_user"),
         ]
 
-    DEFAULT_TITLE_BASE = f"{user}\'s moathon"
-
     def _next_default_title(self) -> str:
-        base = self.DEFAULT_TITLE_BASE
+        nickname = getattr(self.user, 'nickname', self.user.username)
+        base = f"{nickname}'s moathon"
         titles = (Moathon.objects
                   .filter(user=self.user, title__startswith=base)
                   .values_list("title", flat=True))

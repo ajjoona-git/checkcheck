@@ -9,6 +9,7 @@ import HomeView from '@/views/HomeView.vue'
 import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
 import MoathonDetailView from '@/views/moathon/MoathonDetailView.vue'
 import MoathonListView from '@/views/moathon/MoathonListView.vue'
+import MoathonRecommendView from '@/views/moathon/MoathonRecommendView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -44,9 +45,22 @@ const router = createRouter({
       path: '/moathon',
       children: [
         {
+          path: 'recommend',
+          name: 'moathonRecommend',
+          component: MoathonRecommendView,
+        },
+        {
           path: 'create',
           name: 'moathonCreate',
           component: MoathonCreateView,
+          // 다이렉트 모드는 productId가 필수이므로, 없으면 추천 페이지로 리다이렉트하는 가드 추가
+          beforeEnter: (to, from, next) => {
+            if (!to.query.productId) {
+              next({ name: 'moathonRecommend' })
+            } else {
+              next()
+            }
+          }
         },
         {
           path: ':id',
