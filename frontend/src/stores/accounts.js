@@ -49,6 +49,7 @@ export const useAccountStore = defineStore('account', () => {
     axios({
       method: 'post',
       url: `${API_URL}/accounts/logout/`,
+      headers: { Authorization: `Token ${token.value}` }
     })
       .then((res) => {
         console.log('로그아웃이 완료되었습니다.')
@@ -87,4 +88,8 @@ export const useAccountStore = defineStore('account', () => {
     isAuthenticated,
     updateProfile,
    }
+}, {
+  persist: {
+    paths: ['token']
+  }
 })
