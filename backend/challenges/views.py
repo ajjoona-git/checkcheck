@@ -26,7 +26,7 @@ def moathon_list(request):
         moathons = Moathon.objects.all().order_by('-id')
         
         paginator = PageNumberPagination()
-        paginator.page_size = 50
+        paginator.page_size = 24
         result_page = paginator.paginate_queryset(moathons, request)
 
         serializer = MoathonListSerializer(result_page, many=True)
