@@ -14,6 +14,7 @@
           <RouterLink class="nav-link" :to="{ name: 'home' }">HOME</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'explore' }">EXPLORE</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">종목 검색</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 찾기</RouterLink>
           
           <template v-if="!accountStore.isAuthenticated">
             <RouterLink class="nav-link" :to="{ name: 'login' }">LOGIN</RouterLink>

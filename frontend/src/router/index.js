@@ -2,6 +2,7 @@ import VideoDetail from '@/components/video/VideoDetail.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import OnboardingView from '@/views/auth/OnboardingView.vue'
 import SignupView from '@/views/auth/SignupView.vue'
+import BankSearchView from '@/views/finance/BankSearchView.vue'
 import VideoSearchView from '@/views/finance/VideoSearchView.vue'
 import HomeView from '@/views/HomeView.vue'
 import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
@@ -72,6 +73,11 @@ const router = createRouter({
           component: VideoDetail,
         },
       ]
+    },
+    {
+      path: '/bank',
+      name: 'bank',
+      component: BankSearchView,
     },
   ],
 })
