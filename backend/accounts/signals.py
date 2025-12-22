@@ -1,13 +1,19 @@
-from django.db.models.signals import user_logged_in
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
-from .models import User, UserBadge, Badge
-from .badge_functions import award_badges_to_user  # 뱃지 처리 함수
+from django.contrib.auth.signals import user_logged_in
+
+from accounts.services.badge_functions import award_all_badges, award_signup_badges
+
+User = get_user_model()
+
+@receiver(post_save, sender=User)
+def on_user_created(sender, instance, created, **kwargs):
+    if kwargs.get("raw", False):
+        return
+    if created:
+        award_signup_badges(instance)
 
 @receiver(user_logged_in)
 def on_user_login(sender, request, user, **kwargs):
-    """
-    유저가 로그인할 때마다 뱃지 조건을 점검하고 적합한 뱃지를 추가합니다.
-    """
-    # 로그인한 유저에 대해 뱃지 업데이트
-    award_badges_to_user(user)
+    award_all_badges(user)

@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "type": "track",
-            "name": "첫 번째 출발점",
+            "name": "첫 번째 숨 고르기",
             "description": "순조로운 출발입니다. 목표 1/4지점에 도달하셨습니다.",
             "badge_url": "frontend/src/assets/badges/badge_track_25.png"
         }
@@ -75,7 +75,7 @@
         "fields": {
             "type": "achieve",
             "name": "프로 완주러",
-            "description": "모아톤을 3회 이상 성공시켰어요.",
+            "description": "모아톤을 3회 이상 완주했어요.",
             "badge_url": "frontend/src/assets/badges/badge_achieve_3moathons.png"
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "type": "achieve",
             "name": "억만장자의 꿈",
-            "description": "목표 저축 금액을 초과해 1000만 원을 넘었어요.",
+            "description": "만기가 36개월 이상인 모아톤을 시작했어요.",
             "badge_url": "frontend/src/assets/badges/badge_achieve_billionaire.png"
         }
     },

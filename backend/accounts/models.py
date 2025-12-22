@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from challenges.models import Moathon
+from django.db.models import Q
 
 # Create your models here.
 class User(AbstractUser):
@@ -62,11 +63,42 @@ class UserBadge(models.Model):
     obtained_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # 같은 모아톤에서 같은 뱃지(예: 50% 뱃지)를 중복해서 받을 수 없음
-        # 하지만 다른 모아톤에서는 같은 50% 뱃지를 또 받을 수 있음! (이게 중요)
         constraints = [
+            # 같은 모아톤에서 같은 뱃지(예: 50% 뱃지)를 중복해서 받을 수 없음
+            # 하지만 다른 모아톤에서는 같은 50% 뱃지를 또 받을 수 있음! (이게 중요)
             models.UniqueConstraint(
                 fields=['user', 'badge', 'moathon'],
                 name='unique_badge_per_moathon'
+            ),
+            # 유저 종속(모아톤이 없는) 뱃지는 유저당 1번만
+            models.UniqueConstraint(
+                fields=["user", "badge"],
+                condition=Q(moathon__isnull=True),
+                name="unique_user_badge_when_moathon_null",
+            ),
+        ]
+
+class UserFollow(models.Model):
+    follower = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="following_relations",
+    )
+    following = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="follower_relations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["follower", "following"],
+                name="unique_follow_pair",
             )
+        ]
+        indexes = [
+            models.Index(fields=["following", "created_at"]),
+            models.Index(fields=["follower", "created_at"]),
         ]

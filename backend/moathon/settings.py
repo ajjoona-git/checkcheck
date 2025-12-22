@@ -49,7 +49,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'visualizations',
-    'accounts',
     'accounts.apps.AccountsConfig',
     'products',
     'recommendations',

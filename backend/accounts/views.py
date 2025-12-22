@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch, Count
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -12,7 +14,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from challenges.models import Moathon
-from .models import Badge, UserBadge
+from .models import Badge, UserBadge, UserFollow
+from accounts.services.badge_functions import award_social_badges
 
 from .serializers import (
     PasswordResetSerializer,
@@ -300,7 +303,7 @@ def onboarding(request):
         status=status.HTTP_200_OK,
     )
 
-
+@extend_schema(summary="뱃지 컬렉션 조회")
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def badge_collection(request):
@@ -333,3 +336,26 @@ def badge_collection(request):
     return Response({
         "collection": collection_data
     })
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def follow_toggle(request, user_pk):
+    me = request.user
+    target = get_object_or_404(User, pk=user_pk)
+
+    if me.id == target.id:
+        return Response(status=400)
+
+    with transaction.atomic():
+        rel, created = UserFollow.objects.get_or_create(follower=me, following=target)
+        if not created:
+            rel.delete()
+            followed = False
+        else:
+            followed = True
+
+    # 팔로우/언팔로우 직후 배지 갱신(즉시 반영)
+    award_social_badges(target)  # 팔로팔로미(팔로워 수) 체크는 target 기준
+
+    follower_count = UserFollow.objects.filter(following=target).count()
+    return Response({"followed": followed, "follower_count": follower_count})
