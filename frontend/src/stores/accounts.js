@@ -22,7 +22,7 @@ export const useAccountStore = defineStore('account', () => {
         console.log('회원가입이 완료되었습니다.')
         const password = password1
         logIn({ username, email, password })
-        router.replace({ name: 'onboarding' })
+        router.push({ name: 'onboarding' })
       })
       .catch(err => console.log(err))
   }
@@ -40,7 +40,6 @@ export const useAccountStore = defineStore('account', () => {
       .then(res => {
         console.log('로그인이 완료되었습니다.')
         token.value = res.data.key
-        router.push({ name: 'home' })
       })
       .catch(err => console.log(err))
   }
@@ -64,9 +63,9 @@ export const useAccountStore = defineStore('account', () => {
   })
 
   const updateProfile = function (payload) {
-    axios({
+    return axios({
       method: 'patch',
-      url: `${API_URL}/accounts/user/`,
+      url: `${API_URL}/accounts/onboarding/`,
       data: payload,
       headers: {
         Authorization: `Token ${token.value}`,
@@ -75,6 +74,7 @@ export const useAccountStore = defineStore('account', () => {
     })
       .then(res => {
         console.log('프로필 정보가 저장되었습니다.', res.data)
+        return res.data
       })
       .catch(err => console.log(err))
   }

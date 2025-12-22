@@ -20,12 +20,14 @@
 <script setup>
   import { ref } from 'vue';
   import { useAccountStore } from '@/stores/accounts';
+  import { useRouter } from 'vue-router';
 
   const username = ref(null)
   const email = ref(null)
   const password = ref(null)
 
   const accountStore = useAccountStore()
+  const router = useRouter()
 
   const logIn = function () {
     const payload = {
@@ -34,6 +36,7 @@
       password: password.value,
     }
     accountStore.logIn(payload)
+    router.push({ name: 'home' })
   }
 </script>
 
