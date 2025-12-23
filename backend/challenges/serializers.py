@@ -4,14 +4,14 @@ from .models import Moathon, MoathonComment, MoathonLike
 from products.serializers import ProductOptionSimpleSerializer
 from datetime import date
 
-from accounts.models import UserBadge, UserFollow 
+from accounts.models import UserBadge, UserFollow
 
 # 전체 모아톤 조회
 class MoathonListSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source='user.nickname', read_only=True)
     bank = serializers.CharField(source='product_option.product.bank.kor_co_nm', read_only=True)
     product_name = serializers.CharField(source='product_option.product.fin_prdt_nm', read_only=True)
-    progress_rate = serializers.SerializerMethodField()    
+    progress_rate = serializers.SerializerMethodField()
 
     class Meta:
         model = Moathon
@@ -21,10 +21,10 @@ class MoathonListSerializer(serializers.ModelSerializer):
         # 공식: (오늘 - 시작일) / (종료일 - 시작일) * 100
         total_days = (obj.end_date - obj.start_date).days
         elapsed_days = (date.today() - obj.start_date).days
-        
+
         if total_days <= 0: return 100
         if elapsed_days <= 0: return 0
-        
+
         rate = (elapsed_days / total_days) * 100
         return min(int(rate), 100)
 
@@ -38,14 +38,14 @@ class MoathonCreateSerializer(serializers.ModelSerializer):
         if data['start_amount'] > data['target_amount']:
             raise serializers.ValidationError("시작 금액이 목표 금액보다 클 수 없습니다.")
         return data
-    
+
 # 모아톤 수정하기
 class MoathonUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Moathon
         fields = ['title', 'target_amount', 'purpose']
 
-# 모아톤 댓글 
+# 모아톤 댓글
 class MoathonCommentSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source="user.nickname", read_only=True)
     is_owner = serializers.SerializerMethodField()
