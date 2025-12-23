@@ -25,6 +25,10 @@
               <span class="divider">|</span>
               <span>팔로잉 {{ moathon.user_info.following_count }}</span>
             </div>
+            <BadgeLibrary 
+              v-if="moathon.user_info.owner_badges"
+              :badges="moathon.user_info.owner_badges" 
+            />
           </div>
         </div>
       </div>
@@ -131,6 +135,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMoathonStore } from '@/stores/moathon'
 import { useAccountStore } from '@/stores/accounts'
 import ProductCard from '@/components/product/ProductCard.vue'
+import BadgeLibrary from '@/components/common/BadgeLibrary.vue'
 
 const route = useRoute()
 const router = useRouter()
