@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, ProductOption
+from .models import Product, ProductOption, Bank
 
 # 모아톤 상세 페이지에 사용할 금융 상품 정보
 class ProductOptionSimpleSerializer(serializers.ModelSerializer):
@@ -15,17 +15,19 @@ class ProductOptionSimpleSerializer(serializers.ModelSerializer):
             'bank_name',     # 은행명
             'product_type',  # 예금/적금 구분
         ]
-        
+
 # 금융 상품 전체 조회
 class ProductListSerializer(serializers.ModelSerializer):
     class ProductOptionSerializer(serializers.ModelSerializer):
         class Meta:
             model = ProductOption
             fields = [
-                'id', 
-                'save_trm', 
-                'intr_rate', 
-                'intr_rate2'
+                'id',
+                'intr_rate_type_nm',
+                'rsrv_type_nm',
+                'save_trm',
+                'intr_rate',
+                'intr_rate2',
             ]
 
     options = ProductOptionSerializer(many=True, read_only=True)
@@ -35,16 +37,16 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 
+            'id',
             'dcls_month',
-            'bank_name', 
-            'product_type', 
+            'bank_name',
+            'product_type',
             'fin_prdt_nm',
             'join_way',
             'options',
             'max_rate',
         ]
-    
+
     # 해당 상품의 옵션 중 가장 높은 우대금리를 계산해서 반환
     def get_max_rate(self, obj):
         options = obj.options.all()
