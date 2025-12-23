@@ -11,23 +11,24 @@
 
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <RouterLink class="nav-link" :to="{ name: 'home' }">HOME</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'explore' }">EXPLORE</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">종목 검색</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'commodity' }">금/은 시세</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 찾기</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'products' }">금융 상품 찾기</RouterLink>
+          <RouterLink v-if="accountStore.isAuthenticated" class="nav-link" :to="{ name: 'moathonRecommend' }">모아톤 추천받기</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'community' }">모아톤 커뮤니티</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'products' }">예·적금 조회</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 위치</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'commodity' }">시세 확인</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">유튜브 검색</RouterLink>
+        </div>
 
+        <div class="navbar-nav ms-auto">
           <template v-if="!accountStore.isAuthenticated">
-            <RouterLink class="nav-link" :to="{ name: 'login' }">LOGIN</RouterLink>
-            <RouterLink class="nav-link" :to="{ name: 'signup' }">SIGNUP</RouterLink>
+            <RouterLink class="nav-link" :to="{ name: 'login' }">로그인</RouterLink>
+            <RouterLink class="nav-link" :to="{ name: 'signup' }">회원가입</RouterLink>
           </template>
 
           <template v-else>
-            <RouterLink class="nav-link" :to="{ name: 'moathonRecommend' }">모아톤 추천받기</RouterLink>
-            <RouterLink class="nav-link" :to="{ name: 'mypage' }">MY PAGE</RouterLink>
+            <RouterLink class="nav-link" :to="{ name: 'mypage' }">프로필</RouterLink>
             <form @submit.prevent="logOut">
-              <input type="submit" class="nav-link" value="LOGOUT">
+              <input type="submit" class="nav-link" value="로그아웃">
             </form>
           </template>
         </div>

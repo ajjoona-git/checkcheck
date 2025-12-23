@@ -10,6 +10,7 @@ import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
 import MoathonDetailView from '@/views/moathon/MoathonDetailView.vue'
 import MoathonListView from '@/views/moathon/MoathonListView.vue'
 import MoathonRecommendView from '@/views/moathon/MoathonRecommendView.vue'
+import MoathonUpdateView from '@/views/moathon/MoathonUpdateView.vue'
 import ProductListView from '@/views/product/ProductListView.vue'
 import ProductDetailView from '@/views/product/ProductDetailView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
@@ -40,7 +41,7 @@ const router = createRouter({
     },
     {
       path: '/moathons',
-      name: 'explore',
+      name: 'community',
       component: MoathonListView,
     },
     {
@@ -66,8 +67,18 @@ const router = createRouter({
         },
         {
           path: ':id',
-          name: 'moathonDetail',
-          component: MoathonDetailView,
+          children: [
+            {
+              path: '',
+              name: 'moathonDetail',
+              component: MoathonDetailView,
+            },
+            {
+              path: 'update',
+              name: 'moathonUpdate',
+              component: MoathonUpdateView,
+            },
+          ]
         },
       ]
     },
