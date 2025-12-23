@@ -23,9 +23,11 @@ class ProductListSerializer(serializers.ModelSerializer):
             model = ProductOption
             fields = [
                 'id',
+                'intr_rate_type_nm',
+                'rsrv_type_nm',
                 'save_trm',
                 'intr_rate',
-                'intr_rate2'
+                'intr_rate2',
             ]
 
     options = ProductOptionSerializer(many=True, read_only=True)
