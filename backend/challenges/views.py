@@ -135,7 +135,7 @@ def moathon_comment_list_create(request, moathon_pk):
         paginator.page_size = 50
         page = paginator.paginate_queryset(qs, request)
 
-        serializer = MoathonCommentSerializer(page, many=True)
+        serializer = MoathonCommentSerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     write_serializer = MoathonCommentWriteSerializer(data=request.data)

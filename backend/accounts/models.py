@@ -58,7 +58,7 @@ class UserBadge(models.Model):
 
     # [핵심] 트랙 뱃지인 경우, 어떤 모아톤에서 획득했는지 연결
     # 일반 뱃지(팔로워 10명 등)인 경우 null=True
-    moathon = models.ForeignKey(Moathon, on_delete=models.SET_NULL, null=True, blank=True)
+    moathon = models.ForeignKey(Moathon, on_delete=models.CASCADE, null=True, blank=True)
 
     obtained_at = models.DateTimeField(auto_now_add=True)
 
