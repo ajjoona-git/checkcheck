@@ -21,48 +21,14 @@
       <p>등록된 모아톤이 없습니다.</p>
     </div>
 
-    <div class="pagination" v-if="store.totalPages > 1">
-      <button 
-        :disabled="store.currentPage === 1" 
-        @click="changePage(1)"
-        class="page-btn nav-btn"
-      >
-        &lt;&lt;
-      </button>
-
-      <button 
-        :disabled="store.currentPage === 1" 
-        @click="changePage(store.currentPage - 1)"
-        class="page-btn nav-btn"
-      >
-        &lt;
-      </button>
-
-      <button 
-        v-for="page in visiblePages" 
-        :key="page"
-        @click="changePage(page)"
-        class="page-btn number-btn"
-        :class="{ active: page === store.currentPage }"
-      >
-        {{ page }}
-      </button>
-
-      <button 
-        :disabled="store.currentPage === store.totalPages" 
-        @click="changePage(store.currentPage + 1)"
-        class="page-btn nav-btn"
-      >
-        &gt;
-      </button>
-
-      <button 
-        :disabled="store.currentPage === store.totalPages" 
-        @click="changePage(store.totalPages)"
-        class="page-btn nav-btn"
-      >
-        &gt;&gt;
-      </button>
+    <div class="pagination-wrapper" v-if="store.count > 0">
+      <Pagination
+        :current-page="store.currentPage"
+        :total-count="store.count"
+        :items-per-page="12"
+        :display-page-count="5"
+        @change-page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -72,40 +38,15 @@ import { onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useMoathonStore } from '@/stores/moathon'
 import MoathonCard from '@/components/moathon/MoathonCard.vue'
+import Pagination from '@/components/common/Pagination.vue'
 
 const store = useMoathonStore()
 
 // 페이지 변경 핸들러
-const changePage = (page) => {
-  if (page >= 1 && page <= store.totalPages) {
-    store.fetchMoathons(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+const handlePageChange = (page) => {
+  store.fetchMoathons(page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-
-// 화면에 보여줄 페이지 번호 계산 (최대 5개씩 노출)
-const visiblePages = computed(() => {
-  const current = store.currentPage
-  const total = store.totalPages
-  const maxVisible = 5
-  
-  let start = current - Math.floor(maxVisible / 2)
-  start = Math.max(start, 1)
-  
-  let end = start + maxVisible - 1
-  end = Math.min(end, total)
-
-  // 끝 부분 보정 (예: 총 10페이지인데 현재 9페이지면 6,7,8,9,10 보여줌)
-  if (end - start + 1 < maxVisible) {
-    start = Math.max(end - maxVisible + 1, 1)
-  }
-
-  const pages = []
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  return pages
-})
 
 onMounted(() => {
   store.fetchMoathons(1)
@@ -134,14 +75,17 @@ onMounted(() => {
   text-decoration: none;
   border-radius: 30px;
   font-weight: bold;
+  transition: background-color 0.2s;
 }
 
-/* 그리드 레이아웃 수정 */
+.create-btn:hover {
+  background-color: #1a252f;
+}
+
+/* 그리드 레이아웃 */
 .moathon-grid {
   display: grid;
-  gap: 20px; /* 카드 간격 24px -> 20px로 조금 좁힘 */
-  
-  /* 기본(모바일): 1열 */
+  gap: 20px; 
   grid-template-columns: repeat(1, 1fr);
 }
 
@@ -159,7 +103,7 @@ onMounted(() => {
   }
 }
 
-/* 데스크탑: 4열 (최대 4개) */
+/* 데스크탑: 4열 */
 @media (min-width: 1280px) {
   .moathon-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -172,50 +116,9 @@ onMounted(() => {
   color: #888;
 }
 
-/* 페이지네이션 스타일 (기존 유지) */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
+.pagination-wrapper {
   margin-top: 50px;
-}
-
-.page-btn {
-  background: white;
-  border: 1px solid #ddd;
-  min-width: 36px; /* 버튼 크기 살짝 조정 */
-  height: 36px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #555;
-  transition: all 0.2s;
   display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-.page-btn:hover:not(:disabled) {
-  background-color: #f0f0f0;
-  border-color: #bbb;
-}
-
-.page-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  background-color: #f9f9f9;
-}
-
-.page-btn.active {
-  background-color: #2c3e50;
-  color: white;
-  border-color: #2c3e50;
-  font-weight: bold;
-}
-
-.nav-btn {
-  font-weight: bold;
-  color: #888;
 }
 </style>
