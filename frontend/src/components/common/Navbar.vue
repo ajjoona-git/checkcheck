@@ -16,7 +16,7 @@
           <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">종목 검색</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'commodity' }">금/은 시세</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 찾기</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'commodity' }">현물 시세</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'products' }">금융 상품 찾기</RouterLink>
 
           <template v-if="!accountStore.isAuthenticated">
             <RouterLink class="nav-link" :to="{ name: 'login' }">LOGIN</RouterLink>

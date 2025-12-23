@@ -39,7 +39,7 @@ def product_list(request):
         products = products.filter(options__save_trm=save_trm).distinct()
 
     paginator = PageNumberPagination()
-    paginator.page_size = 50
+    paginator.page_size = 24
     result_page = paginator.paginate_queryset(products, request)
 
     if result_page is not None:

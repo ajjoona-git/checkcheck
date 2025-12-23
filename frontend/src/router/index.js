@@ -10,6 +10,8 @@ import MoathonCreateView from '@/views/moathon/MoathonCreateView.vue'
 import MoathonDetailView from '@/views/moathon/MoathonDetailView.vue'
 import MoathonListView from '@/views/moathon/MoathonListView.vue'
 import MoathonRecommendView from '@/views/moathon/MoathonRecommendView.vue'
+import ProductListView from '@/views/product/ProductListView.vue'
+import ProductDetailView from '@/views/product/ProductDetailView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -98,6 +100,21 @@ const router = createRouter({
       path: '/commodity',
       name: 'commodity',
       component: CommoditySearchView,
+    },
+    {
+      path: '/products',
+      children: [
+        {
+          path: '',
+          name: 'products',
+          component: ProductListView,
+        },
+        {
+          path: ':id',
+          name: 'productDetail',
+          component: ProductDetailView,
+        }
+      ],
     },
   ],
 })
