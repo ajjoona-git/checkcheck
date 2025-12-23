@@ -1,12 +1,8 @@
 <template>
   <div class="container">
     <header class="page-header">
-      <h1>🏆 모아톤 챌린지</h1>
+      <h1>모아톤 커뮤니티</h1>
       <p>총 {{ store.count }}개의 도전이 진행 중입니다!</p>
-      
-      <RouterLink :to="{ name: 'moathonCreate' }" class="create-btn">
-        + 내 모아톤 만들기
-      </RouterLink>
     </header>
 
     <div v-if="store.moathons.length > 0" class="moathon-grid">
