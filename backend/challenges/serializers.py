@@ -1,95 +1,10 @@
-from django.db.models import Count
 from rest_framework import serializers
 from .models import Moathon, MoathonComment, MoathonLike
 from products.serializers import ProductOptionSimpleSerializer
 from datetime import date
 
-from accounts.models import UserBadge, UserFollow
-
-# 단일 모아톤 조회
-class MoathonDetailSerializer(serializers.ModelSerializer):
-    nickname = serializers.CharField(source='user.nickname', read_only=True)
-    profile_image = serializers.ImageField(source='user.profile_image', read_only=True)
-
-    product_option = ProductOptionSimpleSerializer(read_only=True)
-    progress_rate = serializers.SerializerMethodField()
-
-    # 작성자의 획득한 뱃지 리스트
-    owner_badges = serializers.SerializerMethodField()
-
-    # 작성자의 팔로워/팔로잉 수 + 내가 팔로우 중인지
-    follower_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
-    is_following = serializers.SerializerMethodField()
-
-    # 모아톤 좋아요 수
-    like_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Moathon
-        fields = [
-            'id', 'title', 'purpose', 'progress_rate', 'target_amount', 'start_date', 'end_date',
-            'product_option',
-            'nickname', 'profile_image',
-            'follower_count', 'following_count', 'is_following',
-            'like_count',
-            'owner_badges',
-        ]
-
-    def get_progress_rate(self, obj):
-        total_days = (obj.end_date - obj.start_date).days
-        elapsed_days = (date.today() - obj.start_date).days
-
-        if total_days <= 0: return 100
-        if elapsed_days <= 0: return 0
-
-        rate = (elapsed_days / total_days) * 100
-        return min(int(rate), 100)
-
-    def get_follower_count(self, obj):
-        owner = obj.user
-        return UserFollow.objects.filter(following=owner).count()
-
-    def get_following_count(self, obj):
-        owner = obj.user
-        return UserFollow.objects.filter(follower=owner).count()
-
-    def get_is_following(self, obj):
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return False
-
-        me = request.user
-        owner = obj.user
-        if me.id == owner.id:
-            return False
-
-        return UserFollow.objects.filter(follower=me, following=owner).exists()
-
-    def get_like_count(self, obj):
-        return MoathonLike.objects.filter(moathon=obj).count()
-
-    def get_owner_badges(self, obj):
-        owner = obj.user
-        qs = (
-            UserBadge.objects
-            .filter(user=owner)
-            .select_related("badge", "moathon")
-            .order_by("-obtained_at")
-        )
-
-        return [
-            {
-                "id": ub.badge_id,
-                "type": ub.badge.type,
-                "name": ub.badge.name,
-                "description": ub.badge.description,
-                "url": ub.badge.badge_url,
-                "moathon_id": ub.moathon_id,  # track이면 값 존재 가능
-                "obtained_at": ub.obtained_at,
-            }
-            for ub in qs
-        ]
+from accounts.models import UserBadge, UserFollow, Badge
+from collections import Counter
 
 # 전체 모아톤 조회
 class MoathonListSerializer(serializers.ModelSerializer):
@@ -133,11 +48,16 @@ class MoathonUpdateSerializer(serializers.ModelSerializer):
 # 모아톤 댓글
 class MoathonCommentSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source="user.nickname", read_only=True)
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = MoathonComment
-        fields = ["id", "moathon", "content", "nickname", "created_at", "updated_at"]
-        read_only_fields = ["id", "moathon", "nickname", "created_at", "updated_at"]
+        fields = ["id", "moathon", "content", "nickname", 'is_owner', "created_at", "updated_at"]
+        read_only_fields = ["id", "moathon", "nickname", 'is_owner', "created_at", "updated_at"]
+
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        return request and request.user == obj.user
 
 # 댓글 작성/수정
 class MoathonCommentWriteSerializer(serializers.ModelSerializer):
@@ -152,3 +72,101 @@ class MoathonCommentWriteSerializer(serializers.ModelSerializer):
         if len(value) > 500:
             raise serializers.ValidationError("댓글은 최대 500자까지 작성할 수 있습니다.")
         return value
+    
+# 단일 모아톤 조회
+class MoathonDetailSerializer(serializers.ModelSerializer):
+    product_option = ProductOptionSimpleSerializer(read_only=True)
+    progress_rate = serializers.SerializerMethodField()
+
+    user_info = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+    comments = MoathonCommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Moathon
+        fields = [
+            'id', 'title', 'purpose', 'progress_rate', 'target_amount', 'start_date', 'end_date',
+            'product_option',
+            'user_info',  # 유저 정보 그룹
+            'likes',      # 좋아요 정보 그룹
+            'comments',   # 댓글 리스트
+        ]
+
+    def get_progress_rate(self, obj):
+        total_days = (obj.end_date - obj.start_date).days
+        elapsed_days = (date.today() - obj.start_date).days
+
+        if total_days <= 0: return 100
+        if elapsed_days <= 0: return 0
+
+        rate = (elapsed_days / total_days) * 100
+        return min(int(rate), 100)
+
+    def get_user_info(self, obj):
+        owner = obj.user
+        request = self.context.get("request")
+        
+        # 1) 팔로워/팔로잉 카운트
+        follower_count = UserFollow.objects.filter(following=owner).count()
+        following_count = UserFollow.objects.filter(follower=owner).count()
+        
+        # 2) 내가 팔로우 중인지 확인
+        is_following = False
+        if request and request.user.is_authenticated and request.user.id != owner.id:
+            is_following = UserFollow.objects.filter(follower=request.user, following=owner).exists()
+
+        # 3) 뱃지 컬렉션 (수정된 부분)
+        # 3-1. 시스템의 모든 뱃지 가져오기 (도감의 틀)
+        all_badges = Badge.objects.all().order_by('id')
+
+        # 3-2. 유저가 획득한 뱃지 ID들 가져오기
+        # values_list를 사용하여 ID만 빠르게 리스트로 가져옴
+        user_acquired_badge_ids = UserBadge.objects.filter(user=owner).values_list('badge_id', flat=True)
+        
+        # 3-3. 뱃지별 획득 수량 계산 (Counter 사용)
+        badge_counts = Counter(user_acquired_badge_ids)
+
+        # 3-4. 최종 리스트 생성
+        owner_badges = []
+        for badge in all_badges:
+            quantity = badge_counts.get(badge.id, 0) # 획득 안 했으면 0
+            
+            owner_badges.append({
+                "id": badge.id,
+                "type": badge.type,
+                "name": badge.name,
+                "description": badge.description,
+                "url": badge.badge_url, # 모델 필드명이 badge_url인지 image인지 확인 필요
+                "is_obtained": quantity > 0,
+                "quantity": quantity, # 프론트엔드 BadgeLibrary에서 xN 표시에 사용
+            })
+
+        # 4) 프로필 이미지 URL 처리
+        profile_image_url = None
+        if owner.profile_image:
+            try:
+                profile_image_url = request.build_absolute_uri(owner.profile_image.url)
+            except:
+                profile_image_url = owner.profile_image.url
+
+        return {
+            "nickname": owner.nickname,
+            "profile_image": profile_image_url,
+            "follower_count": follower_count,
+            "following_count": following_count,
+            "is_following": is_following,
+            "owner_badges": owner_badges
+        }
+
+    def get_likes(self, obj):
+        request = self.context.get("request")
+        count = MoathonLike.objects.filter(moathon=obj).count()
+        
+        is_liked = False
+        if request and request.user.is_authenticated:
+            is_liked = MoathonLike.objects.filter(moathon=obj, user=request.user).exists()
+            
+        return {
+            "count": count,
+            "is_liked": is_liked
+        }

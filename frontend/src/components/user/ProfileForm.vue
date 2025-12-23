@@ -16,23 +16,23 @@
       </div>
 
       <div class="form-group">
-        <label for="credit_score">신용점수<span class="required">*</span></label>
+        <label for="credit_score">신용 점수<span class="required">*</span></label>
         <input type="number" id="credit_score" v-model.number="credit_score" placeholder="예: 850" required min="0"
           max="1000" />
       </div>
 
       <div class="form-group">
-        <label for="assets">자산 (만원 단위)<span class="required">*</span></label>
+        <label for="assets">자산 (원)<span class="required">*</span></label>
         <input type="number" id="assets" v-model.number="assets" placeholder="예: 1000" required min="0" />
       </div>
 
       <div class="form-group">
-        <label for="salary">연봉 (만원 단위)<span class="required">*</span></label>
+        <label for="salary">연봉 (원)<span class="required">*</span></label>
         <input type="number" id="salary" v-model.number="salary" placeholder="예: 3000" required min="0" />
       </div>
 
       <div class="form-group">
-        <label for="average_monthly_spend">평균 월 지출 (만원 단위)<span class="required">*</span></label>
+        <label for="average_monthly_spend">평균 월 지출 (원)<span class="required">*</span></label>
         <input type="number" id="average_monthly_spend" v-model.number="average_monthly_spend" placeholder="예: 100"
           required min="0" />
       </div>
