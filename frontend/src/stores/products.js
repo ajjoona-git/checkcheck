@@ -10,6 +10,7 @@ export const useProductStore = defineStore('product', () => {
   const products = ref([])
   const productDetail = ref(null)
   const isLoading = ref(false)
+  const banks = ref([])
 
   const getProducts = async () => {
     // 이미 데이터가 있다면 다시 부르지 않음 (SPA 네비게이션 시 효율성)
@@ -49,5 +50,19 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
-  return { products, productDetail, getProducts, getProductDetail, isLoading }
+  const getBanks = async () => {
+    if (banks.value.length > 0) return
+
+    try {
+      const response = await axios ({
+        method: 'get',
+        url: `${API_URL}/products/banklist/`,
+      })
+      banks.value = response.data
+    } catch (error) {
+      console.error('은행 목록 조회 실패:', error)
+    }
+  }
+
+  return { products, productDetail, getProducts, getProductDetail, isLoading, banks, getBanks }
 })

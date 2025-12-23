@@ -22,7 +22,7 @@
     <div class="filter-bar">
       <select v-model="filters.bank" class="form-select bank-select">
         <option value="">전체 은행</option>
-        <option v-for="bank in bankList" :key="bank" :value="bank">
+        <option v-for="bank in store.banks" :key="bank" :value="bank">
           {{ bank }}
         </option>
       </select>
@@ -96,15 +96,6 @@ const filters = reactive({
 const currentPage = ref(1)
 const itemsPerPage = 12
 
-// 은행 목록 (하드코딩 예시)
-// TODO: API 호출로 변경
-const bankList = [
-  '우리은행', '한국스탠다드차타드은행', '대구은행', '부산은행', 
-  '광주은행', '제주은행', '전북은행', '경남은행', '중소기업은행', 
-  '한국산업은행', '국민은행', '신한은행', '농협은행', '하나은행', 
-  '케이뱅크', '수협은행', '카카오뱅크', '토스뱅크'
-]
-
 const filteredProducts = computed(() => {
   let results = store.products
 
@@ -170,6 +161,7 @@ const goDetail = (id) => {
 
 onMounted(() => {
   store.getProducts()
+  store.getBanks()
 })
 </script>
 
