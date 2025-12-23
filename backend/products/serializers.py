@@ -6,7 +6,8 @@ class ProductOptionSimpleSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.fin_prdt_nm', read_only=True)
     product_type = serializers.CharField(source='product.product_type', read_only=True)
     bank_name = serializers.CharField(source='product.bank.kor_co_nm', read_only=True)
-
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
+    
     class Meta:
         model = ProductOption
         fields = [
@@ -14,6 +15,7 @@ class ProductOptionSimpleSerializer(serializers.ModelSerializer):
             'product_name',   # 상품명
             'bank_name',     # 은행명
             'product_type',  # 예금/적금 구분
+            'product_id',    # 상품 ID
         ]
 
 # 금융 상품 전체 조회
