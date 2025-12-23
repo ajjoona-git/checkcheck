@@ -1,10 +1,10 @@
-from django.db.models import Count
 from rest_framework import serializers
 from .models import Moathon, MoathonComment, MoathonLike
 from products.serializers import ProductOptionSimpleSerializer
 from datetime import date
 
-from accounts.models import UserBadge, UserFollow
+from accounts.models import UserBadge, UserFollow, Badge
+from collections import Counter
 
 # 전체 모아톤 조회
 class MoathonListSerializer(serializers.ModelSerializer):
@@ -115,24 +115,31 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated and request.user.id != owner.id:
             is_following = UserFollow.objects.filter(follower=request.user, following=owner).exists()
 
-        # 3) 뱃지 리스트
-        badges_qs = (
-            UserBadge.objects
-            .filter(user=owner)
-            .select_related("badge")
-            .order_by("-obtained_at")
-        )
-        owner_badges = [
-            {
-                "id": ub.badge.id,
-                "type": ub.badge.type,
-                "name": ub.badge.name,
-                "description": ub.badge.description,
-                "url": ub.badge.badge_url,
-                "obtained_at": ub.obtained_at,
-            }
-            for ub in badges_qs
-        ]
+        # 3) 뱃지 컬렉션 (수정된 부분)
+        # 3-1. 시스템의 모든 뱃지 가져오기 (도감의 틀)
+        all_badges = Badge.objects.all().order_by('id')
+
+        # 3-2. 유저가 획득한 뱃지 ID들 가져오기
+        # values_list를 사용하여 ID만 빠르게 리스트로 가져옴
+        user_acquired_badge_ids = UserBadge.objects.filter(user=owner).values_list('badge_id', flat=True)
+        
+        # 3-3. 뱃지별 획득 수량 계산 (Counter 사용)
+        badge_counts = Counter(user_acquired_badge_ids)
+
+        # 3-4. 최종 리스트 생성
+        owner_badges = []
+        for badge in all_badges:
+            quantity = badge_counts.get(badge.id, 0) # 획득 안 했으면 0
+            
+            owner_badges.append({
+                "id": badge.id,
+                "type": badge.type,
+                "name": badge.name,
+                "description": badge.description,
+                "url": badge.badge_url, # 모델 필드명이 badge_url인지 image인지 확인 필요
+                "is_obtained": quantity > 0,
+                "quantity": quantity, # 프론트엔드 BadgeLibrary에서 xN 표시에 사용
+            })
 
         # 4) 프로필 이미지 URL 처리
         profile_image_url = None
