@@ -1,6 +1,8 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .models import Moathon, MoathonComment
+from .models import Moathon, MoathonComment, MoathonLike
+from accounts.services.badge_functions import award_achieve_badges_on_moathon_created, award_social_badges
 from .serializers import (
     MoathonDetailSerializer, 
     MoathonListSerializer, 
@@ -60,7 +62,7 @@ def moathon_detail(request, moathon_pk):
     moathon = get_object_or_404(Moathon, pk=moathon_pk)
 
     if request.method == 'GET':
-        serializer = MoathonDetailSerializer(moathon)
+        serializer = MoathonDetailSerializer(moathon, context={"request": request})
         return Response(serializer.data)
     
     if moathon.user != request.user:
@@ -73,7 +75,7 @@ def moathon_detail(request, moathon_pk):
         serializer = MoathonUpdateSerializer(moathon, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             updated_moathon = serializer.save()
-            return Response(MoathonDetailSerializer(updated_moathon).data)
+            return Response(MoathonDetailSerializer(updated_moathon, context={"request": request}).data)
         
     elif request.method == 'DELETE':
         moathon.delete()
@@ -91,10 +93,6 @@ def moathon_detail(request, moathon_pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def moathon_create(request):
-    """
-    모아톤 생성 API
-    POST /moathons/create/
-    """
     create_serializer = MoathonCreateSerializer(data=request.data)
     if create_serializer.is_valid(raise_exception=True):
         product_option = create_serializer.validated_data['product_option']
@@ -104,6 +102,8 @@ def moathon_create(request):
             term_months = 12
         moathon = create_serializer.save(user=request.user, term_months=term_months)
         response_serializer = MoathonDetailSerializer(moathon)
+        # 모아톤 생성 직후 뱃지 지급
+        award_achieve_badges_on_moathon_created(request.user, moathon)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     
 # 댓글 목록 조회 
@@ -180,3 +180,25 @@ def moathon_comment_detail(request, moathon_pk, comment_pk):
 
     comment.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def moathon_like_toggle(request, moathon_pk):
+    user = request.user
+    moathon = get_object_or_404(Moathon, pk=moathon_pk)
+
+    with transaction.atomic():
+        like, created = MoathonLike.objects.get_or_create(user=user, moathon=moathon)
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+
+    # 좋아요/취소 직후 배지 갱신(즉시 반영)
+    award_social_badges(user)               # 응원단장 체크
+    award_social_badges(moathon.user)       # 인기스타 체크(받은 좋아요)
+
+    like_count = MoathonLike.objects.filter(moathon=moathon).count()
+    return Response({"liked": liked, "like_count": like_count})

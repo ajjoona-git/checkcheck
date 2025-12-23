@@ -7,4 +7,6 @@ urlpatterns = [
     path('profile/', views.profile),
     path("profile/update/", views.profile_update),
     path("onboarding/", views.onboarding),
+    path('badge_collection', views.badge_collection),
+    path("<int:user_pk>/follow/", views.follow_toggle),
 ]

@@ -97,3 +97,28 @@ class MoathonComment(models.Model):
         indexes = [
             models.Index(fields=["moathon", "created_at"]),
         ]
+
+class MoathonLike(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="moathon_likes",
+    )
+    moathon = models.ForeignKey(
+        "challenges.Moathon",
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "moathon"],
+                name="unique_like_per_user_moathon",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["moathon", "created_at"]),
+            models.Index(fields=["user", "created_at"]),
+        ]

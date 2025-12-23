@@ -1,4 +1,6 @@
-from django.db.models import Prefetch
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch, Count
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -12,6 +14,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from challenges.models import Moathon
+from .models import Badge, UserBadge, UserFollow
+from accounts.services.badge_functions import award_social_badges
 
 from .serializers import (
     PasswordResetSerializer,
@@ -26,7 +30,7 @@ from drf_spectacular.types import OpenApiTypes
 
 User = get_user_model()
 
-# 비밀번호 잃어버렸을 때, 이메일로 재설정 연결 
+# 비밀번호 잃어버렸을 때, 이메일로 재설정 연결
 @extend_schema(
     tags=["Accounts"],
     summary="비밀번호 재설정 메일 발송",
@@ -141,7 +145,7 @@ def reset_password(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # 비밀번호 검증 + 저장 
+    # 비밀번호 검증 + 저장
     serializer = UserPasswordResetConfirmSerializer(
         instance=user,
         data=request.data,
@@ -180,7 +184,11 @@ def profile(request):
                     )
                     .order_by("-created_at")
                 ),
-            )
+            ),
+            Prefetch(
+                "badges",  # UserBadge.user related_name='badges' 
+                queryset=UserBadge.objects.select_related("badge", "moathon"),
+            ),
         )
         .get(pk=request.user.pk)
     )
@@ -195,6 +203,33 @@ def profile(request):
         except Exception:
             profile_image_url = None
 
+    # 팔로워/팔로잉 수
+    follower_count = UserFollow.objects.filter(following=user).count()
+    following_count = UserFollow.objects.filter(follower=user).count()
+
+    # 뱃지 도감
+    all_badges = Badge.objects.all()
+
+    obtained_stats = (
+        user.badges  # Prefetch로 로드된 UserBadge related manager
+        .values("badge")
+        .annotate(count=Count("id"))
+    )
+    obtained_map = {item["badge"]: item["count"] for item in obtained_stats}
+
+    badges_collection = []
+    for badge in all_badges:
+        cnt = obtained_map.get(badge.id, 0)
+        badges_collection.append({
+            "id": badge.id,
+            "type": badge.type,
+            "name": badge.name,
+            "description": badge.description,
+            "url": badge.badge_url,
+            "is_obtained": cnt > 0,
+            "quantity": cnt,
+        })
+
     data = {
         "profile_image": profile_image_url,
         "email": user.email,
@@ -206,11 +241,15 @@ def profile(request):
         "salary": user.salary,
         "average_monthly_spend": user.average_monthly_spend,
         "tender": user.tender,
+        "follower_count": follower_count,
+        "following_count": following_count,
+        "badge_collection": badges_collection,
+
         "moathons": moathons_data,
     }
     return Response(data)
-    
-# 프로필 수정 
+
+# 프로필 수정
 @extend_schema(
     tags=["Accounts"],
     summary="프로필 수정(PATCH/PUT)",
@@ -298,3 +337,60 @@ def onboarding(request):
         {"onboarding_completed": True},
         status=status.HTTP_200_OK,
     )
+
+@extend_schema(summary="뱃지 컬렉션 조회")
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def badge_collection(request):
+    user = request.user
+
+    # 1. 모든 뱃지 마스터 정보 가져오기 (badge_url 필드가므로 'url'을 맞추어 사용)
+    all_badges = Badge.objects.all()
+
+    # 2. 유저가 획득한 뱃지 정보 가져오기, 뱃지 ID별로 그룹화하여 개수 세기
+    obtained_stats = UserBadge.objects.filter(user=user).values('badge').annotate(count=Count('id'))
+
+    # 딕셔너리로 변환하여 매핑 { badge_id: count }
+    obtained_map = {item['badge']: item['count'] for item in obtained_stats}
+
+    # 3. 데이터 조합
+    collection_data = []
+    for badge in all_badges:
+        count = obtained_map.get(badge.id, 0)
+
+        collection_data.append({
+            "id": badge.id,
+            "type": badge.type,
+            "name": badge.name,
+            "description": badge.description,
+            "url": badge.badge_url,  # 수정: badge_url로 변경
+            "is_obtained": count > 0, # 획득 여부
+            "quantity": count,        # 획득 횟수
+        })
+
+    return Response({
+        "collection": collection_data
+    })
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def follow_toggle(request, user_pk):
+    me = request.user
+    target = get_object_or_404(User, pk=user_pk)
+
+    if me.id == target.id:
+        return Response(status=400)
+
+    with transaction.atomic():
+        rel, created = UserFollow.objects.get_or_create(follower=me, following=target)
+        if not created:
+            rel.delete()
+            followed = False
+        else:
+            followed = True
+
+    # 팔로우/언팔로우 직후 배지 갱신(즉시 반영)
+    award_social_badges(target)  # 팔로팔로미(팔로워 수) 체크는 target 기준
+
+    follower_count = UserFollow.objects.filter(following=target).count()
+    return Response({"followed": followed, "follower_count": follower_count})

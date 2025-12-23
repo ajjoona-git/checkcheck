@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # environ 초기화
 env = environ.Env()
 
-# 개발 환경을 위해 기본 .env 파일 로드 
+# 개발 환경을 위해 기본 .env 파일 로드
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # GMS 환경 변수
@@ -49,7 +49,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'visualizations',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'products',
     'recommendations',
     'challenges',
@@ -91,7 +91,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'allauth.account.middleware.AccountMiddleware', 
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -187,7 +187,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'COMPONENT_SPLIT_REQUEST': True,
     'SERVE_INCLUDE_SCHEMA': False,
-    'SECURITY': [{'tokenAuth': []}], 
+    'SECURITY': [{'tokenAuth': []}],
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -8,7 +8,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      
+
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
           <RouterLink class="nav-link" :to="{ name: 'home' }">HOME</RouterLink>
@@ -16,12 +16,13 @@
           <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">종목 검색</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'commodity' }">금/은 시세</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 찾기</RouterLink>
-          
+          <RouterLink class="nav-link" :to="{ name: 'commodity' }">현물 시세</RouterLink>
+
           <template v-if="!accountStore.isAuthenticated">
             <RouterLink class="nav-link" :to="{ name: 'login' }">LOGIN</RouterLink>
             <RouterLink class="nav-link" :to="{ name: 'signup' }">SIGNUP</RouterLink>
           </template>
-          
+
           <template v-else>
             <RouterLink class="nav-link" :to="{ name: 'moathonRecommend' }">모아톤 추천받기</RouterLink>
             <RouterLink class="nav-link" :to="{ name: 'mypage' }">MY PAGE</RouterLink>
@@ -33,7 +34,7 @@
       </div>
     </div>
   </nav>
-</template> 
+</template>
 
 <script setup>
   import { RouterLink } from 'vue-router';
