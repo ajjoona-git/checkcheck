@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from django.shortcuts import render, get_object_or_404
-from .models import Product, ProductOption
+from .models import Product, Bank
 from .serializers import ProductListSerializer
 
 @extend_schema(
@@ -20,7 +20,7 @@ from .serializers import ProductListSerializer
 def product_list(request):
     """
     전체 금융 상품 조회 API
-    
+
     GET /products/
     """
     products = Product.objects.filter(is_active=True)
@@ -37,7 +37,7 @@ def product_list(request):
 
     if save_trm and save_trm != '전체기간':
         products = products.filter(options__save_trm=save_trm).distinct()
-    
+
     paginator = PageNumberPagination()
     paginator.page_size = 50
     result_page = paginator.paginate_queryset(products, request)
@@ -45,7 +45,7 @@ def product_list(request):
     if result_page is not None:
         serializer = ProductListSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-    
+
     serializer = ProductListSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -54,9 +54,16 @@ def product_list(request):
 def product_detail(request, product_id):
     """
     금융 상품 상세 조회 API
-    
+
     GET /products/<int:product_id>/
     """
     product = get_object_or_404(Product, pk=product_id)
     serializer = ProductListSerializer(product)
     return Response(serializer.data)
+
+@extend_schema(summary="은행 목록 조회")
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def bank_list(request):
+    banklist = Bank.objects.all().order_by("kor_co_nm").values_list("kor_co_nm", flat=True).distinct()
+    return Response(list(banklist))
