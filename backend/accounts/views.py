@@ -334,7 +334,7 @@ def onboarding(request):
 
     # 최소 응답(저장 성공 + 완료 여부). 원하면 serializer.data 전체를 내려도 됨.
     return Response(
-        {"onboarding_completed": True},
+        serializer.data,
         status=status.HTTP_200_OK,
     )
 

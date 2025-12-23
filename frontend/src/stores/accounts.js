@@ -87,21 +87,23 @@ export const useAccountStore = defineStore('account', () => {
     return token.value ? true : false
   })
 
-  const updateProfile = function (payload) {
-    return axios({
-      method: 'put',
-      url: `${API_URL}/accounts/onboarding/`,
-      data: payload,
-      headers: {
-        Authorization: `Token ${token.value}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-      .then(res => {
-        console.log('프로필 정보가 저장되었습니다.', res.data)
-        return res.data
+  const updateProfile = async (payload) => {
+    try {
+      const response = await axios({
+        method: 'put',
+        url: `${API_URL}/accounts/onboarding/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${token.value}`,
+          'Content-Type': 'multipart/form-data'
+        }
       })
-      .catch(err => console.log(err))
+      user.value = response.data
+      console.log('Pinia Updated:', user.value)
+    } catch (error) {
+      console.error('프로필 수정 실패:', error)
+      throw error
+    }
   }
 
   return { 
