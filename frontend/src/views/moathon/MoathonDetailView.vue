@@ -1,18 +1,19 @@
 <template>
   <div class="moathon-detail-container" v-if="moathon">
 
-    <div class="user-profile-section">
-      <header class="detail-header">
-        <div class="title-section">
-          <h1 class="moathon-title">{{ moathon.title }}</h1>
-          <span class="badge-purpose">{{ formatPurpose(moathon.purpose) }}</span>
-        </div>
+    <header class="detail-header">
+      <div class="title-section">
+        <h1 class="moathon-title">{{ moathon.title }}</h1>
+        <span class="badge-purpose">{{ formatPurpose(moathon.purpose) }}</span>
+      </div>
+      <div class="owner-actions" v-if="isOwner">
+        <button @click="handleEdit" class="btn-icon">수정</button>
+        <button @click="handleDelete" class="btn-icon delete">삭제</button>
+      </div>
+    </header>
 
-        <div class="owner-actions" v-if="isOwner">
-          <button @click="handleEdit" class="btn-icon">수정</button>
-          <button @click="handleDelete" class="btn-icon delete">삭제</button>
-        </div>
-
+    <section class="main-content">
+      <div class="user-profile-section">
         <div class="user-profile-card">
           <div class="profile-left">
             <img :src="getImageUrl(moathon.user_info.profile_image)" class="profile-img" alt="프로필" />
@@ -34,11 +35,8 @@
           </div>
           <BadgeLibrary v-if="moathon.user_info.owner_badges" :badges="moathon.user_info.owner_badges" />
         </div>
+      </div>
 
-      </header>
-    </div>
-
-    <section class="main-content">
       <div class="track-visual">
         <div class="track-bg">
           <div class="track-progress" :style="{ width: trackWidth }"></div>
@@ -191,7 +189,7 @@ const handleLike = async () => {
 const handleFollow = async () => {
   if (!accountStore.isAuthenticated) {
     if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
-    router.push({ name: 'login' })
+      router.push({ name: 'login' })
     }
     return
   }
@@ -202,6 +200,8 @@ const handleFollow = async () => {
   if (result) {
     moathon.value.user_info.is_following = result.followed
     moathon.value.user_info.follower_count = result.follower_count
+    await accountStore.getProfile()
+    await fetchMoathonData()
   }
 }
 
@@ -306,11 +306,12 @@ const handleDelete = async () => {
 
   try {
     await store.deleteMoathon(moathon.value.id)
+    await accountStore.getProfile()
     alert('모아톤이 삭제되었습니다.')
-    router.push({ name: 'community' })
+    router.push({ name: 'home' })
   } catch (err) {
     console.error(err)
-    alert('삭제에 실패했습니다.')
+    alert('삭제 중 오류가 발생했습니다.')
   }
 }
 
@@ -706,7 +707,8 @@ onUnmounted(() => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: #0d6efd; /* 기본 파란색 */
+  background-color: #0d6efd;
+  /* 기본 파란색 */
   color: white;
 }
 
@@ -716,13 +718,15 @@ onUnmounted(() => {
 
 /* 언팔로우(팔로우 중) 상태 스타일 */
 .follow-btn.following {
-  background-color: #e9ecef; /* 연한 회색 */
+  background-color: #e9ecef;
+  /* 연한 회색 */
   color: #495057;
   border: 1px solid #ced4da;
 }
 
 .follow-btn.following:hover {
   background-color: #dee2e6;
-  color: #dc3545; /* 빨간 텍스트로 변경 */
+  color: #dc3545;
+  /* 빨간 텍스트로 변경 */
 }
 </style>

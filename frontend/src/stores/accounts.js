@@ -68,19 +68,30 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
-  const logOut = function () {
-    axios({
-      method: 'post',
-      url: `${API_URL}/accounts/logout/`,
-      headers: { Authorization: `Token ${token.value}` }
-    })
-      .then((res) => {
-        console.log('로그아웃이 완료되었습니다.')
-        token.value = null
-        user.value = null
-        router.push({ name: 'login'})
-      })
-      .catch((err) => console.log(err))
+  const logOut = async function () {
+    try {
+      // 1. 백엔드에 로그아웃 요청 (토큰 블랙리스트 처리 등)
+      // 토큰이 없다면 요청을 보낼 필요도 없음
+      if (token.value) {
+        await axios({
+          method: 'post',
+          url: `${API_URL}/accounts/logout/`,
+          headers: {
+            Authorization: `Token ${token.value}`
+          }
+        })
+        console.log('백엔드 로그아웃 성공')
+      }
+    } catch (err) {
+      // 2. 401 에러가 나더라도(이미 만료됨 등) 프론트에서는 무시하고 진행
+      console.warn('백엔드 로그아웃 실패(무시하고 진행):', err)
+    } finally {
+      // 3. [핵심] 성공하든 실패하든 프론트엔드 정보는 무조건 삭제
+      token.value = null
+      user.value = null
+      localStorage.removeItem('token')
+      console.log('프론트엔드 상태 초기화 완료')
+    }
   }
 
   const isAuthenticated = computed(() => {

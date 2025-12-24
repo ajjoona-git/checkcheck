@@ -40,15 +40,20 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
+import { useAccountStore } from '@/stores/accounts'
+import { useMoathonStore } from '@/stores/moathon'
+import { useRouter } from 'vue-router'
+
+const moathonStore = useMoathonStore()
+const accountStore = useAccountStore()
+const router = useRouter()
 
 const props = defineProps({
   isSubmitting: Boolean,
-  // [NEW] 수정을 위한 초기 데이터
   initialData: {
     type: Object,
-    default: null
+    default: () => ({})
   },
-  // [NEW] 수정 모드 여부
   isEdit: {
     type: Boolean,
     default: false
@@ -64,27 +69,55 @@ const formData = reactive({
   start_amount: null
 })
 
-// [NEW] 초기 데이터가 들어오면 폼에 적용 (Immediate: true로 초기 로딩 대응)
+// [수정] 데이터 매핑 로직 강화
 watch(
   () => props.initialData,
   (newData) => {
     if (newData) {
-      formData.title = newData.title
-      formData.purpose = newData.purpose
-      formData.target_amount = newData.target_amount
-      // start_amount는 수정 시 보통 제외하지만, 필요하다면 매핑
+      // 수정 모드이거나, 해당 필드에 값이 있을 때만 매핑 (undefined 방지)
+      if (newData.title) formData.title = newData.title
+      if (newData.purpose) formData.purpose = newData.purpose
+      if (newData.target_amount) formData.target_amount = newData.target_amount
+      // start_amount는 보통 수정 불가하므로 초기화 로직에서 제외하거나 필요시 추가
     }
   },
   { immediate: true }
 )
 
-const submitForm = () => {
-  emit('submit', { ...formData })
+const submitForm = async () => {
+  try {
+    // 1. [수정] Payload(전송 데이터) 구성
+    // reactive 객체인 formData를 일반 객체로 풀어서 복사
+    const payload = { ...formData }
+
+    // 생성 모드이고, 상품 정보(initialData)가 있다면 payload에 병합
+    if (!props.isEdit && props.initialData && props.initialData.id) {
+      payload.id = props.initialData.id
+    }
+    
+    // 2. API 호출
+    if (props.isEdit) {
+      // 수정 (PATCH/PUT)
+      await moathonStore.updateMoathon(props.initialData.id, payload)
+      alert('모아톤이 성공적으로 수정되었습니다!')
+      router.push({ name: 'moathonDetail', params: { id: props.initialData.id } })
+
+    } else {
+      await moathonStore.createMoathon(payload)
+      await accountStore.getProfile()
+      router.push({ name: 'home' })
+    }
+    
+    emit('submit', payload)
+  } catch (err) {
+    console.error(err)
+    const msg = props.isEdit ? '수정에 실패했습니다.' : '생성에 실패했습니다.'
+    alert(msg)
+  }
 }
 </script>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .form-container { width: 100%; }
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }

@@ -1,18 +1,19 @@
 <template>
-  <div class="update-view-container">
-    <h1>모아톤 정보 수정</h1>
-    
-    <div v-if="loading" class="loading-text">데이터를 불러오는 중...</div>
-    
-    <MoathonCreateForm 
-      v-else
-      :is-submitting="submitting" 
-      :is-edit="true"
-      :initial-data="currentData"
-      @submit="handleUpdate" 
-    />
+  <div class="update-view container py-5">
+    <div class="card shadow-sm border-0 p-4" style="max-width: 600px; margin: 0 auto;">
+      <h2 class="text-center mb-4 fw-bold">모아톤 수정하기</h2>
+      
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
 
-    <button class="btn-cancel" @click="goBack">취소</button>
+      <MoathonCreateForm 
+        v-else
+        :is-edit="true"
+        :moathon-id="moathonId" 
+        :initial-data="initialData"
+      />
+    </div>
   </div>
 </template>
 
@@ -26,58 +27,42 @@ const route = useRoute()
 const router = useRouter()
 const store = useMoathonStore()
 
-const moathonId = route.params.id
 const loading = ref(true)
-const submitting = ref(false)
-const currentData = ref(null)
+const initialData = ref({})
 
-// 1. 기존 데이터 불러오기
+// 1. URL에서 ID 추출 (숫자 변환)
+const moathonId = Number(route.params.id)
+
 onMounted(async () => {
   try {
-    // 상세 데이터가 스토어에 없다면 fetch
-    if (!store.moathonDetail || store.moathonDetail.id != moathonId) {
+    // 2. [원본 로직 유지] 스토어에 데이터가 없거나 ID가 다르면 새로 fetch
+    // (주의: fetchMoathonDetail은 반환값이 없을 수 있으므로 호출 후 state를 참조)
+    if (!store.moathonDetail || store.moathonDetail.id !== moathonId) {
       await store.fetchMoathonDetail(moathonId)
     }
     
-    // 폼에 전달할 데이터 객체 생성
+    // 3. [데이터 매핑] 스토어의 상세 정보를 폼 데이터 형식에 맞게 변환
     const detail = store.moathonDetail
+    
     if (detail) {
-      currentData.value = {
+      initialData.value = {
         title: detail.title,
         target_amount: detail.target_amount,
         purpose: detail.purpose,
-        // start_amount는 수정 대상이 아니라면 제외
+        id: detail.id
       }
+    } else {
+      throw new Error('데이터가 존재하지 않습니다.')
     }
+
   } catch (err) {
     console.error(err)
     alert('정보를 불러오지 못했습니다.')
-    router.go(-1)
+    router.back() // 뒤로 가기
   } finally {
     loading.value = false
   }
 })
-
-// 2. 수정 요청 처리
-const handleUpdate = async (formData) => {
-  submitting.value = true
-  try {
-    // Store의 updateMoathon 액션 호출
-    await store.updateMoathon(moathonId, formData)
-    
-    alert('수정이 완료되었습니다.')
-    router.push({ name: 'moathonDetail', params: { id: moathonId } })
-  } catch (err) {
-    console.error(err)
-    alert('수정에 실패했습니다.')
-  } finally {
-    submitting.value = false
-  }
-}
-
-const goBack = () => {
-  router.go(-1)
-}
 </script>
 
 <style scoped>
