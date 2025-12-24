@@ -11,13 +11,13 @@
       <section class="personal-section mb-5">
         
         <div v-if="hasActiveMoathon" class="dashboard-card bg-white p-4 rounded-4 shadow-sm border">
-          <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
               <h5 class="text-muted small mb-1">MY MOATHON</h5>
               <h2 class="fw-bold m-0">나의 목표 달성 현황</h2>
             </div>
             
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 align-items-center">
               <select 
                 v-if="myActiveMoathons.length > 1" 
                 v-model="selectedMoathonId" 
@@ -28,18 +28,35 @@
                 </option>
               </select>
               
-              <router-link :to="{ name: 'moathonCreate' }" class="btn btn-sm btn-outline-primary fw-bold">
+              <router-link :to="{ name: 'moathonCreate' }" class="btn btn-sm btn-outline-primary fw-bold text-nowrap">
                 + 추가
               </router-link>
             </div>
           </div>
 
-          <div class="main-card-wrapper">
-            <MoathonCard 
-              v-if="selectedMoathon" 
-              :moathon="selectedMoathon" 
-              :is-highlight="true" 
-            />
+          <div class="row g-4 align-items-center">
+            <div class="col-lg-7 col-md-12">
+              <div class="p-3">
+                <MoathonTrack 
+                  :percent="currentProgress" 
+                  :profile-image="userProfileImage"
+                  :duration="2.5" 
+                />
+                <p class="text-center mt-3 mb-0 text-muted fw-bold small">
+                  목표까지 힘내세요, {{ userNickname }}님! 🏃‍♂️
+                </p>
+              </div>
+            </div>
+
+            <div class="col-lg-5 col-md-12">
+              <div class="main-card-wrapper h-100">
+                <MoathonCard 
+                  v-if="selectedMoathon" 
+                  :moathon="selectedMoathon" 
+                  :is-highlight="true" 
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -57,7 +74,6 @@
           </div>
         </div>
       </section>
-
 
       <section class="social-section">
         <div class="d-flex align-items-center mb-4 gap-2">
@@ -98,9 +114,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useAccountStore } from '@/stores/accounts'
 import { useMoathonStore } from '@/stores/moathon'
 import MoathonCard from '@/components/moathon/MoathonCard.vue'
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue' // [추가] 트랙 컴포넌트 임포트
+import defaultProfile from '/default-profile.png' // [추가] 기본 이미지
 
 const accountStore = useAccountStore()
 const moathonStore = useMoathonStore()
+const API_URL = import.meta.env.VITE_API_URL // [추가] 환경 변수
 
 const loading = ref(true)
 const selectedMoathonId = ref(null)
@@ -111,10 +130,27 @@ const hasActiveMoathon = computed(() => {
 })
 const myActiveMoathons = computed(() => accountStore.user?.moathons || [])
 
-// 선택된 모아톤
+// 선택된 모아톤 객체
 const selectedMoathon = computed(() => {
   if (!selectedMoathonId.value) return myActiveMoathons.value[0]
   return myActiveMoathons.value.find(m => m.id === selectedMoathonId.value) || myActiveMoathons.value[0]
+})
+
+// [추가] 현재 선택된 모아톤의 진행률 (숫자로 변환)
+const currentProgress = computed(() => {
+  if (!selectedMoathon.value) return 0
+  return parseFloat(selectedMoathon.value.progress_rate || 0)
+})
+
+// [추가] 로그인한 유저의 닉네임
+const userNickname = computed(() => accountStore.user?.nickname || '회원')
+
+// [추가] 프로필 이미지 URL 계산 로직
+const userProfileImage = computed(() => {
+  const path = accountStore.user?.profile_image
+  if (!path) return defaultProfile
+  if (path.startsWith('http')) return path
+  return `${API_URL}${path}` // 미디어 파일 경로 처리
 })
 
 // 2. 팔로잉 모아톤 상태
@@ -163,7 +199,6 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 </script>
 
 <style scoped>
-/* 전체 배경색을 약간 회색으로 주어 카드 섹션을 돋보이게 할 수도 있음 (선택사항) */
 .home-wrapper {
   background-color: #fcfcfc;
   min-height: 100vh;
@@ -172,9 +207,6 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 /* [SECTION 1] 대시보드 스타일 */
 .dashboard-card {
   transition: transform 0.2s ease-in-out;
-}
-.dashboard-card:hover {
-  border-color: #dee2e6 !important; /* hover 시 테두리 약간 진하게 */
 }
 
 /* [SECTION 1] 히어로 배너 스타일 */
