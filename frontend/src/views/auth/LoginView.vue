@@ -2,7 +2,7 @@
   <div>
     <h1>로그인 페이지</h1>
 
-    <form @submit.prevent="logIn">
+    <form @submit.prevent="handleLogin">
       <label for="username">이름: </label>
       <input type="text" id="username" v-model.trim="username" /> <br>
 
@@ -29,15 +29,33 @@
   const accountStore = useAccountStore()
   const router = useRouter()
 
-  const logIn = function () {
+  // const logIn = function () {
+  //   const payload = {
+  //     username: username.value,
+  //     email: email.value,
+  //     password: password.value,
+  //   }
+  //   accountStore.logIn(payload)
+  //   router.push({ name: 'home' })
+  // }
+
+  const handleLogin = async () => {
+  try {
     const payload = {
       username: username.value,
       email: email.value,
       password: password.value,
     }
-    accountStore.logIn(payload)
+    // 1. 로그인이 끝날 때까지 기다립니다.
+    await accountStore.logIn(payload) 
+    
+    // 2. 다 끝나면 이동합니다.
     router.push({ name: 'home' })
+    
+  } catch (err) {
+    alert('로그인에 실패했습니다.')
   }
+}
 </script>
 
 <style scoped>

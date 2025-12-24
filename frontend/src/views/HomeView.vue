@@ -119,24 +119,26 @@ const selectedMoathon = computed(() => {
 
 // 2. 팔로잉 모아톤 상태
 const followingMoathons = computed(() => moathonStore.followingMoathons || [])
-
-// 데이터 로드
 const fetchMoathonData = async () => {
-  if (!accountStore.isAuthenticated) return
-  // 무조건 친구 소식은 가져옴
-  await moathonStore.getFollowingMoathons()
+  if (accountStore.isAuthenticated) {
+    // 혹시 user 정보가 없으면 채우기
+    if (!accountStore.user) await accountStore.getProfile()
+    // 팔로잉 목록 가져오기
+    await moathonStore.getFollowingMoathons()
+  }
 }
 
 onMounted(async () => {
   try {
     loading.value = true
+    // 이미 로그인이 되어있는 경우 (새로고침 등) 바로 실행
     if (accountStore.isAuthenticated) {
-      await accountStore.getProfile()
+      await fetchMoathonData()
     }
-    await fetchMoathonData()
   } catch (err) {
     console.error(err)
   } finally {
+    // 로그인이 안 되어 있어도 로딩은 꺼줘야 함 (Type A 화면을 위해)
     loading.value = false
   }
 })
@@ -145,6 +147,17 @@ onMounted(async () => {
 watch(myActiveMoathons, (newVal) => {
   if (newVal && newVal.length > 0 && !selectedMoathonId.value) {
     selectedMoathonId.value = newVal[0].id
+  }
+}, { immediate: true })
+
+watch(() => accountStore.isAuthenticated, async (newValue) => {
+  if (newValue) {
+    console.log('로그인 완료 감지 -> 데이터 로드 시작')
+    if (!accountStore.user) {
+      await accountStore.getProfile()
+    }
+    // 팔로잉 데이터 등 메인 데이터 호출
+    await fetchMoathonData()
   }
 }, { immediate: true })
 </script>

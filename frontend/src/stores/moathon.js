@@ -26,16 +26,16 @@ export const useMoathonStore = defineStore('moathon', () => {
   const clearMoathonDetail = () => {
     moathonDetail.value = null
   }
-  
+
   const fetchMoathons = async (page = 1) => {
     try {
       const response = await axios.get(`${API_URL}/moathons/`, {
         params: {
           page: page,
-          page_size: itemsPerPage 
+          page_size: itemsPerPage
         }
       })
-      
+
       const { results, count: totalCount } = response.data
 
       moathons.value = results
@@ -98,7 +98,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       throw error
     }
   }
-  
+
   const updateMoathon = async (id, payload) => {
     try {
       const response = await axios({
@@ -124,7 +124,7 @@ export const useMoathonStore = defineStore('moathon', () => {
         headers: {
           Authorization: `Token ${accountStore.token}`,
         }
-      }) 
+      })
     } catch (err) {
       console.error('모아톤 삭제 실패:', err)
       throw err
@@ -134,11 +134,11 @@ export const useMoathonStore = defineStore('moathon', () => {
   const likeMoathon = async (moathonId) => {
     try {
       const response = await axios.post(
-        `${API_URL}/moathons/${moathonId}/like/`, 
-        {}, 
+        `${API_URL}/moathons/${moathonId}/like/`,
+        {},
         { headers: { Authorization: `Token ${accountStore.token}` } }
       )
-      
+
       if (moathonDetail.value && response.data) {
         if (!moathonDetail.value.likes) {
           moathonDetail.value.likes = { count: 0, is_liked: false }
@@ -150,7 +150,7 @@ export const useMoathonStore = defineStore('moathon', () => {
           moathonDetail.value.likes.count = response.data.like_count
         }
       }
-      
+
     } catch (err) {
       console.error('응원하기 실패:', err)
       if (err.response?.status === 401) {
@@ -185,14 +185,14 @@ export const useMoathonStore = defineStore('moathon', () => {
           Authorization: `Token ${accountStore.token}`,
         }
       })
-      
+
       await fetchComments(moathonId)
     } catch (error) {
       console.error('댓글 수정 실패:', error)
       throw error
     }
   }
-  
+
   const deleteComment = async (moathonId, commentId) => {
     try {
       await axios({
@@ -232,17 +232,23 @@ export const useMoathonStore = defineStore('moathon', () => {
 
   const getFollowingMoathons = async () => {
     try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        console.log('로그인 상태가 아니므로 팔로잉 목록을 불러오지 않습니다.')
+        return
+      }
+
       const res = await axios({
         method: 'get',
-        url: `${API_URL}/moathons/following/`, 
+        url: `${API_URL}/moathons/following/`,
         headers: {
-          Authorization: `Token ${accountStore.token}`
+          Authorization: `Token ${token}`
         }
       })
-      
+
       followingMoathons.value = res.data
       console.log('팔로잉 모아톤 로드 성공:', res.data)
-      
+
     } catch (err) {
       console.error('팔로잉 모아톤 로드 실패:', err)
       followingMoathons.value = []
@@ -256,29 +262,29 @@ export const useMoathonStore = defineStore('moathon', () => {
     console.log('Moathon Store 초기화 완료')
   }
 
-  return { 
-    moathons, 
+  return {
+    moathons,
     recommendationResult,
     isRecommending,
-    count, 
-    currentPage, 
+    count,
+    currentPage,
     itemsPerPage,
-    totalPages, 
-    moathonDetail, 
+    totalPages,
+    moathonDetail,
     followingMoathons,
     clearMoathonDetail,
     fetchMoathons,
-    fetchMoathonDetail, 
+    fetchMoathonDetail,
     fetchComments,
     createMoathon,
     updateMoathon,
     deleteMoathon,
     likeMoathon,
-    createComment, 
+    createComment,
     updateComment,
     deleteComment,
     recommendProduct,
     getFollowingMoathons,
     resetState,
-   }
+  }
 })

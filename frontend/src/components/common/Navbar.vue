@@ -23,7 +23,7 @@
           <RouterLink class="nav-link" :to="{ name: 'community' }">모아톤 커뮤니티</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'products' }">예·적금 조회</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'bank' }">은행 위치</RouterLink>
-          <RouterLink class="nav-link" :to="{ name: 'commodity' }">시세 확인</RouterLink>
+          <RouterLink class="nav-link" :to="{ name: 'commodity' }">금·은 시세</RouterLink>
           <RouterLink class="nav-link" :to="{ name: 'videoSearch' }">유튜브 검색</RouterLink>
         </div>
 
