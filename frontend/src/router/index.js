@@ -14,6 +14,7 @@ import MoathonUpdateView from '@/views/moathon/MoathonUpdateView.vue'
 import ProductListView from '@/views/product/ProductListView.vue'
 import ProductDetailView from '@/views/product/ProductDetailView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
+import LandingView from '@/views/LandingView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -21,6 +22,11 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'landing',
+      component: LandingView,
+    },
+    {
+      path: '/home',
       name: 'home',
       component: HomeView,
     },
