@@ -22,7 +22,7 @@ from .serializers import (
     UserPasswordResetConfirmSerializer,
     MoathonListWithRatesSerializer,
     ProfileUpdateSerializer,
-    OnboardingPutSerializer,
+    OnboardingSerializer
 )
 
 from drf_spectacular.utils import extend_schema, OpenApiExample
@@ -252,37 +252,25 @@ def profile(request):
 # 프로필 수정
 @extend_schema(
     tags=["Accounts"],
-    summary="프로필 수정(PATCH/PUT)",
+    summary="프로필 수정(PATCH)",
     request=ProfileUpdateSerializer,
     responses={200: OpenApiTypes.OBJECT},
 )
-@api_view(["PATCH", "PUT"])
+@api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def profile_update(request):
-    user = request.user
-    # PATCH면 TRUE / PUT면 FALSE
-    partial = (request.method == "PATCH")
+    serializer = ProfileUpdateSerializer(request.user, data=request.data, partial=True)
 
-    serializer = ProfileUpdateSerializer(user, data=request.data, partial=partial)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-
-    # 응답에서 이미지 URL은 절대경로로 주는 게 FE에서 편함
-    data = serializer.data
-    if getattr(user, "profile_image", None):
-        try:
-            data["profile_image"] = request.build_absolute_uri(user.profile_image.url)
-        except Exception:
-            pass
-
-    return Response(data, status=status.HTTP_200_OK)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
     tags=["Accounts"],
     summary="온보딩 최종 제출(PUT)",
-    request=OnboardingPutSerializer,
+    request=OnboardingSerializer,
     responses={200: OpenApiTypes.OBJECT},
     examples=[
         OpenApiExample(
@@ -308,35 +296,11 @@ def profile_update(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def onboarding(request):
-    user = request.user
+    serializer = OnboardingSerializer(request.user, data=request.data)
 
-    required_fields = [
-        "gender",
-        "credit_score",
-        "assets",
-        "salary",
-        "average_monthly_spend",
-        "tender",
-    ]
-    missing = [f for f in required_fields if f not in request.data]
-    if missing:
-        return Response(
-            {
-                "detail": "온보딩 제출은 필수 항목을 모두 포함해야 합니다.",
-                "missing_fields": missing,
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    serializer = OnboardingPutSerializer(user, data=request.data, partial=False)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-
-    # 최소 응답(저장 성공 + 완료 여부). 원하면 serializer.data 전체를 내려도 됨.
-    return Response(
-        {"onboarding_completed": True},
-        status=status.HTTP_200_OK,
-    )
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 @extend_schema(summary="뱃지 컬렉션 조회")
 @api_view(['GET'])

@@ -87,21 +87,67 @@ export const useAccountStore = defineStore('account', () => {
     return token.value ? true : false
   })
 
-  const updateProfile = function (payload) {
-    return axios({
-      method: 'put',
-      url: `${API_URL}/accounts/onboarding/`,
-      data: payload,
-      headers: {
-        Authorization: `Token ${token.value}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-      .then(res => {
-        console.log('프로필 정보가 저장되었습니다.', res.data)
-        return res.data
+  const updateProfile = async (payload) => {
+    try {
+      const response = await axios({
+        method: 'put',
+        url: `${API_URL}/accounts/onboarding/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${token.value}`,
+          'Content-Type': 'multipart/form-data'
+        }
       })
-      .catch(err => console.log(err))
+
+      console.log('온보딩 정보 저장 완료:', response.data)
+      await getProfile()
+
+      return response.data
+    } catch (error) {
+      console.error('온보딩 저장 실패:', error)
+      throw error
+    }
+  }
+
+  const editProfile = async (payload) => {
+    try {
+      const res = await axios({
+        method: 'patch',
+        url: `${API_URL}/accounts/profile/update/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${token.value}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      console.log('프로필 수정 완료:', res.data)
+      
+      // 수정 후 최신 정보를 다시 불러와 state 갱신 (데이터 동기화)
+      await getProfile() 
+      
+      return res.data
+    } catch (err) {
+      console.error('프로필 수정 실패:', err)
+      throw err
+    }
+  }
+
+  const followUser = async (targetId) => {
+    try {
+      const res = await axios({
+        method: 'post',
+        url: `${API_URL}/accounts/${targetId}/follow/`,
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      })
+      return res.data
+    } catch (err) {
+      console.error('팔로우 요청 실패:', err)
+      alert('팔로우 요청 중 오류가 발생했습니다.')
+      throw err
+    }
   }
 
   return { 
@@ -114,6 +160,8 @@ export const useAccountStore = defineStore('account', () => {
     getProfile,
     isAuthenticated,
     updateProfile,
+    editProfile,
+    followUser,
    }
 }, {
   persist: {

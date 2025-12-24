@@ -1,38 +1,42 @@
 <template>
   <div class="moathon-detail-container" v-if="moathon">
 
-    <header class="detail-header">
-      <div class="title-section">
-        <h1 class="moathon-title">{{ moathon.title }}</h1>
-        <span class="badge-purpose">{{ formatPurpose(moathon.purpose) }}</span>
-      </div>
-
-      <div class="owner-actions" v-if="isOwner">
-        <button @click="handleEdit" class="btn-icon">수정</button>
-        <button @click="handleDelete" class="btn-icon delete">삭제</button>
-      </div>
-
-      <div class="user-profile-card">
-        <div class="profile-top">
-          <img :src="moathon.user_info.profile_image || '/default-profile.png'" class="profile-img" alt="프로필" />
-          <div class="user-info">
-            <h2 class="nickname">
-              {{ moathon.user_info.nickname }}
-              <span v-if="isOwner" class="badge-owner">ME</span>
-            </h2>
-            <div class="user-stats">
-              <span>팔로워 {{ moathon.user_info.follower_count }}</span>
-              <span class="divider">|</span>
-              <span>팔로잉 {{ moathon.user_info.following_count }}</span>
-            </div>
-            <BadgeLibrary 
-              v-if="moathon.user_info.owner_badges"
-              :badges="moathon.user_info.owner_badges" 
-            />
-          </div>
+    <div class="user-profile-section">
+      <header class="detail-header">
+        <div class="title-section">
+          <h1 class="moathon-title">{{ moathon.title }}</h1>
+          <span class="badge-purpose">{{ formatPurpose(moathon.purpose) }}</span>
         </div>
-      </div>
-    </header>
+
+        <div class="owner-actions" v-if="isOwner">
+          <button @click="handleEdit" class="btn-icon">수정</button>
+          <button @click="handleDelete" class="btn-icon delete">삭제</button>
+        </div>
+
+        <div class="user-profile-card">
+          <div class="profile-left">
+            <img :src="getImageUrl(moathon.user_info.profile_image)" class="profile-img" alt="프로필" />
+            <span class="nickname">{{ moathon.user_info.nickname }}</span>
+          </div>
+
+          <div class="profile-right">
+            <span v-if="isOwner" class="badge-me">ME</span>
+
+            <button v-else @click="handleFollow" :class="['follow-btn', { 'following': isFollowing }]">
+              {{ isFollowing ? '언팔로우' : '팔로우' }}
+            </button>
+          </div>
+
+          <div class="user-stats">
+            <span>팔로워 {{ moathon.user_info.follower_count }}</span>
+            <span class="divider">|</span>
+            <span>팔로잉 {{ moathon.user_info.following_count }}</span>
+          </div>
+          <BadgeLibrary v-if="moathon.user_info.owner_badges" :badges="moathon.user_info.owner_badges" />
+        </div>
+
+      </header>
+    </div>
 
     <section class="main-content">
       <div class="track-visual">
@@ -141,6 +145,7 @@ const route = useRoute()
 const router = useRouter()
 const store = useMoathonStore()
 const accountStore = useAccountStore()
+const API_URL = import.meta.env.VITE_API_URL
 
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
@@ -152,6 +157,20 @@ const editCommentContent = ref('')
 const isOwner = computed(() => {
   return moathon.value?.user_info?.nickname === accountStore.user?.nickname
 })
+
+const isFollowing = computed(() => {
+  return moathon.value?.user_info?.is_following
+})
+
+const getImageUrl = (path) => {
+  if (!path) {
+    return '/default-profile.png'
+  }
+  if (path.startsWith('http')) {
+    return path
+  }
+  return `${API_URL}/media${path}`
+}
 
 // [수정] 좋아요 핸들러 (Store 액션 호출 후 로직은 Store에서 처리 가정)
 const handleLike = async () => {
@@ -167,6 +186,23 @@ const handleLike = async () => {
     return
   }
   await store.likeMoathon(moathonId)
+}
+
+const handleFollow = async () => {
+  if (!accountStore.isAuthenticated) {
+    if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+    router.push({ name: 'login' })
+    }
+    return
+  }
+
+  const targetUser = moathon.value.user_info
+  const result = await accountStore.followUser(targetUser.id)
+
+  if (result) {
+    moathon.value.user_info.is_following = result.followed
+    moathon.value.user_info.follower_count = result.follower_count
+  }
 }
 
 // mappedProduct 등 나머지 로직은 기존 구조(product_option)가 유지되므로 동일
@@ -271,7 +307,7 @@ const handleDelete = async () => {
   try {
     await store.deleteMoathon(moathon.value.id)
     alert('모아톤이 삭제되었습니다.')
-    router.push({ name: 'community' }) 
+    router.push({ name: 'community' })
   } catch (err) {
     console.error(err)
     alert('삭제에 실패했습니다.')
@@ -652,5 +688,41 @@ onUnmounted(() => {
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.8rem;
+}
+
+.badge-me {
+  background-color: #6c757d;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.follow-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #0d6efd; /* 기본 파란색 */
+  color: white;
+}
+
+.follow-btn:hover {
+  background-color: #0b5ed7;
+}
+
+/* 언팔로우(팔로우 중) 상태 스타일 */
+.follow-btn.following {
+  background-color: #e9ecef; /* 연한 회색 */
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+.follow-btn.following:hover {
+  background-color: #dee2e6;
+  color: #dc3545; /* 빨간 텍스트로 변경 */
 }
 </style>

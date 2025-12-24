@@ -1,7 +1,7 @@
 <template>
   <div class="badge-library card">
     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 px-3">
-      <h6 class="m-0 fw-bold">🏆 뱃지 도감</h6>
+      <h6 class="m-0 fw-bold">뱃지 도감</h6>
       <span class="page-indicator text-muted small">{{ currentPage + 1 }} / {{ totalPages }}</span>
     </div>
 
