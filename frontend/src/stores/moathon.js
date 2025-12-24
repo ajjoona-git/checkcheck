@@ -232,7 +232,7 @@ export const useMoathonStore = defineStore('moathon', () => {
 
   const getFollowingMoathons = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = accountStore.token
       if (!token) {
         console.log('로그인 상태가 아니므로 팔로잉 목록을 불러오지 않습니다.')
         return
