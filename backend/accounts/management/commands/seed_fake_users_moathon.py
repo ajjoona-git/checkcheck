@@ -11,7 +11,7 @@ from accounts.models import User
 from challenges.models import Moathon
 from products.models import ProductOption
 
-# 하한과 상한을 기반으로 데이터 품질, 현실성 반영 
+# 하한과 상한을 기반으로 데이터 품질, 현실성 반영
 def clamp_int(x: float, lo: int, hi: int) -> int:
     return int(max(lo, min(hi, round(x))))
 
@@ -19,14 +19,14 @@ def clamp_int(x: float, lo: int, hi: int) -> int:
 class Command(BaseCommand):
     help = "Seed fake Users and Moathon rows (real ProductOption ids only)."
 
-    # 명령어 실행시 옵션 
+    # 명령어 실행시 옵션
     def add_arguments(self, parser):
         parser.add_argument("--users", type=int, default=20000)
         parser.add_argument("--moathons", type=int, default=40000)
         parser.add_argument("--seed", type=int, default=42)
-        parser.add_argument("--password", type=str, default="fakePw!234")  # 로그인 안 할 거라서 동일비번으로 만듬 
+        parser.add_argument("--password", type=str, default="fakePw!234")  # 로그인 안 할 거라서 동일비번으로 만듬
 
-    # 실제 실행 로직 
+    # 실제 실행 로직
     def handle(self, *args, **opts):
         n_users = opts["users"]
         n_moathons = opts["moathons"]
@@ -44,8 +44,8 @@ class Command(BaseCommand):
         if not options:
             self.stdout.write(self.style.ERROR("ProductOption 데이터가 없습니다. 먼저 금융상품 데이터를 적재하세요."))
             return
-        
-        # 옵션을 비교할 때 최고 우대금리 존재하면 최고 우대금리 아니면 기본 금리 
+
+        # 옵션을 비교할 때 최고 우대금리 존재하면 최고 우대금리 아니면 기본 금리
         def option_rate(opt: ProductOption) -> float:
             v = opt.intr_rate2 if opt.intr_rate2 is not None else opt.intr_rate
             try:
@@ -101,9 +101,9 @@ class Command(BaseCommand):
                 pass
 
         # 특정 상품, 은행으로 가입이 몰리는 현상 반영 (숫자가 클수록 쏠림 커짐)
-        ALPHA_PROD = 1.25    # 상품 쏠림 
-        ALPHA_BANK = 1.05    # 은행 쏠림 
-        BANK_EFFECT = 0.25   # 은행 선호 영향 
+        ALPHA_PROD = 1.25    # 상품 쏠림
+        ALPHA_BANK = 1.05    # 은행 쏠림
+        BANK_EFFECT = 0.25   # 은행 선호 영향
 
         bank_ids = sorted(set(product_bank.values()))
         bank_weight = {bid: 1.0 / ((i + 1) ** ALPHA_BANK) for i, bid in enumerate(bank_ids, start=0)}
@@ -131,12 +131,19 @@ class Command(BaseCommand):
             for term in opts_by_product_term[pid].keys():
                 products_by_type_term[ptype][term].append(pid)
 
-        # 2) User 생성 
+        # 2) User 생성
         users = []
 
         # 닉네임 유니크 보장
-        def unique_nickname(i: int) -> str:
-            return f"seed{seed}_nick{random.randint(10_000_000, 99_999_999)}_{i}"
+        def unique_nickname(email: str) -> str:
+            local = (email or "").split("@", 1)[0].strip().lower()
+            base = local or "user"
+            nickname = base
+            suffix = 2
+            while User.objects.filter(nickname=nickname).exists():
+                nickname = f"{base}_{suffix}"
+                suffix += 1
+            return nickname
 
         # 나이 분포: 20~30대 위주 + 40~50대 일부
         def sample_birth_date():
@@ -152,7 +159,7 @@ class Command(BaseCommand):
         def sample_credit_score():
             return clamp_int(random.gauss(800, 70), 500, 950)
 
-        # 연봉(원): 평균 4,500만 근처 
+        # 연봉(원): 평균 4,500만 근처
         def sample_salary_won():
             return clamp_int(random.gauss(45_000_000, 18_000_000), 18_000_000, 150_000_000)
 
@@ -188,7 +195,7 @@ class Command(BaseCommand):
         )
 
         for i in range(n_users):
-            username = f"fake_{seed}_{i}"  
+            username = f"fake_{seed}_{i}"
             first = faker.first_name()
             last = faker.last_name()
             base_username = f"{last}{first}"   # 김순옥
@@ -223,7 +230,7 @@ class Command(BaseCommand):
                     is_superuser=False,
                     date_joined=joined,
 
-                    nickname=unique_nickname(i),
+                    nickname=unique_nickname(email),
                     birth=birth,
                     gender=random.choice(gender_choices),
                     credit_score=credit,
@@ -233,6 +240,7 @@ class Command(BaseCommand):
                     tender=tender,
                 )
             )
+        last_id = User.objects.order_by("-id").values_list("id", flat=True).first() or 0
 
         with transaction.atomic():
             User.objects.bulk_create(users, batch_size=2000)
@@ -240,8 +248,8 @@ class Command(BaseCommand):
         # 방금 만든 유저만 다시 로드(필요 필드만)
         user_rows = list(
             User.objects
-            .filter(nickname__startswith=f"seed{seed}_nick")
-            .values("id", "salary", "assets", "average_monthly_spend")
+            .filter(id__gt=last_id)
+            .values("id", "nickname", "salary", "assets", "average_monthly_spend")
         )
         self.stdout.write(self.style.SUCCESS(f"Users created: {len(user_rows)}"))
 
@@ -449,28 +457,69 @@ class Command(BaseCommand):
 
             return start, target
 
-        # 타이틀: 30% 커스텀, 70% user's moathon
+        # 타이틀: 80% 커스텀, 20% user's moathon
         custom_titles = {
-            "GOAL": ["결혼자금", "내집마련", "이사자금", "차량구입", "유학준비"],
-            "SHORT": ["비상금", "단기여유자금", "여행모아톤", "이벤트자금"],
-            "SAFE": ["안전자산", "현금보관", "예비자금", "원금보장"],
-            "HABIT": ["저축습관", "월급루틴", "자동저축", "한달저축"],
-            "YIELD": ["이자극대화", "우대금리도전", "금리챙기기"],
+            "GOAL": [
+                "결혼자금", "신혼여행자금", "예식비용", "혼수마련", "청첩장비용",
+                "내집마련", "청약통장플랜", "전세자금", "보증금모으기", "주택자금",
+                "이사자금", "이사비용", "인테리어자금", "가구·가전구입", "리모델링자금",
+                "차량구입", "첫차마련", "중고차자금", "자동차계약금", "면허·보험준비",
+                "유학준비", "어학연수", "학비모으기", "등록금플랜", "교환학생준비",
+                "창업자금", "사업시드", "장비구입비", "초기운영자금", "스몰비즈플랜",
+                "자격증비용", "시험준비비", "수강료모으기", "부트캠프등록금", "커리어업그레이드",
+                "부모님선물", "가족여행자금", "효도여행", "기념일선물", "집들이선물",
+                "출산준비", "육아용품", "산후조리원", "가정보험준비", "가족확장플랜",
+            ],
+            "SHORT": [
+                "비상금", "생활비버퍼", "급전대비", "돌발지출대비", "긴급예산",
+                "단기여유자금", "월말방어", "주말소비통제", "소확행예산", "이번달여유",
+                "여행모아톤", "항공권모으기", "숙소비용", "맛집투어자금", "휴가비용",
+                "이벤트자금", "생일선물비", "기념일데이트", "연말모임비", "경조사비",
+                "의료비예비", "치과비용", "검진비용", "약값모으기", "병원비버퍼",
+                "수리비용", "차량수리비", "핸드폰교체비", "가전수리비", "집수리예산",
+                "취미예산", "운동등록비", "레슨비용", "덕질예산", "공연·전시예산",
+                "이직준비", "면접정장비", "포트폴리오비", "취업준비비", "이직버퍼",
+            ],
+            "SAFE": [
+                "안전자산", "현금보관", "현금쿠션", "원금보장", "무위험보관",
+                "예비자금", "생활안정자금", "가계안전망", "리스크제로", "안정플랜",
+                "목돈보관", "대기자금", "잠깐보관", "현금파킹", "대기예치",
+                "비상금플랜", "긴급자금통장", "안전통장", "세이프박스", "마음안정통장",
+                "가족안전망", "부모님비상금", "아이교육예비", "가정안정자금", "가족쿠션",
+                "보험료대비", "연납보험료", "자동이체버퍼", "고정비방어", "지출안정화",
+                "환율변동대비", "해외결제대비", "여행비상금", "비상현금", "예비달러",
+            ],
+            "HABIT": [
+                "저축습관", "월급루틴", "자동저축", "한달저축", "매일저축",
+                "1일1저축", "주간저축", "월간저축", "루틴챌린지", "습관만들기",
+                "라떼값저축", "커피값모으기", "배달비절약", "소비줄이기", "지출다이어트",
+                "선저축후소비", "통장쪼개기", "용돈관리", "가계부루틴", "소비통제",
+                "적금루틴", "자동이체습관", "만기까지버티기", "완주챌린지", "꾸준함훈련",
+                "월급날저축", "주급저축", "잔돈모으기", "잔액저축", "남는돈저축",
+                "노플렉스챌린지", "무지출데이", "지출리셋", "소비리셋", "절약모드",
+            ],
+            "YIELD": [
+                "이자극대화", "우대금리도전", "금리챙기기", "이자수확", "금리사냥",
+                "고금리플랜", "금리상승기대", "최고금리찾기", "우대조건올클", "금리최적화",
+                "복리의마법", "이자재투자", "이자불리기", "수익률루틴", "수익챌린지",
+                "만기이자극대화", "우대금리모으기", "조건충족플랜", "월별우대달성", "혜택풀세팅",
+                "금리비교", "상품갈아타기", "리밸런싱", "금리런", "고금리환승",
+                "단리vs복리", "복리우선", "이자계산습관", "우대체크", "금리체크",
+                "파킹+적금", "파킹최적화", "예치전략", "분산예치", "금리분산",
+            ],
         }
 
-        def next_users_moathon_title(used_titles: set):
-            base = "user's moathon"
+        def next_users_moathon_title(nickname: str, used_titles: set):
+            nick = (nickname or "user").strip()
+            base = f"{nick}'s moathon"
+
             if base not in used_titles:
                 return base
-            max_n = 1
-            for t in used_titles:
-                if t == base:
-                    max_n = max(max_n, 1)
-                elif t.startswith(base):
-                    suf = t[len(base):]
-                    if suf.isdigit():
-                        max_n = max(max_n, int(suf))
-            return f"{base}{max_n + 1}"
+
+            n = 2
+            while f"{base}{n}" in used_titles:
+                n += 1
+            return f"{base}{n}"
 
         # 5) Moathon bulk 생성 (save() 미호출이므로 title, start_date, end_date 직접 생성)
         moathons = []
@@ -487,7 +536,7 @@ class Command(BaseCommand):
                 opt = pick_option(ptype, term, purpose, used_option_ids)
                 start_amt, target_amt = amounts_for(urow, opt, ptype, purpose, term)
 
-                if random.random() < 0.30:
+                if random.random() < 0.80:
                     base_title = random.choice(custom_titles[purpose])
                     title = base_title
                     n = 2
@@ -495,10 +544,10 @@ class Command(BaseCommand):
                         title = f"{base_title}{n}"
                         n += 1
                 else:
-                    title = next_users_moathon_title(used_titles)
+                    title = next_users_moathon_title(urow["nickname"], used_titles)
 
                 used_titles.add(title)
-                
+
                 days_ago = random.randint(0, 365) # 0일(오늘) ~ 365일 전 사이
                 rand_start_date = today - timedelta(days=days_ago)
                 calc_end_date = rand_start_date + timedelta(days=term * 30)
