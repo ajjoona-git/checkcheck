@@ -38,6 +38,10 @@
       </div>
 
       <div class="track-visual">
+        <MoathonTrack :percent="currentProgress" :profile-image="userProfileImage" />
+      </div>
+      
+      <!-- <div class="track-visual">
         <div class="track-bg">
           <div class="track-progress" :style="{ width: trackWidth }"></div>
           <div class="runner-icon" :style="{ left: trackWidth }">
@@ -49,7 +53,7 @@
           <span>START</span>
           <span>GOAL</span>
         </div>
-      </div>
+      </div> -->
 
       <div class="info-stats">
         <div class="stat-item">
@@ -132,12 +136,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue' // onMounted 제거
 import { useRoute, useRouter } from 'vue-router'
 import { useMoathonStore } from '@/stores/moathon'
 import { useAccountStore } from '@/stores/accounts'
 import ProductCard from '@/components/product/ProductCard.vue'
 import BadgeLibrary from '@/components/common/BadgeLibrary.vue'
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue';
+import defaultProfile from '/default-profile.png';
 
 const route = useRoute()
 const router = useRouter()
@@ -145,13 +151,15 @@ const store = useMoathonStore()
 const accountStore = useAccountStore()
 const API_URL = import.meta.env.VITE_API_URL
 
+// store의 상태를 computed로 가져옴
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
 const newComment = ref('')
 const editingCommentId = ref(null)
 const editCommentContent = ref('')
+const currentProgress = ref(0) // 트랙 애니메이션용 진행률
 
-// [수정] 본인 확인 로직 (user_info 접근)
+// [안전장치 추가] moathon.value가 없을 때 에러 방지 (? 사용)
 const isOwner = computed(() => {
   return moathon.value?.user_info?.nickname === accountStore.user?.nickname
 })
@@ -161,20 +169,21 @@ const isFollowing = computed(() => {
 })
 
 const getImageUrl = (path) => {
-  if (!path) {
-    return '/default-profile.png'
-  }
-  if (path.startsWith('http')) {
-    return path
-  }
-  return `${API_URL}/media${path}`
+  if (!path) return defaultProfile
+  if (path.startsWith('http')) return path
+  return `${API_URL}${path}`
 }
 
-// [수정] 좋아요 핸들러 (Store 액션 호출 후 로직은 Store에서 처리 가정)
+// 프로필 이미지 경로 계산 (에러 방지 로직 추가)
+const userProfileImage = computed(() => {
+  if (moathon.value?.user_info?.profile_image) {
+    return getImageUrl(moathon.value.user_info.profile_image)
+  }
+  return defaultProfile;
+});
+
 const handleLike = async () => {
   const moathonId = route.params.id
-
-  // 데이터 로딩 전이거나 ID가 없으면 중단
   if (!moathonId || !moathon.value) return
 
   if (!accountStore.isAuthenticated) {
@@ -194,18 +203,19 @@ const handleFollow = async () => {
     return
   }
 
+  // moathon.value가 로드되었는지 확인
+  if (!moathon.value || !moathon.value.user_info) return;
+
   const targetUser = moathon.value.user_info
   const result = await accountStore.followUser(targetUser.id)
 
   if (result) {
-    moathon.value.user_info.is_following = result.followed
-    moathon.value.user_info.follower_count = result.follower_count
+    // [수정] 존재하지 않는 함수 fetchMoathonData() 제거 -> 스토어 액션 사용
+    await store.fetchMoathonDetail(moathon.value.id)
     await accountStore.getProfile()
-    await fetchMoathonData()
   }
 }
 
-// mappedProduct 등 나머지 로직은 기존 구조(product_option)가 유지되므로 동일
 const mappedProduct = computed(() => {
   if (!moathon.value?.product_option) return null
   const opt = moathon.value.product_option
@@ -219,7 +229,7 @@ const mappedProduct = computed(() => {
   }
 })
 
-// --- Methods (기존과 동일) ---
+// --- Methods ---
 const trackWidth = computed(() => {
   const rate = parseFloat(moathon.value?.progress_rate || 0)
   return `${Math.min(rate, 100)}%`
@@ -271,7 +281,6 @@ const saveComment = async (commentId) => {
     alert('내용을 입력해주세요.')
     return
   }
-
   try {
     const moathonId = route.params.id
     if (!moathonId) return
@@ -287,13 +296,11 @@ const submitComment = async () => {
   if (!newComment.value.trim()) return
   await store.createComment(moathon.value.id, newComment.value)
   newComment.value = ''
-  store.fetchMoathonDetail(moathon.value.id)
 }
 
 const deleteComment = async (commentId) => {
   if (confirm('댓글을 삭제하시겠습니까?')) {
     await store.deleteComment(moathon.value.id, commentId)
-    store.fetchMoathonDetail(moathon.value.id)
   }
 }
 
@@ -303,7 +310,6 @@ const handleEdit = () => {
 
 const handleDelete = async () => {
   if (!confirm('정말로 모아톤을 삭제하시겠습니까? 복구할 수 없습니다.')) return
-
   try {
     await store.deleteMoathon(moathon.value.id)
     await accountStore.getProfile()
@@ -315,13 +321,26 @@ const handleDelete = async () => {
   }
 }
 
-// 데이터 로딩
+// [핵심 수정] 데이터 로딩 로직 개선
 watch(
   () => route.params.id,
-  (newId) => {
+  async (newId) => {
     if (newId) {
       store.clearMoathonDetail()
-      store.fetchMoathonDetail(newId)
+      await store.fetchMoathonDetail(newId)
+    }
+  },
+  { immediate: true }
+)
+
+// [핵심 수정] onMounted 대신 watch로 데이터가 로드되면 progress 업데이트
+// moathon 데이터가 변경될 때마다 실행되어 로딩 직후 값을 세팅함
+watch(
+  moathon,
+  (newData) => {
+    if (newData && newData.progress_rate) {
+      // 데이터가 로드된 후 값 설정
+      currentProgress.value = newData.progress_rate
     }
   },
   { immediate: true }
