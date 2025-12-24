@@ -109,6 +109,30 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
+  const editProfile = async (payload) => {
+    try {
+      const res = await axios({
+        method: 'patch',
+        url: `${API_URL}/accounts/profile/update/`,
+        data: payload,
+        headers: {
+          Authorization: `Token ${token.value}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      console.log('프로필 수정 완료:', res.data)
+      
+      // 수정 후 최신 정보를 다시 불러와 state 갱신 (데이터 동기화)
+      await getProfile() 
+      
+      return res.data
+    } catch (err) {
+      console.error('프로필 수정 실패:', err)
+      throw err
+    }
+  }
+
   const followUser = async (targetId) => {
     try {
       const res = await axios({
@@ -136,6 +160,7 @@ export const useAccountStore = defineStore('account', () => {
     getProfile,
     isAuthenticated,
     updateProfile,
+    editProfile,
     followUser,
    }
 }, {
