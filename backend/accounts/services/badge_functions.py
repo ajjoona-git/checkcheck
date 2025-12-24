@@ -36,16 +36,16 @@ def award_all_badges(user) -> None:
 # 회원가입 직후
 def award_signup_badges(user) -> None:
     with transaction.atomic():
-        _grant(user, "achieve", ACH_START, moathon=None)
+        _grant(user, "achieve", ACH_START)
 
 # 모아톤 생성 직후(티끌 모아 태산, 억만장자의 꿈)
 def award_achieve_badges_on_moathon_created(user, moathon: Moathon) -> None:
     with transaction.atomic():
-        _grant(user, "achieve", ACH_DEPOSIT, moathon=moathon)
+        _grant(user, "achieve", ACH_DEPOSIT)
 
         term_months = _get_term_months_by_save_trm(moathon)
         if term_months is not None and term_months >= 36:
-            _grant(user, "achieve", ACH_BILLIONAIRE, moathon=moathon)
+            _grant(user, "achieve", ACH_BILLIONAIRE)
 
 
 def award_track_badges(user) -> None:
@@ -57,13 +57,13 @@ def award_track_badges(user) -> None:
 
         # 누적 지급 방식
         if progress >= 25:
-            _grant(user, "track", TRACK_25, moathon=m)
+            _grant_track(user, "track", TRACK_25, moathon=m)
         if progress >= 50:
-            _grant(user, "track", TRACK_50, moathon=m)
+            _grant_track(user, "track", TRACK_50, moathon=m)
         if progress >= 75:
-            _grant(user, "track", TRACK_75, moathon=m)
+            _grant_track(user, "track", TRACK_75, moathon=m)
         if progress >= 100:
-            _grant(user, "track", TRACK_100, moathon=m)
+            _grant_track(user, "track", TRACK_100, moathon=m)
 
 
 def award_achieve_badges(user) -> None:
@@ -73,34 +73,34 @@ def award_achieve_badges(user) -> None:
     # 작심삼일 탈출(모아톤별)
     for m in moathons:
         if _maintained_days(m, today=today) >= 3:
-            _grant(user, "achieve", ACH_3DAYS, moathon=m)
+            _grant(user, "achieve", ACH_3DAYS)
 
     # 프로 완주러(유저당 1회)
     expired_cnt = Moathon.objects.filter(user=user, end_date__lt=today).count()
     if expired_cnt >= 3:
-        _grant(user, "achieve", ACH_PRO, moathon=None)
+        _grant(user, "achieve", ACH_PRO)
 
 
 def award_social_badges(user) -> None:
     # 소통요정: 내가 작성한 댓글 5개 이상
     my_comment_cnt = MoathonComment.objects.filter(user=user).count()
     if my_comment_cnt >= 5:
-        _grant(user, "social", SOC_COMMENTS, moathon=None)
+        _grant(user, "social", SOC_COMMENTS)
 
     # 응원단장: 내가 타인 모아톤에 누른 좋아요 10회
     cheer_cnt = MoathonLike.objects.filter(user=user).exclude(moathon__user=user).count()
     if cheer_cnt >= 10:
-        _grant(user, "social", SOC_CHEERLEADER, moathon=None)
+        _grant(user, "social", SOC_CHEERLEADER)
 
     # 인기스타: 내 모아톤이 받은 좋아요 20개
     beloved_cnt = MoathonLike.objects.filter(moathon__user=user).exclude(user=user).count()
     if beloved_cnt >= 20:
-        _grant(user, "social", SOC_BELOVED, moathon=None)
+        _grant(user, "social", SOC_BELOVED)
 
     # 팔로팔로미: 팔로워 10명
     follower_cnt = UserFollow.objects.filter(following=user).count()
     if follower_cnt >= 10:
-        _grant(user, "social", SOC_FOLLOWERS, moathon=None)
+        _grant(user, "social", SOC_FOLLOWERS)
 
 
 def _progress_rate(moathon: Moathon, today: date) -> int:
@@ -140,12 +140,22 @@ def _get_badge(badge_type: str, badge_name: str) -> Optional[Badge]:
         return None
 
 
-def _grant(user, badge_type: str, badge_name: str, moathon=None) -> None:
+def _grant_track(user, badge_type: str, badge_name: str, moathon=None) -> None:
     badge = _get_badge(badge_type, badge_name)
     if not badge:
         return
 
     try:
         UserBadge.objects.get_or_create(user=user, badge=badge, moathon=moathon)
+    except IntegrityError:
+        pass
+
+def _grant(user, badge_type: str, badge_name: str) -> None:
+    badge = _get_badge(badge_type, badge_name)
+    if not badge:
+        return
+
+    try:
+        UserBadge.objects.get_or_create(user=user, badge=badge)
     except IntegrityError:
         pass

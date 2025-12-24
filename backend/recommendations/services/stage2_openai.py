@@ -32,7 +32,7 @@ class Stage2Output:
     option_id: int # 최종 선택된 옵션 id
     reasons: List[str] # 선택 근거
     warnings: List[str] # 주의사항
-    used_fallback: bool # GMS 실패 시 규칙 기반 풀백 여부 
+    used_fallback: bool # GMS 실패 시 규칙 기반 풀백 여부
 
 
 DEVELOPER_MSG = "Answer in Korean. 반드시 JSON만 출력하고 다른 텍스트는 출력하지 마세요."
@@ -62,8 +62,8 @@ SYSTEM_INSTRUCTIONS = """\
 {
   "product_id": <int>,
   "option_id": <int>,
-  "reasons": [<string>, <string>, ...],   # 2~5개
-  "warnings": [<string>, ...]            # 0~4개
+  "reasons": [<string>, <string>, ...],
+  "warnings": [<string>, ...]
 }
 """
 
@@ -119,7 +119,7 @@ def shortlist_options_for_product(
     if not opts:
         return []
 
-    # 우대 금리가 존재하면 우대금리 우선, 아니면 기존 금리 
+    # 우대 금리가 존재하면 우대금리 우선, 아니면 기존 금리
     def rate2(o: Dict[str, Any]) -> float:
         v = o.get("intr_rate2")
         if v is None:
@@ -148,7 +148,7 @@ def shortlist_options_for_product(
         for o in ranked
     ]
 
-# 상품별 텍스트(우대조건/유의사항/만기 후 이자 등)를 상품 단위로 한 번만 모아서 payload에 넣음 
+# 상품별 텍스트(우대조건/유의사항/만기 후 이자 등)를 상품 단위로 한 번만 모아서 payload에 넣음
 def _build_product_texts(product_ids: List[int]) -> Dict[int, Dict[str, Any]]:
     """
     Top10 상품의 텍스트/메타를 상품 단위로 1번만 모아서 제공.
@@ -183,7 +183,7 @@ def _build_product_texts(product_ids: List[int]) -> Dict[int, Dict[str, Any]]:
         }
     return out
 
-# LLM 응답에서 JSON 객체 추출하고 파싱 
+# LLM 응답에서 JSON 객체 추출하고 파싱
 def _extract_json(text: str) -> Dict[str, Any]:
     t = (text or "").strip()
 
@@ -199,7 +199,7 @@ def _extract_json(text: str) -> Dict[str, Any]:
         raise ValueError("JSON 파싱 실패")
     return json.loads(t[l:r + 1])
 
-# GMS 호출 
+# GMS 호출
 def _gms_chat_completion_json(
     *,
     model: str,
@@ -230,7 +230,7 @@ def _gms_chat_completion_json(
     content = data["choices"][0]["message"]["content"]
     return _extract_json(content)
 
-# Stage1에서 받은 결과에서 최종 option_id 1개 확정 
+# Stage1에서 받은 결과에서 최종 option_id 1개 확정
 def pick_final_option_from_top10(
     *,
     user,
@@ -351,6 +351,6 @@ def pick_final_option_from_top10(
             product_id=int(first["product_id"]),
             option_id=int(first["option_id"]),
             reasons=["후보 옵션 중 조건 충족이 확인된 옵션을 선택했습니다."],
-            warnings=[], 
+            warnings=[],
             used_fallback=True,
         )
