@@ -6,47 +6,31 @@
     </div>
 
     <div class="card">
-      <div class="selected-product-info">
+      <div v-if="productId" class="selected-product-info">
         <p>선택된 상품 ID: <strong>{{ productId }}</strong></p>
+        </div>
+      <div v-else class="alert alert-warning text-center">
+        주의: 상품 정보가 선택되지 않았습니다.
       </div>
 
-      <MoathonCreateForm :is-submitting="isSubmitting" @submit="handleCreate" />
+      <MoathonCreateForm 
+        :is-edit="false" 
+        :initial-data="{ product_option: Number(productId) }"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMoathonStore } from '@/stores/moathon'
+// Store 호출 제거 (MoathonCreateForm 내부에서 처리함)
 import MoathonCreateForm from '@/components/moathon/MoathonCreateForm.vue'
 
 const route = useRoute()
-const store = useMoathonStore()
-
-const isSubmitting = ref(false)
 const productId = computed(() => route.query.productId)
 
-const handleCreate = async (formData) => {
-  if (!productId.value) {
-    alert('잘못된 접근입니다. 상품 정보가 없습니다.')
-    return
-  }
-
-  isSubmitting.value = true
-  try {
-    // 폼 데이터 + 쿼리 파라미터의 상품 ID 결합
-    const payload = {
-      ...formData,
-      product_option: Number(productId.value)
-    }
-    await store.createMoathon(payload)
-  } catch (error) {
-    alert('모아톤 생성에 실패했습니다.')
-  } finally {
-    isSubmitting.value = false
-  }
-}
+// handleCreate 로직 제거 -> MoathonCreateForm 내부의 submitForm에서 처리됨
 </script>
 
 <style scoped>

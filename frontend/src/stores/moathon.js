@@ -10,6 +10,7 @@ export const useMoathonStore = defineStore('moathon', () => {
   const API_URL = import.meta.env.VITE_API_URL
 
   const moathons = ref([])
+  const followingMoathons = ref([])
   const recommendationResult = ref(null) // 추천된 상품 목록 저장
   const isRecommending = ref(false)   // 추천 로딩 상태
 
@@ -229,6 +230,25 @@ export const useMoathonStore = defineStore('moathon', () => {
     }
   }
 
+  const getFollowingMoathons = async () => {
+    try {
+      const res = await axios({
+        method: 'get',
+        url: `${API_URL}/moathons/following/`, 
+        headers: {
+          Authorization: `Token ${accountStore.token}`
+        }
+      })
+      
+      followingMoathons.value = res.data
+      console.log('팔로잉 모아톤 로드 성공:', res.data)
+      
+    } catch (err) {
+      console.error('팔로잉 모아톤 로드 실패:', err)
+      followingMoathons.value = []
+    }
+  }
+
   return { 
     moathons, 
     recommendationResult,
@@ -238,6 +258,7 @@ export const useMoathonStore = defineStore('moathon', () => {
     itemsPerPage,
     totalPages, 
     moathonDetail, 
+    followingMoathons,
     clearMoathonDetail,
     fetchMoathons,
     fetchMoathonDetail, 
@@ -250,5 +271,6 @@ export const useMoathonStore = defineStore('moathon', () => {
     updateComment,
     deleteComment,
     recommendProduct,
+    getFollowingMoathons,
    }
 })
