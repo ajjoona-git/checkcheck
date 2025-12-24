@@ -14,7 +14,7 @@
 
       <div class="user-profile-card">
         <div class="profile-top">
-          <img :src="moathon.user_info.profile_image || '/default-profile.png'" class="profile-img" alt="프로필" />
+          <img :src="getImageUrl(moathon.user_info.profile_image)" class="profile-img" alt="프로필" />
           <div class="user-info">
             <h2 class="nickname">
               {{ moathon.user_info.nickname }}
@@ -141,6 +141,7 @@ const route = useRoute()
 const router = useRouter()
 const store = useMoathonStore()
 const accountStore = useAccountStore()
+const API_URL = import.meta.env.VITE_API_URL
 
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
@@ -152,6 +153,16 @@ const editCommentContent = ref('')
 const isOwner = computed(() => {
   return moathon.value?.user_info?.nickname === accountStore.user?.nickname
 })
+
+const getImageUrl = (path) => {
+  if (!path) {
+    return '/default-profile.png' 
+  }
+  if (path.startsWith('http')) {
+    return path
+  }
+  return `${API_URL}/media${path}`
+}
 
 // [수정] 좋아요 핸들러 (Store 액션 호출 후 로직은 Store에서 처리 가정)
 const handleLike = async () => {
