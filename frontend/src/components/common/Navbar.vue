@@ -40,11 +40,16 @@
 <script setup>
   import { RouterLink } from 'vue-router';
   import { useAccountStore } from '@/stores/accounts';
+  import { useMoathonStore } from '@/stores/moathon'
   import logo from '@/assets/logo.svg'
 
   const accountStore = useAccountStore()
+  const moathonStore = useMoathonStore()
+  
   const logOut = function () {
     accountStore.logOut()
+    moathonStore.resetState()
+    window.location.href = '/'
   }
 </script>
 

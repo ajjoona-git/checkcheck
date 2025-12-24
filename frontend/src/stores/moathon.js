@@ -249,6 +249,13 @@ export const useMoathonStore = defineStore('moathon', () => {
     }
   }
 
+  const resetState = () => {
+    moathons.value = []
+    followingMoathons.value = []
+    moathonDetail.value = null
+    console.log('Moathon Store 초기화 완료')
+  }
+
   return { 
     moathons, 
     recommendationResult,
@@ -272,5 +279,6 @@ export const useMoathonStore = defineStore('moathon', () => {
     deleteComment,
     recommendProduct,
     getFollowingMoathons,
+    resetState,
    }
 })
