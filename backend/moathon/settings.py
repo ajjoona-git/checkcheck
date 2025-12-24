@@ -79,7 +79,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication', # 개발자 테스트용 (Swagger)
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
