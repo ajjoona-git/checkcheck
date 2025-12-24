@@ -86,55 +86,53 @@ class MoathonListWithRatesSerializer(MoathonListSerializer):
 
 # 프로필 수정
 class ProfileUpdateSerializer(serializers.ModelSerializer):
-    # 파일 업로드 필드는 선택적으로 허용 
-    profile_image = serializers.ImageField(required=False, allow_null=True)
+    email = serializers.EmailField(read_only=True)
+    nickname = serializers.CharField(read_only=True)
+    birth = serializers.DateField(read_only=True)
+    username = serializers.CharField(read_only=True)
 
-    email = serializers.EmailField(required=False, allow_blank=False)
-    nickname = serializers.CharField(required=False, allow_blank=False)
-
-    class Meta:
-        model = User
-        fields = [
-            "profile_image",
-            "email",
-            "nickname",
-            "birth",
-            "gender",
-            "credit_score",
-            "assets",
-            "salary",
-            "average_monthly_spend",
-            "tender",
-        ]
-
-    def validate_email(self, value):
-        value = (value or "").strip()
-        if not value:
-            raise serializers.ValidationError("이메일은 비어 있을 수 없습니다.")
-        return value
-
-    def validate_nickname(self, value):
-        value = (value or "").strip()
-        if not value:
-            raise serializers.ValidationError("닉네임은 비어 있을 수 없습니다.")
-        return value
-    
-# 회원가입 이후 즉시 User정보 채우기(프로필 빼고 필수)
-class OnboardingPutSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = [
-            "profile_image",
-            "gender",
-            "credit_score",
-            "assets",
-            "salary",
-            "average_monthly_spend",
+            # Read-only
+            "username", "email", "nickname", "birth",
+
+            # Writable (금융/프로필 정보)
+            "profile_image", 
+            "gender", 
+            "credit_score", 
+            "assets", 
+            "salary", 
+            "average_monthly_spend", 
             "tender",
         ]
-        # 모델 null/blank 설정과 무관하게 "이 API에서는 반드시 받는다"를 강제
+
+# 온보딩
+class OnboardingSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(read_only=True)
+    nickname = serializers.CharField(read_only=True)
+    birth = serializers.DateField(read_only=True)
+    username = serializers.CharField(read_only=True)
+
+    profile_image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = [
+            # Read-only
+            "username", "email", "nickname", "birth",
+
+            # Writable (금융/프로필 정보)
+            "profile_image", 
+            "gender", 
+            "credit_score", 
+            "assets", 
+            "salary", 
+            "average_monthly_spend", 
+            "tender",
+        ]
         extra_kwargs = {
             "gender": {"required": True, "allow_null": False},
             "credit_score": {"required": True, "allow_null": False},
