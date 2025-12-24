@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from datetime import date
 
 User = get_user_model()
 
@@ -202,3 +203,33 @@ def moathon_like_toggle(request, moathon_pk):
 
     like_count = MoathonLike.objects.filter(moathon=moathon).count()
     return Response({"liked": liked, "like_count": like_count})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def following_moathon_list(request):
+    """
+    내가 팔로우하는 유저들의 '진행 중인' 모아톤 조회
+    """
+    user = request.user
+    
+    # 1. 내가 팔로우하는 유저들의 ID 리스트 추출
+    # UserFollow 모델 정의: follower(나) -> related_name="following_relations"
+    # following_relations는 내가 팔로우한 '관계(Row)'들을 가져옵니다.
+    # 여기서 'following' 필드(내가 팔로우한 사람)의 ID만 뽑아냅니다.
+    following_ids = user.following_relations.values_list('following_id', flat=True)
+
+    # 2. 조건 필터링
+    # - 작성자가 팔로잉 목록에 포함됨 (user__id__in)
+    # - 종료일이 오늘보다 같거나 큼 (end_date__gte -> 진행 중)
+    # - 최신순 정렬
+    today = date.today()
+    
+    moathons = Moathon.objects.filter(
+        user__id__in=following_ids,
+        end_date__gte=today
+    ).select_related('user').order_by('-created_at') 
+
+    # 3. 시리얼라이징 및 반환
+    serializer = MoathonListSerializer(moathons, many=True)
+    
+    return Response(serializer.data)
