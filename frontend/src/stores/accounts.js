@@ -29,22 +29,25 @@ export const useAccountStore = defineStore('account', () => {
       .catch(err => console.log(err))
   }
 
-  const logIn = function (payload) {
+  const logIn = async function (payload) { 
     const { username, email, password } = payload
 
-    axios({
-      method: 'post',
-      url: `${API_URL}/accounts/login/`,
-      data: {
-        username, email, password
-      }
-    })
-      .then(async res => {
-        console.log('로그인이 완료되었습니다.')
-        token.value = res.data.key
-        await getProfile()
+    try {
+      const res = await axios({
+        method: 'post',
+        url: `${API_URL}/accounts/login/`,
+        data: { username, email, password }
       })
-      .catch(err => console.log(err))
+      console.log('로그인 성공, 토큰 저장 중...')
+
+      const newToken = res.data.key
+      token.value = newToken
+      localStorage.setItem('token', newToken) 
+      await getProfile()
+    } catch (err) {
+      console.error('로그인 에러:', err)
+      throw err
+    }
   }
 
   const getProfile = async () => {
@@ -58,7 +61,7 @@ export const useAccountStore = defineStore('account', () => {
           Authorization: `Token ${token.value}`
         }
       })
-      
+
       user.value = response.data
       console.log('유저 정보 로드 완료:', user.value)
       return response.data
@@ -131,12 +134,12 @@ export const useAccountStore = defineStore('account', () => {
           'Content-Type': 'multipart/form-data'
         }
       })
-      
+
       console.log('프로필 수정 완료:', res.data)
-      
+
       // 수정 후 최신 정보를 다시 불러와 state 갱신 (데이터 동기화)
-      await getProfile() 
-      
+      await getProfile()
+
       return res.data
     } catch (err) {
       console.error('프로필 수정 실패:', err)
@@ -161,7 +164,7 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
-  return { 
+  return {
     API_URL,
     token,
     user,
@@ -173,7 +176,7 @@ export const useAccountStore = defineStore('account', () => {
     updateProfile,
     editProfile,
     followUser,
-   }
+  }
 }, {
   persist: {
     paths: ['token', 'user']
