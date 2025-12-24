@@ -86,33 +86,32 @@ watch(
 
 const submitForm = async () => {
   try {
-    // 1. [수정] Payload(전송 데이터) 구성
-    // reactive 객체인 formData를 일반 객체로 풀어서 복사
-    const payload = { ...formData }
-
-    // 생성 모드이고, 상품 정보(initialData)가 있다면 payload에 병합
-    if (!props.isEdit && props.initialData && props.initialData.id) {
-      payload.id = props.initialData.id
+    const payload = {
+      ...props.initialData, // 예: { product_option: 1 }
+      ...formData           // 예: { title: '...', purpose: '...', ... }
     }
-    
-    // 2. API 호출
+
     if (props.isEdit) {
-      // 수정 (PATCH/PUT)
       await moathonStore.updateMoathon(props.initialData.id, payload)
       alert('모아톤이 성공적으로 수정되었습니다!')
       router.push({ name: 'moathonDetail', params: { id: props.initialData.id } })
 
     } else {
+      // 생성 (POST)
       await moathonStore.createMoathon(payload)
-      await accountStore.getProfile()
+      await accountStore.getProfile() // 프로필 갱신 (진행 중인 모아톤 목록 업데이트)
       router.push({ name: 'home' })
     }
     
     emit('submit', payload)
   } catch (err) {
     console.error(err)
-    const msg = props.isEdit ? '수정에 실패했습니다.' : '생성에 실패했습니다.'
-    alert(msg)
+    if (err.response && err.response.status === 400) {
+        alert('입력 정보를 확인해주세요. (필수 항목 누락 등)')
+    } else {
+        const msg = props.isEdit ? '수정에 실패했습니다.' : '생성에 실패했습니다.'
+        alert(msg)
+    }
   }
 }
 </script>
