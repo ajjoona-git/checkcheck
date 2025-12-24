@@ -28,7 +28,7 @@
 
       <hr class="my-4 opacity-25">
 
-      <h5 class="mb-3 fw-bold text-dark">📋 상세 정보</h5>
+      <h5 class="mb-3 fw-bold text-dark">상세 정보</h5>
       <div class="info-grid">
         <div class="info-item">
           <span class="label">생년월일</span>

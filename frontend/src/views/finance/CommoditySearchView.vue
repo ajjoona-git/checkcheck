@@ -1,7 +1,7 @@
 <template>
   <div class="market-container">
     <div class="header-section">
-      <h1>📈 금/은 시세 조회</h1>
+      <h1>금/은 시세 조회</h1>
       <p>원하는 기간의 시세 변동을 확인해보세요.</p>
     </div>
 

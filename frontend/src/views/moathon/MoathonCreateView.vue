@@ -1,7 +1,7 @@
 <template>
   <div class="create-view">
     <div class="header">
-      <h1>🚩 모아톤 시작하기</h1>
+      <h1>모아톤 시작하기</h1>
       <p>선택하신 금융 상품으로 모아톤을 시작합니다.</p>
     </div>
 

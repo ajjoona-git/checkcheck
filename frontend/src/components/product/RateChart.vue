@@ -1,6 +1,6 @@
 <template>
   <div class="rate-chart card p-4 mb-4">
-    <h3 class="mb-3">📊 나의 상품 금리 비교</h3>
+    <h3 class="mb-3">나의 상품 금리 비교</h3>
     <div class="chart-container">
       <div v-for="item in chartData" :key="item.id" class="chart-row">
         <div class="label-col">

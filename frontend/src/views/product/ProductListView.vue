@@ -1,7 +1,7 @@
 <template>
   <div class="product-list-container">
     <div class="header">
-      <h1>🏦 금융 상품 찾기</h1>
+      <h1>금융 상품 찾기</h1>
       <p>나에게 딱 맞는 예/적금 상품을 찾아보세요.</p>
     </div>
 

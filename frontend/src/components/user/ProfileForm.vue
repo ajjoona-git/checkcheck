@@ -30,18 +30,18 @@
       </div>
 
       <div class="form-group mb-3">
-        <label for="assets" class="form-label">자산 (만원 단위)<span class="required">*</span></label>
-        <input type="number" id="assets" class="form-control" v-model.number="assets" placeholder="예: 1000" required min="0" />
+        <label for="assets" class="form-label">자산 (원)<span class="required">*</span></label>
+        <input type="number" id="assets" class="form-control" v-model.number="assets" placeholder="예: 100000000" required min="0" />
       </div>
 
       <div class="form-group mb-3">
-        <label for="salary" class="form-label">연봉 (만원 단위)<span class="required">*</span></label>
-        <input type="number" id="salary" class="form-control" v-model.number="salary" placeholder="예: 3000" required min="0" />
+        <label for="salary" class="form-label">연봉 (원)<span class="required">*</span></label>
+        <input type="number" id="salary" class="form-control" v-model.number="salary" placeholder="예: 34000000" required min="0" />
       </div>
 
       <div class="form-group mb-3">
-        <label for="average_monthly_spend" class="form-label">평균 월 지출 (만원 단위)<span class="required">*</span></label>
-        <input type="number" id="average_monthly_spend" class="form-control" v-model.number="average_monthly_spend" placeholder="예: 100" required min="0" />
+        <label for="average_monthly_spend" class="form-label">평균 월 지출 (원)<span class="required">*</span></label>
+        <input type="number" id="average_monthly_spend" class="form-control" v-model.number="average_monthly_spend" placeholder="예: 880000" required min="0" />
       </div>
 
       <div class="form-group mb-4">
