@@ -98,11 +98,31 @@ export const useAccountStore = defineStore('account', () => {
           'Content-Type': 'multipart/form-data'
         }
       })
-      user.value = response.data
-      console.log('Pinia Updated:', user.value)
+
+      console.log('온보딩 정보 저장 완료:', response.data)
+      await getProfile()
+
+      return response.data
     } catch (error) {
-      console.error('프로필 수정 실패:', error)
+      console.error('온보딩 저장 실패:', error)
       throw error
+    }
+  }
+
+  const followUser = async (targetId) => {
+    try {
+      const res = await axios({
+        method: 'post',
+        url: `${API_URL}/accounts/${targetId}/follow/`,
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      })
+      return res.data
+    } catch (err) {
+      console.error('팔로우 요청 실패:', err)
+      alert('팔로우 요청 중 오류가 발생했습니다.')
+      throw err
     }
   }
 
@@ -116,6 +136,7 @@ export const useAccountStore = defineStore('account', () => {
     getProfile,
     isAuthenticated,
     updateProfile,
+    followUser,
    }
 }, {
   persist: {

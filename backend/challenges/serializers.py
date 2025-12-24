@@ -150,6 +150,7 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
                 profile_image_url = owner.profile_image.url
 
         return {
+            "id": owner.id,
             "nickname": owner.nickname,
             "profile_image": profile_image_url,
             "follower_count": follower_count,
