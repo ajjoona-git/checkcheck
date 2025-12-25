@@ -61,7 +61,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/accounts'
 
 import UserProfileSection from '@/components/user/UserProfileSection.vue'
@@ -71,25 +72,44 @@ import RateChart from '@/components/product/RateChart.vue'
 import MoathonCard from '@/components/moathon/MoathonCard.vue'
 
 const store = useAccountStore()
+const route = useRoute()
+const router = useRouter()
+
 const user = computed(() => store.user)
 const loading = ref(true)
 const isEditing = ref(false)
+
+watch(
+  () => route.query.edit,
+  (newVal) => {
+    isEditing.value = newVal === 'true'
+  },
+  { immediate: true }
+)
+
 onMounted(async () => {
   try {
+    loading.value = true
     await store.getProfile()
   } catch (err) {
-    console.error(err)
+    console.error('내 정보 로딩 실패:', err)
   } finally {
     loading.value = false
   }
 })
 
 const toggleEdit = () => {
-  isEditing.value = !isEditing.value
+  const nextState = !isEditing.value
+  isEditing.value = nextState
+  router.replace({ 
+    query: { ...route.query, edit: nextState ? 'true' : undefined } 
+  })
 }
 
 const onUpdateSuccess = async () => {
   isEditing.value = false
+  router.replace({ query: { ...route.query, edit: undefined } })
+  await store.getProfile()
 }
 </script>
 
