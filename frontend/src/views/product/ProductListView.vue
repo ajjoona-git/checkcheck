@@ -1,87 +1,95 @@
 <template>
-  <div class="product-list-container">
-    <div class="header">
-      <h1>금융 상품 찾기</h1>
-      <p>나에게 딱 맞는 예/적금 상품을 찾아보세요.</p>
-    </div>
+  <div class="page-wrapper">
+    <div class="container py-5 fade-in">
+      
+      <header class="page-header text-center mb-5">
+        <h1 class="header-title">예·적금 조회</h1>
+        <p class="header-subtitle">
+          나에게 딱 맞는 <span class="highlight">금융 상품</span>을 찾아보세요.
+        </p>
+      </header>
 
-    <div class="text-end mb-2">
-      <button 
-        @click="refreshData" 
-        class="btn btn-sm btn-outline-secondary"
-        :disabled="store.isLoading"
-      >
-        <i class="bi bi-arrow-clockwise"></i> 최신 데이터로 새로고침
-      </button>
-    </div>
+      <div class="control-bar d-flex flex-column flex-lg-row justify-content-between align-items-center mb-4 gap-3">
+        
+        <ul class="nav nav-pills custom-pills">
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: filters.type === 'ALL' }" @click.prevent="filters.type = 'ALL'" href="#">전체</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: filters.type === 'DEPOSIT' }" @click.prevent="filters.type = 'DEPOSIT'" href="#">정기예금</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: filters.type === 'SAVING' }" @click.prevent="filters.type = 'SAVING'" href="#">정기적금</a>
+          </li>
+        </ul>
 
-    <div class="tabs-wrapper mb-4">
-      <ul class="nav nav-pills justify-content-center">
-        <li class="nav-item">
-          <a class="nav-link" :class="{ active: filters.type === 'ALL' }" @click.prevent="filters.type = 'ALL'" href="#">전체</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" :class="{ active: filters.type === 'DEPOSIT' }" @click.prevent="filters.type = 'DEPOSIT'" href="#">정기예금</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" :class="{ active: filters.type === 'SAVING' }" @click.prevent="filters.type = 'SAVING'" href="#">정기적금</a>
-        </li>
-      </ul>
-    </div>
+        <div class="d-flex align-items-center gap-2 filter-group">
+          
+          <select v-model="filters.bank" class="form-select custom-select compact">
+            <option value="">전체 은행</option>
+            <option v-for="bank in store.banks" :key="bank" :value="bank">
+              {{ bank }}
+            </option>
+          </select>
 
-    <div class="filter-bar">
-      <select v-model="filters.bank" class="form-select bank-select">
-        <option value="">전체 은행</option>
-        <option v-for="bank in store.banks" :key="bank" :value="bank">
-          {{ bank }}
-        </option>
-      </select>
+          <select v-model="filters.period" class="form-select custom-select compact">
+            <option value="">전체 기간</option>
+            <option value="6">6개월</option>
+            <option value="12">12개월</option>
+            <option value="24">24개월</option>
+            <option value="36">36개월</option>
+          </select>
 
-      <select v-model="filters.period" class="form-select period-select">
-        <option value="">전체 기간</option>
-        <option value="6">6개월</option>
-        <option value="12">12개월</option>
-        <option value="24">24개월</option>
-        <option value="36">36개월</option>
-      </select>
-    </div>
-
-    <div v-if="store.isLoading" class="loading-state">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2">모든 상품 정보를 불러오는 중입니다...</p>
-    </div>
-
-    <div v-else>
-      <div class="header-info mb-3">
-        <span class="badge bg-secondary">{{ filteredProducts.length }}개의 상품</span>
-        <span v-if="filters.period" class="ms-2 text-primary small">
-          * {{ filters.period }}개월 금리 기준 정렬됨
-        </span>
-        <span v-else class="ms-2 text-primary small">
-          * 최고 우대 금리 기준 정렬됨
-        </span>
+          <button 
+            @click="refreshData" 
+            class="btn btn-refresh compact"
+            :disabled="store.isLoading"
+            title="최신 데이터 불러오기"
+          >
+            <i class="bi bi-arrow-clockwise" :class="{ 'spin-icon': store.isLoading }"></i> 
+          </button>
+        </div>
       </div>
 
-      <div v-if="filteredProducts.length > 0">
-        <div class="product-grid">
-          <ProductCard
-            v-for="product in paginatedProducts" 
-            :key="product.id" 
-            :product="product"
-            @click="goDetail(product.id)"
-          />
+      <div v-if="store.isLoading" class="loading-state">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3 text-muted fw-medium">최신 금리 정보를 불러오는 중입니다...</p>
+      </div>
+
+      <div v-else>
+        <div class="d-flex justify-content-end mb-3 px-1">
+          <span class="sort-info text-muted small">
+            총 <b class="text-dark">{{ filteredProducts.length }}</b>개 · 
+            {{ filters.period ? `${filters.period}개월 금리순` : '최고 우대금리순' }}
+          </span>
         </div>
 
-        <Pagination
-          :current-page="currentPage"
-          :total-count="filteredProducts.length"
-          :items-per-page="itemsPerPage"
-          @change-page="handlePageChange"
-        />
-      </div>
+        <div v-if="filteredProducts.length > 0">
+          <div class="product-grid">
+            <ProductCard
+              v-for="product in paginatedProducts" 
+              :key="product.id" 
+              :product="product"
+              @click="goDetail(product.id)"
+            />
+          </div>
 
-      <div v-else class="empty-state">
-        <p>조건에 맞는 상품이 없습니다.</p>
+          <div class="mt-5 d-flex justify-content-center">
+            <Pagination
+              :current-page="currentPage"
+              :total-count="filteredProducts.length"
+              :items-per-page="itemsPerPage"
+              @change-page="handlePageChange"
+            />
+          </div>
+        </div>
+
+        <div v-else class="empty-state">
+          <p>조건에 맞는 상품을 찾지 못했습니다.</p>
+          <button class="btn btn-outline-primary btn-sm mt-2 rounded-pill px-3" @click="filters.bank = ''; filters.period = ''">
+            필터 초기화
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -98,45 +106,35 @@ const store = useProductStore()
 const router = useRouter()
 
 const filters = reactive({
-  type: 'ALL',      // ALL, DEPOSIT, SAVING
-  bank: '',         // 은행명
-  period: ''        // 저장 기간 (문자열 '6', '12' 등)
+  type: 'ALL',
+  bank: '',
+  period: '' 
 })
 
 const currentPage = ref(1)
 const itemsPerPage = 12
 
-// [캐싱 설정] 
 const CACHE_KEY = 'moathon_products_data'
-const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24시간 (하루)
+const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000
 
 const filteredProducts = computed(() => {
-  // store.products가 없으면 빈 배열 반환 (에러 방지)
   if (!store.products) return []
   
   let results = store.products
-
-  // 1. 탭 필터
   if (filters.type !== 'ALL') {
     results = results.filter(p => p.product_type === filters.type)
   }
-
-  // 2. 은행 필터
   if (filters.bank) {
     results = results.filter(p => p.bank_name === filters.bank)
   }
-
-  // 3. 기간 필터
   if (filters.period) {
     results = results.filter(p => 
       p.options.some(opt => opt.save_trm === filters.period)
     )
   }
 
-  // 4. 정렬
   return [...results].sort((a, b) => {
     let rateA, rateB
-
     if (filters.period) {
       const optA = a.options.find(o => o.save_trm === filters.period)
       const optB = b.options.find(o => o.save_trm === filters.period)
@@ -146,7 +144,6 @@ const filteredProducts = computed(() => {
       rateA = a.max_rate
       rateB = b.max_rate
     }
-    
     return rateB - rateA
   })
 })
@@ -168,25 +165,17 @@ const handlePageChange = (page) => {
 
 const goDetail = (id) => {
   router.push({ name: 'productDetail', params: { id } })
+  window.scrollTo(0, 0)
 }
 
-// [핵심 로직] 데이터 로드 함수 (캐시 우선)
 const loadData = async (forceRefresh = false) => {
-  // 1. 로컬 스토리지 확인
   const cachedData = localStorage.getItem(CACHE_KEY)
   const now = new Date().getTime()
 
-  // 2. 캐시가 있고, 강제 새로고침이 아니며, 유효 기간 내인 경우
   if (!forceRefresh && cachedData) {
     const parsed = JSON.parse(cachedData)
-    
-    // 유효기간 체크 (현재 시간 - 저장 시간 < 설정 시간)
     if (now - parsed.timestamp < CACHE_EXPIRY_MS) {
-      console.log('LocalStorage에서 상품 데이터를 불러왔습니다.')
-      
-      // Pinia Store에 직접 데이터 주입
-      // (Store에 setProducts 같은 액션이 없다면 직접 할당 가능하지만, 
-      // Pinia는 $patch나 직접 할당 모두 반응성을 지원합니다)
+      console.log('LocalStorage에서 데이터 로드')
       store.products = parsed.products
       store.banks = parsed.banks
       store.isLoading = false
@@ -194,12 +183,10 @@ const loadData = async (forceRefresh = false) => {
     }
   }
 
-  // 3. 캐시가 없거나 만료되었으면 API 호출
-  console.log('서버에서 최신 상품 데이터를 불러옵니다...')
+  console.log('API 데이터 요청')
   await store.getProducts()
   await store.getBanks()
 
-  // 4. 받아온 데이터를 로컬 스토리지에 저장
   const dataToSave = {
     timestamp: now,
     products: store.products,
@@ -208,7 +195,6 @@ const loadData = async (forceRefresh = false) => {
   localStorage.setItem(CACHE_KEY, JSON.stringify(dataToSave))
 }
 
-// 강제 새로고침 버튼용
 const refreshData = () => {
   if (confirm('최신 금리 정보를 다시 불러오시겠습니까?')) {
     loadData(true)
@@ -221,52 +207,134 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.product-list-container { max-width: 1200px; margin: 0 auto; padding: 40px 16px; }
-.header { text-align: center; margin-bottom: 30px; }
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
+}
+
+/* 1. Header (커뮤니티 페이지 스타일 통일) */
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  /* 그라데이션 텍스트 */
+  background: linear-gradient(135deg, var(--moathon-green) 0%, var(--moathon-deep) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.highlight {
+  color: var(--moathon-green);
+  font-weight: 800;
+}
 
 /* 탭 스타일 */
-.nav-pills .nav-link {
-  color: #666;
-  border-radius: 20px;
-  padding: 8px 24px;
-  margin: 0 4px;
-  font-weight: 600;
-}
-.nav-pills .nav-link.active {
-  background-color: #2c3e50;
-  color: #fff;
+.custom-pills {
+  background: white;
+  padding: 4px;
+  border-radius: 50px;
+  display: inline-flex;
 }
 
-/* 필터 바 */
-.filter-bar {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 20px;
+.custom-pills .nav-link {
+  color: var(--text-secondary);
+  border-radius: 50px;
+  padding: 6px 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
-.form-select {
-  width: auto;
+
+.custom-pills .nav-link.active {
+  background-color: var(--moathon-green);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* 필터 그룹 */
+.custom-select.compact {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 6px 32px 6px 12px; /* 오른쪽 패딩은 화살표 공간 */
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
   min-width: 120px;
-  border-radius: 8px;
-  border-color: #ddd;
+  height: 38px;
+  background-position: right 10px center;
+}
+.custom-select:focus {
+  border-color: var(--moathon-green);
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
 }
 
+/* 새로고침 버튼 (아이콘만 작게) */
+.btn-refresh.compact {
+  border: 1px solid #e0e0e0;
+  background: white;
+  color: var(--text-secondary);
+  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+.btn-refresh:hover:not(:disabled) {
+  background: #f8f9fa;
+  color: var(--moathon-green);
+  border-color: var(--moathon-green);
+}
+
+.spin-icon { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* 그리드 */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+  gap: 24px;
 }
 
+/* 상태 표시 */
 .loading-state, .empty-state {
   text-align: center;
-  padding: 80px 0;
-  color: #888;
+  padding: 100px 0;
+  color: var(--text-secondary);
+}
+.empty-state {
+  background: white;
+  border-radius: 24px;
+  border: 2px dashed #e0e0e0;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.header-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+@media (max-width: 991px) {
+  .control-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-group {
+    justify-content: space-between;
+  }
+  .custom-select.compact {
+    flex: 1;
+  }
 }
 </style>

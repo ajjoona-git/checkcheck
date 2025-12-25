@@ -29,7 +29,7 @@
       
       <div class="opt-action">
         <button @click="$emit('select-option', option.id)" class="create-btn">
-          이 옵션으로 시작하기
+          이 옵션으로 시작하기 <i class="bi bi-arrow-right-circle ms-2"></i>
         </button>
       </div>
     </div>
@@ -52,7 +52,7 @@ defineEmits(['select-option'])
 .options-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .option-card {
@@ -60,8 +60,8 @@ defineEmits(['select-option'])
   justify-content: space-between;
   align-items: center;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 24px 32px;
   background: white;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
@@ -88,9 +88,9 @@ defineEmits(['select-option'])
 }
 
 .badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -126,7 +126,7 @@ defineEmits(['select-option'])
 .rate-item .value {
   font-size: 1.1rem;
   font-weight: 700;
-  font-family: 'Roboto', sans-serif; /* 숫자 가독성 */
+  font-family: 'Roboto', sans-serif;
 }
 
 .value.basic {
@@ -150,11 +150,13 @@ defineEmits(['select-option'])
   color: white;
   border: none;
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .create-btn:hover {
@@ -167,6 +169,7 @@ defineEmits(['select-option'])
     flex-direction: column;
     align-items: stretch;
     gap: 20px;
+    padding: 24px;
   }
   
   .opt-action {
@@ -176,6 +179,7 @@ defineEmits(['select-option'])
   
   .create-btn {
     width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

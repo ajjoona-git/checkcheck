@@ -62,7 +62,6 @@
 
         <div v-else class="hero-banner text-center py-5 rounded-4 bg-primary-subtle border border-primary-subtle">
           <div class="py-2">
-            <span class="badge bg-primary mb-3 px-3 py-2 rounded-pill">Start Now</span>
             <h1 class="display-6 fw-bold text-dark mb-3">목돈 만들기, 시작이 반입니다!</h1>
             <p class="text-secondary mb-4">
               나에게 딱 맞는 예적금 상품을 추천받고<br>
@@ -115,7 +114,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/accounts'
 import { useMoathonStore } from '@/stores/moathon'
 import MoathonCard from '@/components/moathon/MoathonCard.vue'
@@ -221,28 +220,157 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 </script>
 
 <style scoped>
+/* 전체 레이아웃 배경 */
 .home-wrapper {
-  background-color: #fcfcfc;
-  min-height: 100vh;
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
+  padding-bottom: 60px;
 }
 
-/* [SECTION 1] 대시보드 스타일 */
+/* [SECTION 1] 대시보드 카드 스타일 (Bento Grid 스타일) */
 .dashboard-card {
-  transition: transform 0.2s ease-in-out;
+  background-color: white;
+  border-radius: 32px !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+  padding: 40px !important;
+  transition: transform 0.3s ease;
 }
 
-/* [SECTION 1] 히어로 배너 스타일 */
+.dashboard-card h2 {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.dashboard-card h5 {
+  color: var(--moathon-green);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* 드롭다운 스타일 커스텀 */
+.form-select {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding-left: 16px;
+}
+.form-select:focus {
+  border-color: var(--moathon-green);
+  box-shadow: 0 0 0 0.25rem rgba(27, 94, 32, 0.1);
+}
+
+/* 추가 버튼 스타일 */
+.btn-outline-primary {
+  border-color: var(--moathon-green);
+  color: var(--moathon-green);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.btn-outline-primary:hover {
+  background-color: var(--moathon-green);
+  color: white;
+}
+
+/* [SECTION 1] 히어로 배너 (진행 중인 모아톤 없을 때) */
 .hero-banner {
-  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%) !important;
+  border: 1px solid rgba(27, 94, 32, 0.1) !important;
+  border-radius: 32px !important;
+  box-shadow: 0 20px 40px rgba(27, 94, 32, 0.05);
+  padding: 80px 20px !important;
 }
 
-/* [SECTION 2] 빈 상태(Empty State) 스타일 */
-.border-dashed {
-  border-style: dashed !important;
-  border-color: #cbd5e1 !important;
+.hero-banner h1 {
+  color: var(--text-primary) !important;
+  font-weight: 800;
+  margin-bottom: 16px;
 }
 
+.hero-banner p {
+  color: var(--text-secondary) !important;
+  font-size: 1.1rem;
+  margin-bottom: 32px;
+}
+
+.hero-banner .badge {
+  background-color: var(--moathon-green) !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 메인 CTA 버튼 (내 맞춤 모아톤 만들기) */
+.hero-banner .btn-primary {
+  background-color: var(--moathon-green) !important;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 20px rgba(27, 94, 32, 0.2) !important;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hero-banner .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(27, 94, 32, 0.3) !important;
+  background-color: #144a18 !important; 
+}
+
+/* [SECTION 2] 친구들의 소식 섹션 */
+.social-section h3 {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.social-section .badge {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-secondary) !important;
+  font-weight: 600;
+}
+
+/* 빈 상태(Empty State) 스타일 */
 .empty-social-state {
-  background-color: #f8fafc;
+  background-color: white !important;
+  border: 2px dashed #e0e0e0 !important;
+  border-radius: 24px !important;
+  padding: 60px 20px !important;
+}
+
+.empty-social-state h5 {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-social-state .btn-outline-dark {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.empty-social-state .btn-outline-dark:hover {
+  background-color: var(--text-primary);
+  color: white;
+}
+
+/* 스피너 색상 강제 지정 */
+.spinner-border.text-primary {
+  color: var(--moathon-green) !important;
+}
+
+/* 반응형 패딩 조정 */
+@media (max-width: 768px) {
+  .dashboard-card {
+    padding: 24px !important;
+    border-radius: 24px !important;
+  }
+  
+  .hero-banner {
+    padding: 40px 20px !important;
+  }
+  
+  .hero-banner h1 {
+    font-size: 1.8rem;
+  }
 }
 </style>

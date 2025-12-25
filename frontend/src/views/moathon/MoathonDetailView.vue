@@ -1,92 +1,120 @@
 <template>
-  <div class="container py-5" v-if="!isLoading && moathon">
+  <div class="page-wrapper" v-if="!isLoading && moathon && moathon.user_info">
+    <div class="container py-5 fade-in">
 
-    <header class="detail-header mb-5">
-      <div class="d-flex justify-content-between align-items-end border-bottom pb-3">
-        <div class="title-section">
-          <span class="badge-purpose mb-2">{{ formatPurpose(moathon.purpose) }}</span>
-          <h1 class="moathon-title fw-bold">{{ moathon.title }}</h1>
+      <header class="detail-header mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 border-bottom pb-4">
+          <div class="title-section">
+            <h1 class="moathon-title fw-bold m-0">
+              {{ moathon.title }}
+              <span class="badge-purpose ms-2">{{ formatPurpose(moathon.purpose) }}</span>
+            </h1>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <div class="owner-actions d-flex gap-2" v-if="isOwner">
+              <button @click="handleEdit" class="btn btn-icon btn-outline-secondary" title="수정">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button @click="handleDelete" class="btn btn-icon btn-outline-danger" title="삭제">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="owner-actions" v-if="isOwner">
-          <button @click="handleEdit" class="btn btn-outline-secondary btn-sm me-2">수정</button>
-          <button @click="handleDelete" class="btn btn-outline-danger btn-sm">삭제</button>
+      </header>
+
+      <div class="row g-4 mb-5">
+
+        <div class="col-lg-8">
+          <div class="info-card main-info-card h-100 p-4 p-md-5">
+
+            <div class="track-section mb-5">
+              <div class="track-wrapper">
+                <MoathonTrack :percent="currentProgress" :profile-image="userProfileImage" />
+              </div>
+              <p class="text-center mt-3 text-secondary small">
+                목표까지 <span class="text-dark fw-bold">{{ dDayText }}</span> 남았습니다!
+              </p>
+            </div>
+
+            <hr class="my-5 border-secondary opacity-10">
+
+            <div class="stats-grid">
+              <div class="stat-text">
+                <span class="label">목표 금액</span>
+                <span class="value">{{ Number(moathon.target_amount).toLocaleString() }}원</span>
+              </div>
+
+              <div class="stat-text">
+                <span class="label">개최일</span>
+                <span class="value">{{ moathon.start_date }}</span>
+              </div>
+
+              <div class="stat-text">
+                <span class="label">종료일</span>
+                <span class="value">{{ moathon.end_date }}</span>
+              </div>
+
+              <div class="product-embedded">
+                <h5 class="section-label mb-3">사용 중인 상품</h5>
+                <ProductCard :product="mappedProduct" @click="goProductDetail" />
+              </div>
+            </div>
+
+
+          </div>
         </div>
-      </div>
-    </header>
 
-    <div class="row g-5">
-      <div class="col-lg-8">
-        <section class="track-section mb-5 p-4">
-          <div class="track-wrapper">
-            <MoathonTrack :percent="currentProgress" :profile-image="userProfileImage" />
-          </div>
-        </section>
+        <div class="col-lg-4">
+          <div class="info-card profile-card h-100 d-flex flex-column">
+            <div class="d-flex flex-column align-items-center text-center my-5">
+              <div class="profile-img-container mb-3">
+                <img :src="getImageUrl(moathon.user_info.profile_image)" class="profile-img-lg" alt="프로필" />
+              </div>
+              <h4 class="nickname">{{ moathon.user_info.nickname }}</h4>
 
-        <section class="info-stats-grid mb-5">
-          <div class="stat-card">
-            <span class="label">목표 금액</span>
-            <span class="value text-primary">{{ Number(moathon.target_amount).toLocaleString() }}원</span>
-          </div>
-          <div class="stat-card">
-            <span class="label">기간</span>
-            <span class="value">{{ moathon.start_date }} ~ {{ moathon.end_date }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="label">D-Day</span>
-            <span class="value">{{ dDay }}</span>
-          </div>
-        </section>
-
-        <section class="product-section mb-5" v-if="mappedProduct">
-          <h5 class="fw-bold mb-3">사용 중인 금융 상품</h5>
-          <ProductCard :product="mappedProduct" @click="goProductDetail" />
-        </section>
-
-        <section class="action-section mb-5">
-          <button class="btn-like-large" :class="{ active: moathon.likes.is_liked }" @click="handleLike">
-            <span class="heart-icon">{{ moathon.likes.is_liked ? '❤️' : '🤍' }}</span>
-            <span class="like-text ms-2">
-              {{ moathon.likes.is_liked ? '이미 응원하셨습니다!' : '이 모아톤 응원하기' }}
-            </span>
-            <span class="like-badge ms-2">{{ moathon.likes.count || 0 }}</span>
-          </button>
-        </section>
-
-        <hr class="d-lg-none my-5">
-      </div>
-
-      <div class="col-lg-4">
-        <div class="sticky-top" style="top: 2rem; z-index: 10;">
-          <div class="user-profile-card shadow-sm border">
-            <div class="profile-header d-flex flex-column align-items-center text-center pb-4 border-bottom">
-              <img :src="getImageUrl(moathon.user_info.profile_image)" class="profile-img-lg mb-3" alt="프로필" />
-              <h4 class="nickname fw-bold mb-1">{{ moathon.user_info.nickname }}</h4>
-
-              <div class="mt-3">
-                <span v-if="isOwner" class="badge bg-secondary rounded-pill px-3 py-2">나의 모아톤</span>
-                <button v-else @click="handleFollow" :class="['btn-follow', { 'following': isFollowing }]">
+              <div class="mt-2 mb-3">
+                <span v-if="isOwner" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">나의
+                  모아톤</span>
+                <button v-else @click="handleFollow" :class="['btn-follow btn-sm', { 'following': isFollowing }]">
                   {{ isFollowing ? '팔로잉' : '팔로우' }}
                 </button>
               </div>
 
-              <div class="user-metrics mt-3 d-flex gap-3 text-secondary small">
-                <span>팔로워 <b class="text-dark">{{ moathon.user_info.follower_count }}</b></span>
-                <span>팔로잉 <b class="text-dark">{{ moathon.user_info.following_count }}</b></span>
+              <div class="user-metrics d-flex justify-content-center gap-3 small w-100 pt-2">
+                <div>
+                  <span class="text-secondary d-block mb-1">팔로워</span>
+                  <span class="fw-bold text-primary">{{ moathon.user_info.follower_count }}</span>
+                </div>
+                <div class="vertical-divider"></div>
+                <div>
+                  <span class="text-secondary d-block mb-1">팔로잉</span>
+                  <span class="fw-bold text-dark">{{ moathon.user_info.following_count }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="badges-section pt-4">
-              <h6 class="fw-bold text-start mb-3 ms-2">획득한 뱃지</h6>
-              <BadgeLibrary v-if="moathon.user_info.owner_badges" :badges="moathon.user_info.owner_badges" />
-              <p v-else class="text-muted small text-center py-3">아직 획득한 뱃지가 없습니다.</p>
+            <hr class="w-100 my-2 opacity-10 my-4">
+
+            <div class="badges-section flex-grow-1">
+              <h4 class="fw-bold">획득한 뱃지</h4>
+              <div v-if="moathon.user_info.owner_badges">
+                <BadgeLibrary :badges="moathon.user_info.owner_badges"
+                  class="sidebar-badge-lib shadow-none border-0 p-0" />
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-12">
+          <CommentSection :moathon-id="moathon.id" :comments="comments" :likes="moathon.likes" :on-like="handleLike" />
+        </div>
+      </div>
+
     </div>
-
-    <CommentSection :moathon-id="moathon.id" :comments="comments" />
-
   </div>
 
   <div v-else-if="isLoading" class="loading-container d-flex justify-content-center align-items-center vh-100">
@@ -96,14 +124,14 @@
   </div>
 
   <div v-else class="error-container d-flex flex-column justify-content-center align-items-center vh-100">
-    <h3 class="text-muted mb-3">모아톤 정보를 불러올 수 없습니다.</h3>
-    <p class="text-secondary mb-4">존재하지 않거나 삭제된 페이지일 수 있습니다.</p>
-    <button @click="router.push({ name: 'home' })" class="btn btn-primary px-4">홈으로 돌아가기</button>
+    <i class="bi bi-exclamation-circle fs-1 text-muted mb-3"></i>
+    <h3 class="text-muted mb-2">모아톤 정보를 불러올 수 없습니다.</h3>
+    <button @click="router.push({ name: 'home' })" class="btn btn-primary px-4 rounded-pill mt-3">홈으로 돌아가기</button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMoathonStore } from '@/stores/moathon'
 import { useAccountStore } from '@/stores/accounts'
@@ -119,14 +147,50 @@ const store = useMoathonStore()
 const accountStore = useAccountStore()
 const API_URL = import.meta.env.VITE_API_URL
 
+const isLoading = ref(true)
+const currentProgress = ref(0)
+
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
-const currentProgress = ref(0)
-const isLoading = ref(true)
-
 const isOwner = computed(() => moathon.value?.user_info?.nickname === accountStore.user?.nickname)
 const isFollowing = computed(() => moathon.value?.user_info?.is_following)
 
+const fetchData = async (id) => {
+  if (!id) return
+
+  isLoading.value = true
+  store.clearMoathonDetail()
+
+  try {
+    await store.fetchMoathonDetail(id)
+  } catch (error) {
+    console.error("Detail Load Error:", error)
+    if (error.response?.status === 401) {
+      alert("로그인이 필요한 서비스입니다.")
+      router.push({ name: 'login' })
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData(route.params.id)
+})
+
+watch(() => route.params.id, (newId) => {
+  fetchData(newId)
+})
+
+watch(moathon, (newData) => {
+  if (newData?.progress_rate) {
+    currentProgress.value = newData.progress_rate
+  }
+})
+
+onUnmounted(() => store.clearMoathonDetail())
+
+// --- Helpers & Computed ---
 const getImageUrl = (path) => {
   if (!path) return defaultProfile
   if (path.startsWith('http')) return path
@@ -140,29 +204,6 @@ const userProfileImage = computed(() => {
   return defaultProfile;
 });
 
-const handleLike = async () => {
-  if (!accountStore.isAuthenticated) {
-    if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
-      router.push({ name: 'login' })
-    }
-    return
-  }
-  await store.likeMoathon(route.params.id)
-}
-
-const handleFollow = async () => {
-  if (!accountStore.isAuthenticated) {
-    if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) router.push({ name: 'login' })
-    return
-  }
-  if (!moathon.value?.user_info) return;
-  const result = await accountStore.followUser(moathon.value.user_info.id)
-  if (result) {
-    await store.fetchMoathonDetail(moathon.value.id)
-    await accountStore.getProfile()
-  }
-}
-
 const mappedProduct = computed(() => {
   if (!moathon.value?.product_option) return null
   const opt = moathon.value.product_option
@@ -175,18 +216,47 @@ const mappedProduct = computed(() => {
   }
 })
 
-// --- Utils ---
 const dDay = computed(() => {
   if (!moathon.value) return ''
   const end = new Date(moathon.value.end_date)
   const today = new Date()
-  const diffDays = Math.ceil((end - today) / (1000 * 60 * 60 * 24))
+  today.setHours(0, 0, 0, 0)
+  const diffTime = end.getTime() - today.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
   return diffDays >= 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`
+})
+
+const dDayText = computed(() => {
+  return dDay.value.replace('D', 'D-').replace('--', '+')
 })
 
 const formatPurpose = (code) => {
   const map = { 'GOAL': '목돈 만들기', 'SHORT': '단기 여유자금', 'SAFE': '안정적 자산 보관', 'YIELD': '이자 극대화', 'HABIT': '저축 습관 형성' }
   return map[code] || code
+}
+
+// --- Actions ---
+const handleLike = async () => {
+  if (!accountStore.isAuthenticated) {
+    if (confirm('로그인이 필요한 서비스입니다.')) router.push({ name: 'login' })
+    return
+  }
+  await store.likeMoathon(route.params.id)
+}
+
+const handleFollow = async () => {
+  if (!accountStore.isAuthenticated) {
+    if (confirm('로그인이 필요한 서비스입니다.')) router.push({ name: 'login' })
+    return
+  }
+  if (!moathon.value?.user_info) return;
+  const result = await accountStore.followUser(moathon.value.user_info.id)
+  if (result) {
+    // 팔로우 후 데이터 갱신 (화면 깜빡임 방지 위해 로딩 없이 갱신)
+    await store.fetchMoathonDetail(moathon.value.id)
+    await accountStore.getProfile()
+  }
 }
 
 const goProductDetail = () => {
@@ -201,170 +271,216 @@ const handleDelete = async () => {
     router.push({ name: 'home' })
   }
 }
-
-// --- Watchers ---
-watch(() => route.params.id, async (newId) => {
-  if (newId) {
-    isLoading.value = true // 로딩 시작
-    store.clearMoathonDetail()
-
-    try {
-      await store.fetchMoathonDetail(newId)
-      isLoading.value = false
-    } catch (error) {
-      const status = error.response?.status
-
-      // CASE 1: 비로그인 유저 접근 (401 Unauthorized)
-      if (status === 401) {
-        alert("로그인이 필요한 서비스입니다.")
-        router.push({ name: 'login' })
-        return // 로딩 상태를 끄지 않고 페이지 이동
-      } else {
-        // [CASE 2] 기타 에러 (404 등) -> 에러 화면 표시
-        console.error("Detail Load Error:", error)
-        isLoading.value = false
-      }
-    }
-  }
-}, { immediate: true })
-
-watch(moathon, (newData) => {
-  if (newData?.progress_rate) currentProgress.value = newData.progress_rate
-}, { immediate: true })
-
-onUnmounted(() => store.clearMoathonDetail())
 </script>
 
 <style scoped>
-.badge-purpose {
-  background-color: #e3f2fd;
-  color: #0d6efd;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 700;
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-header {
+  position: relative;
 }
 
 .moathon-title {
-  color: #333;
-  margin-top: 0.5rem;
+  color: var(--text-primary);
+  font-size: 2.2rem;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
-.info-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.badge-purpose {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: #e8f5e9;
+  color: var(--moathon-green);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 99px;
+  transform: translateY(-2px);
 }
 
-.stat-card {
-  background: #fff;
+.btn-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: white;
   border: 1px solid #eee;
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
+}
+
+.btn-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.info-card {
+  background: white;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease;
+}
+
+.track-section {
+  position: relative;
+}
+
+/* 통계 및 상품 그리드 레이아웃 제어 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* 통계 텍스트 박스 스타일링 */
+.stat-text {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-}
-
-.stat-card .label {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: 600;
-}
-
-.stat-card .value {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #333;
-}
-
-.btn-like-large {
-  width: 100%;
-  padding: 18px;
-  background: white;
-  border: 2px solid #eee;
-  border-radius: 16px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: 24px;
+  text-align: center;
 }
 
-.btn-like-large:hover {
-  background: #f8f9fa;
-  border-color: #ddd;
-}
-
-.btn-like-large.active {
-  background: #fff0f3;
-  border-color: #ffc9db;
-  color: #e0245e;
-}
-
-.like-badge {
-  background: #f1f3f5;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-weight: bold;
+.stat-text .label {
   font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-.btn-like-large.active .like-badge {
-  background: #ffe3e8;
-  color: #e0245e;
+.stat-text .value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: keep-all;
 }
 
-.user-profile-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 30px 20px;
+/* 상품 카드는 하단에 꽉 차게 배치 */
+.product-embedded {
+  grid-column: span 3;
+  background-color: white;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.section-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding-left: 24px;
+}
+
+.profile-card {
+  padding: 40px 24px;
+}
+
+.profile-img-container {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  padding: 4px;
+  border: 2px solid #f1f3f5;
+  margin: 0 auto;
 }
 
 .profile-img-lg {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #f8f9fa;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.nickname {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* 팔로우 버튼 */
 .btn-follow {
   padding: 8px 24px;
   border-radius: 50px;
   border: none;
-  font-weight: bold;
-  background: #0d6efd;
+  font-weight: 700;
+  background: var(--moathon-green);
   color: white;
   transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
 }
 
 .btn-follow:hover {
-  background: #0b5ed7;
+  background: #144a18;
+  transform: translateY(-2px);
 }
 
 .btn-follow.following {
-  background: #e9ecef;
-  color: #495057;
-  border: 1px solid #ced4da;
+  background: #f1f3f5;
+  color: var(--text-secondary);
+  box-shadow: none;
+  border: 1px solid #e0e0e0;
 }
 
-.btn-follow.following:hover {
-  color: #dc3545;
-  background: #ffeea1;
-  border-color: #ffeea1;
+.user-metrics .fw-bold {
+  font-size: 1.1rem;
+}
+
+.vertical-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e0e0e0;
+  margin: 0 8px;
+}
+
+/* 뱃지 섹션 */
+.badges-section {
+  width: 100%;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+.badges-section h4 {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 24px;
+  padding-left: 4px;
+  font-weight: 700;
+}
+
+.loading-container, .error-container {
+  background-color: var(--bg-secondary);
+}
+
+.error-container i {
+  font-size: 3rem;
+  opacity: 0.3;
 }
 
 @media (max-width: 991px) {
-  .info-stats-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
-
-  .sticky-top {
-    position: static !important;
+  .product-embedded {
+    grid-column: span 1;
   }
 }
 </style>
