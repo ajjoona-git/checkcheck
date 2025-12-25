@@ -85,12 +85,9 @@ const getVideo = () => {
       if (item?.snippet?.publishedAt) {
         item.snippet.publishedAtFormatted = item.snippet.publishedAt.split('T')[0]
       }
-
-      console.log('상세 정보 조회 성공:', item)
       video.value = item
     })
     .catch(err => {
-      console.log(err)
       alert('영상을 불러올 수 없습니다.')
       router.back()
     })

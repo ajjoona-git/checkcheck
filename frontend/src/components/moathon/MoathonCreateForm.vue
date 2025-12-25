@@ -107,7 +107,6 @@ const submitForm = async () => {
 
     emit('submit', payload)
   } catch (err) {  // 에러 처리
-    console.error(err)
     if (err.response && err.response.status === 400) {
       alert('입력 정보를 확인해주세요.')
     } else {  // 서버 에러

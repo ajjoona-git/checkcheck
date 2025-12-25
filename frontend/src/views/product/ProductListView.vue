@@ -174,7 +174,6 @@ const loadData = async (forceRefresh = false) => {
   if (!forceRefresh && cachedData) {
     const parsed = JSON.parse(cachedData)
     if (now - parsed.timestamp < CACHE_EXPIRY_MS) {
-      console.log('LocalStorage에서 데이터 로드')
       store.products = parsed.products
       store.banks = parsed.banks
       store.isLoading = false
@@ -182,7 +181,6 @@ const loadData = async (forceRefresh = false) => {
     }
   }
 
-  console.log('API 데이터 요청')
   await store.getProducts()
   await store.getBanks()
 

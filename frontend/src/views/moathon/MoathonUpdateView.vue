@@ -65,7 +65,6 @@ onMounted(async () => {
     }
 
   } catch (err) {
-    console.error(err)
     alert('정보를 불러오지 못했습니다.')
     router.back()
   } finally {

@@ -180,7 +180,8 @@ onMounted(async () => {
     loading.value = true
     await store.getProfile()
   } catch (err) {
-    console.error(err)
+    // 프로필 로드 실패
+    throw err
   } finally {
     loading.value = false
   }

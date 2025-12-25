@@ -204,7 +204,6 @@ watch(myActiveMoathons, (newVal) => {
 // 로그인 상태 변경 감지
 watch(() => accountStore.isAuthenticated, async (newValue) => {
   if (newValue) {
-    console.log('로그인 완료 감지 -> 데이터 로드 시작')
     if (!accountStore.user) {
       await accountStore.getProfile()
     }

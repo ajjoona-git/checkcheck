@@ -176,7 +176,6 @@ const submitForm = async function () {
     }
     emit('success');
   } catch (error) {
-    console.error(error);
     alert(props.isEdit ? '수정에 실패했습니다.' : '저장에 실패했습니다.');
   }
 }

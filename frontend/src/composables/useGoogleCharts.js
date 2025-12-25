@@ -28,12 +28,12 @@ export const useGoogleCharts = () => {
 
       // 3. 최초 로딩 시작
       isLoading.value = true
-      
+
       const script = document.createElement('script')
       script.src = 'https://www.gstatic.com/charts/loader.js'
       script.async = true
       script.defer = true
-      
+
       script.onload = () => {
         if (!window.google) {
           reject(new Error('Google Charts loader failed to load'))
@@ -47,12 +47,12 @@ export const useGoogleCharts = () => {
           resolve(window.google)
         })
       }
-      
+
       script.onerror = (err) => {
         isLoading.value = false
         reject(err)
       }
-      
+
       document.head.appendChild(script)
     })
   }

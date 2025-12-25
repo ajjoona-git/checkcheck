@@ -239,7 +239,6 @@ const fetchData = async (id) => {
   try {
     await store.fetchMoathonDetail(id)
   } catch (error) {
-    console.error('Detail Load Error:', error)
     if (error.response?.status === 401) {
       alert('로그인이 필요한 서비스입니다.')
       router.push({ name: 'login' })

@@ -77,7 +77,8 @@ const fetchProduct = async (productId) => {
   try {
     await store.getProductDetail(productId)
   } catch (err) {
-    console.error('상품 정보 로딩 실패:', err)
+    // 식품 정보 로드 실패
+    throw err
   } finally {
     isLoading.value = false
   }

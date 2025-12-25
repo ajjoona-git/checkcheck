@@ -129,7 +129,7 @@ const fetchMarketPrices = async (assetType) => {
       marketData.value = response.data.data
     }
   } catch (error) {
-    console.error('시세 조회 실패:', error)
+    // 시세 조회 실패 시 에러 처리
   } finally {
     isLoading.value = false
   }
