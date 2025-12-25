@@ -23,12 +23,37 @@
       <div class="bento-grid mt-5">
         <div class="bento-item tall reveal">
           <h3>나만의 금융 파트너</h3>
-          <p>데이터 기반 추천 알고리즘</p>
-          <div class="icon-box">📊</div>
+          <p>복잡한 금리 비교 없이,<br>AI가 당신에게 딱 맞는 상품을 찾아줍니다.</p>
+          <div class="recommend-box">
+            <!-- <UserProfileSection :user="user" /> -->
+            <MoathonRecommendCard :detail="mockRecommendDetail" :warnings="mockWarnings"
+              class="landing-recommend-card" />
+          </div>
         </div>
+
         <div class="bento-item wide reveal" style="transition-delay: 0.1s;">
           <h3>함께 달리는 페이스메이커</h3>
-          <p>친구들과 함께하는 챌린지</p>
+          <p>혼자하면 포기하기 쉽지만,<br>친구들과 함께라면 끝까지 갈 수 있습니다.</p>
+          <div class="track-box">
+            <MoathonTrack :percent="75" :duration="2" :profile-image="defaultProfile" />
+            <p class="text-center mt-3 mb-0 text-muted fw-normal small">
+              목표까지 힘내세요, <b>말랑이</b>님! 🏃‍♂️
+            </p>
+          </div>
+          <!-- <div class="card-box mt-3">
+            <MoathonCard :moathon="mockMoathon" :is-highlight="true" class="landing-moathon-card" />
+          </div> -->
+        </div>
+
+        <div class="bento-item wide reveal" style="transition-delay: 0.1s;">
+          <h3>성취를 기록하는 명예의 전당</h3>
+          <p>
+            목표 달성의 순간들을 특별한 뱃지로 남겨보세요.<br>
+            하나씩 채워가는 즐거움이 꾸준한 저축의 원동력이 됩니다.
+          </p>
+          <div class="track-box">
+            <BadgeLibrary :badges="mockBadgeCollection" />
+          </div>
         </div>
       </div>
     </section>
@@ -79,7 +104,72 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import UserProfileSection from '@/components/user/UserProfileSection.vue';
+import MoathonRecommendCard from '@/components/moathon/MoathonRecommendCard.vue';
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue';
+import MoathonCard from '@/components/moathon/MoathonCard.vue';
+import BadgeLibrary from '@/components/common/BadgeLibrary.vue';
+import defaultProfile from '/default-profile.png'
+
+const mockRecommendDetail = ref({
+  bank_name: '모아톤은행',
+  product_name: '트래블 적금',
+  rsrv_type_nm: '정액적립식',
+  save_trm: '12',
+  intr_rate: 3.5,
+  intr_rate2: 4.5,
+  intr_rate_type_nm: '단리',
+  spcl_cnd: "급여이체 실적이 있는 경우 연 0.5%p 우대\nKB국민카드 결제 실적이 있는 경우 연 0.3%p 우대",
+  etc_note: "말랑이님의 '유럽여행' 목표 달성을 위해 가장 적합한 상품이에요. \n안정적인 1금융권 상품 중 가장 높은 우대금리를 제공합니다."
+})
+
+const mockWarnings = ref([
+  '최고 금리는 우대 조건 달성 시 적용됩니다.',
+  '이 예금은 예금자보호법에 따라 보호됩니다.',
+  '만기 전 해지 시 약정 이율보다 낮은 금리가 적용될 수 있습니다.'
+])
+
+const mockMoathon = ref({
+  title: '유럽 여행 자금 만들기',
+  bank: '모아톤은행',
+  nickname: '말랑이',
+  product_name: '트래블 적금',
+  progress_rate: 75,
+})
+
+const mockBadgeCollection = ref([
+  {
+    name: '저축의 시작',
+    quantity: 3,
+    url: '/src/assets/badges/badge_achieve_3days.png'
+  },
+  {
+    name: '완주 트로피',
+    quantity: 2,
+    url: '/src/assets/badges/badge_track_100.png'
+  },
+  {
+    name: "시작이 반",
+    quantity: 1,
+    url: "/src/assets/badges/badge_achieve_start.png"
+  },
+  {
+    name: "억만장자의 꿈",
+    quantity: 1,
+    url: "/src/assets/badges/badge_achieve_billionaire.png"
+  },
+  {
+    name: "응원 단장",
+    quantity: 0,
+    url: "frontend/src/assets/badges/badge_social_cheerleader.png"
+  },
+  {
+    name: "티끌 모아 태산",
+    quantity: 1,
+    url: "frontend/src/assets/badges/badge_achieve_deposit.png"
+  }
+])
 
 let observer = null
 
@@ -221,7 +311,7 @@ onUnmounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 320px;
   transition: all 0.5s ease;
   border: 1px solid rgba(0, 0, 0, 0.02);
@@ -275,6 +365,14 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 2rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.track-box {
+  padding: 40px 16px 30px;
+}
+
+.recommend-box {
+  padding: 40px 0;
 }
 
 @media (max-width: 768px) {

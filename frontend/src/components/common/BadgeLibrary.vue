@@ -1,11 +1,11 @@
 <template>
   <div class="badge-library card">
-    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-4 px-4">
       <h6 class="m-0 fw-bold">획득한 뱃지</h6>
     </div>
 
     <div class="card-body p-3">
-      <div class="row g-3" style="min-height: 280px;"> <div 
+      <div class="row g-3 pb-3"> <div 
           v-for="badge in paginatedBadges" 
           :key="badge.id" 
           class="col-4 d-flex flex-column align-items-center justify-content-start"

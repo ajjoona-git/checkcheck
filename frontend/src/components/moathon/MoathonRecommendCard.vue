@@ -107,6 +107,7 @@ defineEmits(['create', 'retry'])
 
 .product-title {
   font-size: 1.6rem;
+  font-weight: bold;
   margin: 12px 0;
   color: #333;
 }
