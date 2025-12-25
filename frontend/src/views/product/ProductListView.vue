@@ -5,6 +5,16 @@
       <p>나에게 딱 맞는 예/적금 상품을 찾아보세요.</p>
     </div>
 
+    <div class="text-end mb-2">
+      <button 
+        @click="refreshData" 
+        class="btn btn-sm btn-outline-secondary"
+        :disabled="store.isLoading"
+      >
+        <i class="bi bi-arrow-clockwise"></i> 최신 데이터로 새로고침
+      </button>
+    </div>
+
     <div class="tabs-wrapper mb-4">
       <ul class="nav nav-pills justify-content-center">
         <li class="nav-item">
@@ -96,10 +106,17 @@ const filters = reactive({
 const currentPage = ref(1)
 const itemsPerPage = 12
 
+// [캐싱 설정] 
+const CACHE_KEY = 'moathon_products_data'
+const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24시간 (하루)
+
 const filteredProducts = computed(() => {
+  // store.products가 없으면 빈 배열 반환 (에러 방지)
+  if (!store.products) return []
+  
   let results = store.products
 
-  // 1. 탭 필터 (예금/적금)
+  // 1. 탭 필터
   if (filters.type !== 'ALL') {
     results = results.filter(p => p.product_type === filters.type)
   }
@@ -109,37 +126,31 @@ const filteredProducts = computed(() => {
     results = results.filter(p => p.bank_name === filters.bank)
   }
 
-  // 3. 기간 필터 (선택한 기간 옵션이 있는 상품만)
+  // 3. 기간 필터
   if (filters.period) {
     results = results.filter(p => 
       p.options.some(opt => opt.save_trm === filters.period)
     )
   }
 
-  // 4. 정렬 (최고 금리순)
-  // 원본 보호를 위해 복사본([...]) 생성 후 정렬
+  // 4. 정렬
   return [...results].sort((a, b) => {
     let rateA, rateB
 
     if (filters.period) {
-      // 기간이 선택되었으면, 해당 기간의 우대금리(intr_rate2)를 찾아 비교
       const optA = a.options.find(o => o.save_trm === filters.period)
       const optB = b.options.find(o => o.save_trm === filters.period)
-      // 해당 기간 옵션이 없으면 -1 (맨 뒤로 보냄)
       rateA = optA ? optA.intr_rate2 : -1
       rateB = optB ? optB.intr_rate2 : -1
     } else {
-      // 기간 선택 없으면 상품 자체의 최고 우대 금리(max_rate) 사용
       rateA = a.max_rate
       rateB = b.max_rate
     }
     
-    // 내림차순 정렬
     return rateB - rateA
   })
 })
 
-// [페이지네이션] 현재 페이지에 보여줄 데이터 슬라이싱
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
@@ -159,9 +170,53 @@ const goDetail = (id) => {
   router.push({ name: 'productDetail', params: { id } })
 }
 
+// [핵심 로직] 데이터 로드 함수 (캐시 우선)
+const loadData = async (forceRefresh = false) => {
+  // 1. 로컬 스토리지 확인
+  const cachedData = localStorage.getItem(CACHE_KEY)
+  const now = new Date().getTime()
+
+  // 2. 캐시가 있고, 강제 새로고침이 아니며, 유효 기간 내인 경우
+  if (!forceRefresh && cachedData) {
+    const parsed = JSON.parse(cachedData)
+    
+    // 유효기간 체크 (현재 시간 - 저장 시간 < 설정 시간)
+    if (now - parsed.timestamp < CACHE_EXPIRY_MS) {
+      console.log('LocalStorage에서 상품 데이터를 불러왔습니다.')
+      
+      // Pinia Store에 직접 데이터 주입
+      // (Store에 setProducts 같은 액션이 없다면 직접 할당 가능하지만, 
+      // Pinia는 $patch나 직접 할당 모두 반응성을 지원합니다)
+      store.products = parsed.products
+      store.banks = parsed.banks
+      store.isLoading = false
+      return
+    }
+  }
+
+  // 3. 캐시가 없거나 만료되었으면 API 호출
+  console.log('서버에서 최신 상품 데이터를 불러옵니다...')
+  await store.getProducts()
+  await store.getBanks()
+
+  // 4. 받아온 데이터를 로컬 스토리지에 저장
+  const dataToSave = {
+    timestamp: now,
+    products: store.products,
+    banks: store.banks
+  }
+  localStorage.setItem(CACHE_KEY, JSON.stringify(dataToSave))
+}
+
+// 강제 새로고침 버튼용
+const refreshData = () => {
+  if (confirm('최신 금리 정보를 다시 불러오시겠습니까?')) {
+    loadData(true)
+  }
+}
+
 onMounted(() => {
-  store.getProducts()
-  store.getBanks()
+  loadData()
 })
 </script>
 
