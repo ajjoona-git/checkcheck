@@ -304,7 +304,6 @@ def onboarding(request):
 
 @extend_schema(summary="뱃지 컬렉션 조회")
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def badge_collection(request):
     user = request.user
 
