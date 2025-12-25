@@ -3,12 +3,12 @@
     <div class="card-body p-4">
       <div v-if="chartData.length > 0" class="chart-container">
         <div v-for="item in chartData" :key="item.id" class="chart-row">
-          
+
           <div class="label-col">
             <span class="product-name text-truncate" :title="item.fin_prdt_nm">{{ item.product_name }}</span>
             <span class="bank-name text-muted">{{ item.bank }}</span>
           </div>
-          
+
           <div class="bar-area">
             <div class="bar-group">
               <div class="bar basic" :style="{ width: item.rate1Width + '%' }">
@@ -17,7 +17,7 @@
               <span class="legend" v-if="item.rate1Width <= 15">{{ item.intr_rate }}%</span>
               <span class="legend-label">기본</span>
             </div>
-            
+
             <div class="bar-group">
               <div class="bar max" :style="{ width: item.rate2Width + '%' }">
                 <span class="rate-text" v-if="item.rate2Width > 15">{{ item.intr_rate2 }}%</span>
@@ -28,7 +28,7 @@
           </div>
         </div>
       </div>
-      
+
       <div v-else class="text-center py-5 text-muted">
         <i class="bi bi-bar-chart-line fs-1 mb-2 d-block opacity-50"></i>
         비교할 데이터가 없습니다.
@@ -50,10 +50,10 @@ const props = defineProps({
 // 차트 데이터 가공
 const chartData = computed(() => {
   if (!props.moathons || props.moathons.length === 0) return []
-  
+
   // 기준점 계산 (최대 금리가 너무 작으면 5%를 기준으로 함)
   const maxRateValue = Math.max(
-    ...props.moathons.map(m => Math.max(m.intr_rate || 0, m.intr_rate2 || 0)), 
+    ...props.moathons.map(m => Math.max(m.intr_rate || 0, m.intr_rate2 || 0)),
     5
   )
 
@@ -68,14 +68,16 @@ const chartData = computed(() => {
 
 <style scoped>
 .rate-chart.card {
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
   background: white;
-  height: 100%; /* 부모 높이에 맞춤 */
+  height: 100%;
 }
 
-.chart-title { color: var(--text-primary); }
+.chart-title {
+  color: var(--text-primary);
+}
 
 .chart-row {
   display: flex;
@@ -106,7 +108,7 @@ const chartData = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-right: 10px; /* 텍스트 공간 확보 */
+  padding-right: 10px;
 }
 
 .bar-group {
@@ -117,7 +119,7 @@ const chartData = computed(() => {
 
 .bar {
   height: 100%;
-  border-radius: 6px; /* 둥근 바 */
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -130,8 +132,14 @@ const chartData = computed(() => {
 }
 
 /* 색상 변수 활용 */
-.bar.basic { background-color: var(--moathon-deep); opacity: 0.7; }
-.bar.max { background-color: var(--moathon-green); }
+.bar.basic {
+  background-color: var(--moathon-deep);
+  opacity: 0.7;
+}
+
+.bar.max {
+  background-color: var(--moathon-green);
+}
 
 .rate-text {
   font-size: 0.75rem;

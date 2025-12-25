@@ -16,13 +16,10 @@
         <span class="label">상품</span>
         <span class="value text-truncate">{{ moathon.product_name }}</span>
       </div>
-      
+
       <div class="progress-section">
         <div class="progress-bg">
-          <div 
-            class="progress-fill" 
-            :style="{ width: `${moathon.progress_rate}%` }"
-          ></div>
+          <div class="progress-fill" :style="{ width: `${moathon.progress_rate}%` }"></div>
         </div>
         <div class="progress-text">
           <span class="label">달성률</span>
@@ -49,8 +46,8 @@ const props = defineProps({
 
 const router = useRouter()
 
+// 모아톤 상세 페이지로 이동
 const goDetail = () => {
-  // 실제 데이터 구조에 따라 id 필드명 확인 (보통 id 또는 pk)
   if (props.moathon.id) {
     router.push({ name: 'moathonDetail', params: { id: props.moathon.id } })
   }
@@ -77,7 +74,7 @@ const goDetail = () => {
 /* 하이라이트 모드 (메인 페이지 등에서 강조용) */
 .moathon-card.highlight {
   border: 1px solid var(--moathon-green);
-  background-color: #f1f8e9; /* 아주 연한 초록 배경 */
+  background-color: #f1f8e9;
 }
 
 .moathon-card:hover {
@@ -100,7 +97,7 @@ const goDetail = () => {
 
 .bank-badge {
   font-size: 0.75rem;
-  background-color: rgba(27, 94, 32, 0.08); /* 연한 모아톤 그린 배경 */
+  background-color: rgba(27, 94, 32, 0.08);
   color: var(--moathon-green);
   padding: 6px 10px;
   border-radius: 20px;

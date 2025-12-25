@@ -6,29 +6,17 @@
     </div>
 
     <div class="comment-action-row mb-5 p-2 bg-white shadow-sm border d-flex align-items-center">
-      
-      <button 
-        class="btn btn-like-circle rounded-circle ms-1"
-        :class="{ active: likes?.is_liked }"
-        @click="onLike"
-        title="이 모아톤 응원하기"
-      >
+
+      <button class="btn btn-like-circle rounded-circle ms-1" :class="{ active: likes?.is_liked }" @click="onLike"
+        title="이 모아톤 응원하기">
         <i class="bi" :class="likes?.is_liked ? 'bi-heart-fill' : 'bi-heart'"></i>
       </button>
 
-      <input 
-        v-model="newComment" 
-        type="text" 
-        class="form-control border-0 bg-transparent px-3"
-        placeholder="따뜻한 응원의 한마디를 남겨주세요!" 
-        @keyup.enter="submitComment" 
-      />
+      <input v-model="newComment" type="text" class="form-control border-0 bg-transparent px-3"
+        placeholder="따뜻한 응원의 한마디를 남겨주세요!" @keyup.enter="submitComment" />
 
-      <button 
-        class="btn btn-primary-custom rounded-pill px-4 py-2 me-1" 
-        @click="submitComment" 
-        :disabled="!newComment.trim()"
-      >
+      <button class="btn btn-primary-custom rounded-pill px-4 py-2 me-1" @click="submitComment"
+        :disabled="!newComment.trim()">
         등록
       </button>
     </div>
@@ -37,12 +25,7 @@
       <div v-for="comment in comments" :key="comment.id" class="comment-item p-4 bg-white border rounded-4">
 
         <div v-if="editingCommentId === comment.id" class="edit-mode d-flex gap-2">
-          <input 
-            v-model="editCommentContent" 
-            type="text" 
-            class="form-control"
-            @keyup.enter="saveComment(comment.id)" 
-          />
+          <input v-model="editCommentContent" type="text" class="form-control" @keyup.enter="saveComment(comment.id)" />
           <button @click="saveComment(comment.id)" class="btn btn-dark btn-sm text-nowrap rounded-3">저장</button>
           <button @click="cancelEdit" class="btn btn-light border btn-sm text-nowrap rounded-3">취소</button>
         </div>
@@ -53,7 +36,7 @@
               <span class="fw-bold text-primary">{{ comment.nickname }}</span>
               <span class="text-muted small">• {{ formatDate(comment.created_at) }}</span>
             </div>
-            
+
             <div class="comment-actions" v-if="comment.is_owner">
               <button @click="startEdit(comment)" class="action-btn me-2">수정</button>
               <button @click="deleteComment(comment.id)" class="action-btn">삭제</button>
@@ -62,7 +45,7 @@
           <p class="mb-0 text-dark comment-content">{{ comment.content }}</p>
         </div>
       </div>
-      
+
       <div v-if="comments.length === 0" class="text-center py-5 text-muted">
         <p>아직 작성된 댓글이 없습니다. 첫 번째 응원을 남겨보세요!</p>
       </div>
@@ -88,22 +71,26 @@ const editCommentContent = ref('')
 
 const formatDate = (dateStr) => dateStr ? dateStr.substring(0, 10) : ''
 
+// 댓글 등록
 const submitComment = async () => {
   if (!newComment.value.trim()) return
   await store.createComment(props.moathonId, newComment.value)
   newComment.value = ''
 }
 
-const startEdit = (c) => { 
+// 댓글 수정 모드 시작
+const startEdit = (c) => {
   editingCommentId.value = c.id
-  editCommentContent.value = c.content 
+  editCommentContent.value = c.content
 }
 
-const cancelEdit = () => { 
+// 댓글 수정 취소
+const cancelEdit = () => {
   editingCommentId.value = null
-  editCommentContent.value = '' 
+  editCommentContent.value = ''
 }
 
+// 댓글 수정 저장
 const saveComment = async (commentId) => {
   if (!editCommentContent.value.trim()) {
     alert('내용을 입력해주세요.')
@@ -113,6 +100,7 @@ const saveComment = async (commentId) => {
   cancelEdit()
 }
 
+// 댓글 삭제
 const deleteComment = async (commentId) => {
   if (confirm('댓글을 삭제하시겠습니까?')) {
     await store.deleteComment(props.moathonId, commentId)
@@ -190,7 +178,7 @@ const deleteComment = async (commentId) => {
 
 /* 댓글 아이템 */
 .comment-item {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   border-color: #f1f3f5 !important;
   transition: background-color 0.2s;
 }

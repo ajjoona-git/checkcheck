@@ -7,6 +7,7 @@ from accounts.services.badge_functions import award_all_badges, award_signup_bad
 
 User = get_user_model()
 
+# 회원가입 직후 뱃지 지급
 @receiver(post_save, sender=User)
 def on_user_created(sender, instance, created, **kwargs):
     if kwargs.get("raw", False):
@@ -14,6 +15,7 @@ def on_user_created(sender, instance, created, **kwargs):
     if created:
         award_signup_badges(instance)
 
+# 로그인 직후 뱃지 점검 및 지급
 @receiver(user_logged_in)
 def on_user_login(sender, request, user, **kwargs):
     award_all_badges(user)

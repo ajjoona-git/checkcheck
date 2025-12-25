@@ -9,42 +9,24 @@
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="username">이름</label>
-          <input 
-            type="text" 
-            id="username" 
-            v-model.trim="username" 
-            placeholder="이름을 입력하세요"
-            class="form-input"
-          />
+          <input type="text" id="username" v-model.trim="username" placeholder="이름을 입력하세요" class="form-input" />
         </div>
 
         <div class="form-group">
           <label for="email">이메일</label>
-          <input 
-            type="email" 
-            id="email" 
-            v-model.trim="email" 
-            placeholder="example@moathon.com"
-            class="form-input"
-          />
+          <input type="email" id="email" v-model.trim="email" placeholder="example@moathon.com" class="form-input" />
         </div>
 
         <div class="form-group">
           <label for="password">비밀번호</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model.trim="password" 
-            placeholder="비밀번호를 입력하세요"
-            class="form-input"
-          />
+          <input type="password" id="password" v-model.trim="password" placeholder="비밀번호를 입력하세요" class="form-input" />
         </div>
 
         <button type="submit" class="submit-btn mt-4">로그인</button>
       </form>
 
       <div class="auth-footer">
-        <p>아직 계정이 없으신가요? 
+        <p>아직 계정이 없으신가요?
           <router-link :to="{ name: 'signup' }" class="link-text">회원가입</router-link>
         </p>
       </div>
@@ -53,30 +35,31 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue';
-  import { useAccountStore } from '@/stores/accounts';
-  import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useAccountStore } from '@/stores/accounts';
+import { useRouter } from 'vue-router';
 
-  const username = ref(null)
-  const email = ref(null)
-  const password = ref(null)
+const username = ref(null)
+const email = ref(null)
+const password = ref(null)
 
-  const accountStore = useAccountStore()
-  const router = useRouter()
+const accountStore = useAccountStore()
+const router = useRouter()
 
-  const handleLogin = async () => {
-    try {
-      const payload = {
-        username: username.value,
-        email: email.value,
-        password: password.value,
-      }
-      await accountStore.logIn(payload) 
-      router.push({ name: 'home' })
-    } catch (err) {
-      alert('로그인에 실패했습니다. 정보를 확인해주세요.')
+// 로그인 처리
+const handleLogin = async () => {
+  try {
+    const payload = {
+      username: username.value,
+      email: email.value,
+      password: password.value,
     }
+    await accountStore.logIn(payload)
+    router.push({ name: 'home' })
+  } catch (err) {
+    alert('로그인에 실패했습니다. 정보를 확인해주세요.')
   }
+}
 </script>
 
 <style scoped>
@@ -156,7 +139,8 @@
 }
 
 .submit-btn:hover {
-  background-color: #144a18; /* 더 진한 녹색 */
+  background-color: #144a18;
+  /* 더 진한 녹색 */
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(27, 94, 32, 0.2);
 }
@@ -184,7 +168,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

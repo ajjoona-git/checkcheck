@@ -130,60 +130,71 @@ const loading = ref(true)
 const isEditing = ref(false)
 
 const currentMoathonPage = ref(0)
-const MOATHON_ITEMS_PER_PAGE = 3 
+const MOATHON_ITEMS_PER_PAGE = 3
 
+// 전체 모아톤 페이지 수
 const totalMoathonPages = computed(() => {
   const count = user.value?.moathons?.length || 0
   if (count === 0) return 1
   return Math.ceil(count / MOATHON_ITEMS_PER_PAGE)
 })
 
+// 현재 페이지에 해당하는 모아톤 목록
 const paginatedMoathons = computed(() => {
   const list = user.value?.moathons || []
   const start = currentMoathonPage.value * MOATHON_ITEMS_PER_PAGE
   return list.slice(start, start + MOATHON_ITEMS_PER_PAGE)
 })
 
+// 이전 페이지로 이동
 const prevMoathonPage = () => {
   if (currentMoathonPage.value > 0) currentMoathonPage.value--
 }
 
+// 다음 페이지로 이동
 const nextMoathonPage = () => {
   if (currentMoathonPage.value < totalMoathonPages.value - 1) currentMoathonPage.value++
 }
 
+// 성별 텍스트 변환
 const genderText = computed(() => {
   if (user.value?.gender === undefined || user.value?.gender === null) return '-'
   const map = { '0': '남성', '1': '여성' }
   return map[String(user.value.gender)] || '기타'
 })
 
+// 화폐 단위 포맷터
 const formatMoney = (value) => {
   if (value === undefined || value === null) return '0'
   return Number(value).toLocaleString()
 }
 
+// 편집 모드 쿼리 파라미터 감지
 watch(() => route.query.edit, (newVal) => {
   isEditing.value = newVal === 'true'
 }, { immediate: true })
 
+// 사용자 프로필 로드
 onMounted(async () => {
   try {
     loading.value = true
     await store.getProfile()
   } catch (err) {
-    console.error(err)
+    // 프로필 로드 실패
+    throw err
   } finally {
     loading.value = false
   }
 })
 
+// 편집 모드 토글
 const toggleEdit = () => {
   const nextState = !isEditing.value
   isEditing.value = nextState
   router.replace({ query: { ...route.query, edit: nextState ? 'true' : undefined } })
 }
 
+// 프로필 수정 성공 시 처리
 const onUpdateSuccess = async () => {
   isEditing.value = false
   router.replace({ query: { ...route.query, edit: undefined } })
@@ -265,7 +276,7 @@ const onUpdateSuccess = async () => {
   background: var(--bg-secondary);
   padding: 6px 16px;
   border-radius: 30px;
-    align-self: center;
+  align-self: center;
   width: fit-content;
 }
 
@@ -278,8 +289,15 @@ const onUpdateSuccess = async () => {
   display: flex;
   align-items: center;
 }
-.nav-btn:disabled { color: #d0d0d0; cursor: not-allowed; }
-.nav-btn:hover:not(:disabled) { color: var(--moathon-green); }
+
+.nav-btn:disabled {
+  color: #d0d0d0;
+  cursor: not-allowed;
+}
+
+.nav-btn:hover:not(:disabled) {
+  color: var(--moathon-green);
+}
 
 .page-indicator {
   font-size: 0.8rem;

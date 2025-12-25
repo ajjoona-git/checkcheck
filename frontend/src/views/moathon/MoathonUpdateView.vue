@@ -1,26 +1,22 @@
 <template>
   <div class="page-wrapper">
     <div class="container fade-in">
-      
+
       <div class="header text-center mb-5">
         <h1 class="page-title">모아톤 수정하기</h1>
         <p class="page-subtitle">목표나 제목을 변경하여 새로운 마음으로 시작해보세요.</p>
       </div>
 
       <div class="update-card shadow-sm">
-        
+
         <div v-if="loading" class="loading-state">
           <div class="spinner-border text-primary" role="status"></div>
           <p class="mt-3 text-muted">정보를 불러오는 중입니다...</p>
         </div>
 
         <div v-else>
-          <MoathonCreateForm 
-            :is-edit="true"
-            :moathon-id="moathonId" 
-            :initial-data="initialData"
-          />
-          
+          <MoathonCreateForm :is-edit="true" :moathon-id="moathonId" :initial-data="initialData" />
+
           <div class="mt-4 text-center border-top pt-4">
             <button @click="router.back()" class="btn btn-cancel">
               취소하고 돌아가기
@@ -46,15 +42,16 @@ const store = useMoathonStore()
 const loading = ref(true)
 const initialData = ref({})
 
-// 1. URL에서 ID 추출
 const moathonId = Number(route.params.id)
 
+// 모아톤 상세 정보 조회
 onMounted(async () => {
   try {
+    // 이미 로드된 모아톤이 없거나, 다른 모아톤일 경우 새로 조회
     if (!store.moathonDetail || store.moathonDetail.id !== moathonId) {
       await store.fetchMoathonDetail(moathonId)
     }
-    
+
     const detail = store.moathonDetail
     if (detail) {
       initialData.value = {
@@ -68,7 +65,6 @@ onMounted(async () => {
     }
 
   } catch (err) {
-    console.error(err)
     alert('정보를 불러오지 못했습니다.')
     router.back()
   } finally {
@@ -132,13 +128,25 @@ onMounted(async () => {
   color: var(--text-primary);
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 576px) {
-  .update-card { padding: 24px; }
+  .update-card {
+    padding: 24px;
+  }
 }
 </style>

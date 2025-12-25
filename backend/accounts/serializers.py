@@ -8,6 +8,7 @@ from challenges.serializers import MoathonListSerializer
 
 User = get_user_model()
 
+# 새 사용자 등록 시 추가 정보(nickname, birth) 처리
 class CustomRegisterSerializer(RegisterSerializer):
     """
     dj-rest-auth 회원가입 시에
@@ -40,6 +41,7 @@ class CustomRegisterSerializer(RegisterSerializer):
         return user
 
 
+# 비밀번호 재설정 메일 송부 시 이메일 검증
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -49,6 +51,7 @@ class PasswordResetSerializer(serializers.Serializer):
         return value
 
 
+# 비밀번호 재설정 토큰 검증 및 새 비밀번호 업데이트
 class UserPasswordResetConfirmSerializer(serializers.ModelSerializer):
     new_password = serializers.CharField(write_only=True)
     new_password2 = serializers.CharField(write_only=True)
@@ -84,7 +87,7 @@ class MoathonListWithRatesSerializer(MoathonListSerializer):
     class Meta(MoathonListSerializer.Meta):
         fields = MoathonListSerializer.Meta.fields + ["intr_rate", "intr_rate2"]
 
-# 프로필 수정
+# 사용자 프로필 정보 수정(이미지, 금융정보 등)
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     nickname = serializers.CharField(read_only=True)
@@ -109,7 +112,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "tender",
         ]
 
-# 온보딩
+# 온보딩 단계에서 수집되는 금융정보 및 프로필 정보 스키마
 class OnboardingSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     nickname = serializers.CharField(read_only=True)

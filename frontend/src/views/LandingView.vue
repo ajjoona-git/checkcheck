@@ -25,7 +25,6 @@
           <h3>나만의 금융 파트너</h3>
           <p>복잡한 금리 비교 없이,<br>AI가 당신에게 딱 맞는 상품을 찾아줍니다.</p>
           <div class="recommend-box">
-            <!-- <UserProfileSection :user="user" /> -->
             <MoathonRecommendCard :detail="mockRecommendDetail" :warnings="mockWarnings"
               class="landing-recommend-card" />
           </div>
@@ -40,9 +39,6 @@
               목표까지 힘내세요, <b>말랑이</b>님! 🏃‍♂️
             </p>
           </div>
-          <!-- <div class="card-box mt-3">
-            <MoathonCard :moathon="mockMoathon" :is-highlight="true" class="landing-moathon-card" />
-          </div> -->
         </div>
 
         <div class="bento-item wide reveal" style="transition-delay: 0.1s;">
@@ -130,13 +126,12 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import UserProfileSection from '@/components/user/UserProfileSection.vue';
-import MoathonRecommendCard from '@/components/moathon/MoathonRecommendCard.vue';
-import MoathonTrack from '@/components/moathon/MoathonTrack.vue';
-import MoathonCard from '@/components/moathon/MoathonCard.vue';
-import BadgeLibrary from '@/components/common/BadgeLibrary.vue';
+import MoathonRecommendCard from '@/components/moathon/MoathonRecommendCard.vue'
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue'
+import BadgeLibrary from '@/components/common/BadgeLibrary.vue'
 import defaultProfile from '/default-profile.png'
 
+// 추천 상품 상세 정보
 const mockRecommendDetail = ref({
   bank_name: '모아톤은행',
   product_name: '트래블 적금',
@@ -149,20 +144,14 @@ const mockRecommendDetail = ref({
   etc_note: "말랑이님의 '유럽여행' 목표 달성을 위해 가장 적합한 상품이에요. \n안정적인 1금융권 상품 중 가장 높은 우대금리를 제공합니다."
 })
 
+// 추천 상품 주의사항 목록
 const mockWarnings = ref([
   '최고 금리는 우대 조건 달성 시 적용됩니다.',
   '이 예금은 예금자보호법에 따라 보호됩니다.',
   '만기 전 해지 시 약정 이율보다 낮은 금리가 적용될 수 있습니다.'
 ])
 
-const mockMoathon = ref({
-  title: '유럽 여행 자금 만들기',
-  bank: '모아톤은행',
-  nickname: '말랑이',
-  product_name: '트래블 적금',
-  progress_rate: 75,
-})
-
+// 뱃지 컬렉션 목록
 const mockBadgeCollection = ref([
   {
     name: "반환점 터치",
@@ -208,32 +197,36 @@ const mockBadgeCollection = ref([
 
 let observer = null
 
+// 스크롤 시 요소 진입 애니메이션 및 부드러운 스크롤 설정
 onMounted(() => {
+  // IntersectionObserver로 화면에 보이는 요소에 active 클래스 추가
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('active');
+        entry.target.classList.add('active')
       }
-    });
-  }, { threshold: 0.15 });
+    })
+  }, { threshold: 0.15 })
 
-  const revealElements = document.querySelectorAll('.reveal');
-  revealElements.forEach(el => observer.observe(el));
+  const revealElements = document.querySelectorAll('.reveal')
+  revealElements.forEach(el => observer.observe(el))
 
+  // 앵커 링크 클릭 시 부드러운 스크롤 이동
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const targetId = this.getAttribute('href');
+      e.preventDefault()
+      const targetId = this.getAttribute('href')
       if (targetId && targetId !== '#') {
-        const targetElement = document.querySelector(targetId);
+        const targetElement = document.querySelector(targetId)
         if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
+          targetElement.scrollIntoView({ behavior: 'smooth' })
         }
       }
-    });
-  });
+    })
+  })
 })
 
+// IntersectionObserver 정리 및 메모리 해제
 onUnmounted(() => {
   if (observer) observer.disconnect()
 })

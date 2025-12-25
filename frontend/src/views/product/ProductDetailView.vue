@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper" v-if="product">
     <div class="container py-5 fade-in">
-      
+
       <div class="header-section text-center mb-5">
         <h1 class="product-title">{{ product.fin_prdt_nm }}</h1>
         <div class="badges mb-3 d-flex justify-content-center gap-2">
@@ -40,11 +40,8 @@
           <p class="section-desc">원하는 조건을 선택하여 저축 챌린지를 시작해보세요.</p>
         </div>
 
-        <ProductOptionList 
-          v-if="product.options && product.options.length > 0" 
-          :options="product.options"
-          @select-option="goMoathonCreate" 
-        />
+        <ProductOptionList v-if="product.options && product.options.length > 0" :options="product.options"
+          @select-option="goMoathonCreate" />
 
         <div v-else class="empty-state">
           <p>상세 옵션 정보가 없습니다.</p>
@@ -74,17 +71,20 @@ const router = useRouter()
 const isLoading = ref(true)
 const product = computed(() => store.productDetail)
 
+// 상품 정보 조회
 const fetchProduct = async (productId) => {
   isLoading.value = true
   try {
     await store.getProductDetail(productId)
   } catch (err) {
-    console.error('상품 정보 로딩 실패:', err)
+    // 식품 정보 로드 실패
+    throw err
   } finally {
     isLoading.value = false
   }
 }
 
+// 라우트 변경 감지 및 상품 정보 재조회
 watch(
   () => route.params.id,
   (newId) => {
@@ -93,6 +93,7 @@ watch(
   { immediate: true }
 )
 
+// 모아톤 생성 페이지로 이동
 const goMoathonCreate = (optionId) => {
   if (!accountStore.isAuthenticated) {
     const userConfirm = confirm('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')
@@ -115,7 +116,9 @@ const goMoathonCreate = (optionId) => {
   min-height: calc(100vh - 80px);
 }
 
-.container { max-width: 1000px; }
+.container {
+  max-width: 1000px;
+}
 
 /* Header */
 .product-title {
@@ -142,8 +145,16 @@ const goMoathonCreate = (optionId) => {
   font-size: 0.9rem;
   font-weight: 700;
 }
-.type-badge.DEPOSIT { background-color: #e3f2fd; color: #1976d2; }
-.type-badge.SAVING { background-color: #f3e5f5; color: #7b1fa2; }
+
+.type-badge.DEPOSIT {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.type-badge.SAVING {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
 
 /* Info Grid */
 .info-grid {
@@ -156,23 +167,34 @@ const goMoathonCreate = (optionId) => {
   background: white;
   border-radius: 24px;
   padding: 32px;
-  border: 1px solid rgba(0,0,0,0.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.full-width { grid-column: 1 / -1; }
+.full-width {
+  grid-column: 1 / -1;
+}
 
 .icon-circle {
-  width: 48px; height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
 }
-.bg-blue-light { background: #e3f2fd; }
-.bg-green-light { background: #e8f5e9; }
+
+.bg-blue-light {
+  background: #e3f2fd;
+}
+
+.bg-green-light {
+  background: #e8f5e9;
+}
 
 .info-label {
   font-size: 1rem;
@@ -190,30 +212,62 @@ const goMoathonCreate = (optionId) => {
 }
 
 /* Options Section */
-.section-title { font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
-.section-desc { color: var(--text-secondary); font-size: 1.1rem; }
+.section-title {
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
 
-.divider { border-color: rgba(0,0,0,0.05); }
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.divider {
+  border-color: rgba(0, 0, 0, 0.05);
+}
 
 /* Loading State */
 .loading-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 50vh; color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: var(--text-secondary);
 }
 
 .empty-state {
-  text-align: center; padding: 40px;
-  background: white; border-radius: 24px; color: var(--text-secondary);
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 24px;
+  color: var(--text-secondary);
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
-  .info-grid { grid-template-columns: 1fr; }
-  .product-title { font-size: 2rem; }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-title {
+    font-size: 2rem;
+  }
 }
 </style>

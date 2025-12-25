@@ -1,3 +1,4 @@
+// 앱의 모든 라우트 및 네비게이션 설정
 import VideoDetail from '@/components/video/VideoDetail.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import OnboardingView from '@/views/auth/OnboardingView.vue'
@@ -17,6 +18,7 @@ import MyPageView from '@/views/user/MyPageView.vue'
 import LandingView from '@/views/LandingView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
+// 라우터 인스턴스 생성 및 모든 경로 정의
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -135,6 +137,7 @@ const router = createRouter({
     },
   ],
 
+  // 페이지 스크롤 위치 기억 (이전 방문 페이지는 저장된 위치로, 새 페이지는 맨 위로)
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition

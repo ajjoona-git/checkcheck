@@ -2,12 +2,12 @@
   <div class="user-profile card">
     <div class="card-body p-4 p-lg-5">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start gap-4">
-        
+
         <div class="d-flex gap-4 align-items-center">
           <div class="profile-img-wrapper">
             <img :src="profileImage" class="profile-img" alt="프로필" />
           </div>
-          
+
           <div class="info-text">
             <div class="d-flex align-items-center gap-2 mb-1">
               <h2 class="m-0 fw-bold user-name">{{ user.nickname }}</h2>
@@ -15,9 +15,9 @@
                 {{ tenderText }}
               </span>
             </div>
-            
+
             <p class="user-email">{{ user.email }}</p>
-            
+
             <div class="social-stats">
               <span>팔로워 <b class="text-dark">{{ user.follower_count || 0 }}</b></span>
               <span class="divider">·</span>
@@ -31,8 +31,8 @@
           {{ isEditing ? '취소' : '정보 수정' }}
         </button>
       </div>
-      
-      </div>
+
+    </div>
   </div>
 </template>
 
@@ -46,6 +46,7 @@ const props = defineProps({
 
 defineEmits(['toggle-edit'])
 
+// 프로필 이미지 URL
 const profileImage = computed(() => {
   if (!props.user.profile_image) return '/default-profile.png'
   if (props.user.profile_image.startsWith('http')) return props.user.profile_image
@@ -53,6 +54,7 @@ const profileImage = computed(() => {
   return `${API_URL}${props.user.profile_image}`
 })
 
+// 투자 성향 텍스트
 const tenderText = computed(() => {
   const map = {
     '1': '안정형', '2': '안정추구형', '3': '위험중립형',
@@ -61,6 +63,7 @@ const tenderText = computed(() => {
   return map[String(props.user.tender)] || '미설정'
 })
 
+// 투자 성향에 따른 배지 클래스
 const tenderClass = computed(() => {
   const t = String(props.user.tender)
   if (t === '1' || t === '2') return 'safe'
@@ -73,7 +76,7 @@ const tenderClass = computed(() => {
 .user-profile.card {
   border: none;
   border-radius: 32px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   background: white;
 }
 
@@ -104,17 +107,36 @@ const tenderClass = computed(() => {
   font-weight: 700;
   vertical-align: middle;
 }
-.status-badge.safe { background-color: #e8f5e9; color: var(--moathon-green); }
-.status-badge.danger { background-color: #ffebee; color: #d32f2f; }
-.status-badge.neutral { background-color: #f5f5f5; color: var(--text-secondary); }
 
-.user-email { color: var(--text-secondary); margin-bottom: 8px; }
+.status-badge.safe {
+  background-color: #e8f5e9;
+  color: var(--moathon-green);
+}
+
+.status-badge.danger {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.status-badge.neutral {
+  background-color: #f5f5f5;
+  color: var(--text-secondary);
+}
+
+.user-email {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
 
 .social-stats {
   font-size: 0.95rem;
   color: var(--text-secondary);
 }
-.divider { margin: 0 8px; color: #dee2e6; }
+
+.divider {
+  margin: 0 8px;
+  color: #dee2e6;
+}
 
 .btn-outline-custom {
   border: 1px solid #e0e0e0;
@@ -127,6 +149,7 @@ const tenderClass = computed(() => {
   align-items: center;
   gap: 6px;
 }
+
 .btn-outline-custom:hover {
   background-color: var(--bg-secondary);
   border-color: #d0d0d0;

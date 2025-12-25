@@ -6,7 +6,7 @@ from datetime import date
 from accounts.models import UserBadge, UserFollow, Badge
 from collections import Counter
 
-# 전체 모아톤 조회
+# 모아톤 목록 조회 및 현재진행률 계산
 class MoathonListSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source='user.nickname', read_only=True)
     bank = serializers.CharField(source='product_option.product.bank.kor_co_nm', read_only=True)
@@ -45,7 +45,7 @@ class MoathonUpdateSerializer(serializers.ModelSerializer):
         model = Moathon
         fields = ['title', 'target_amount', 'purpose']
 
-# 모아톤 댓글
+# 모아톤 댓글 목록 조회
 class MoathonCommentSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source="user.nickname", read_only=True)
     is_owner = serializers.SerializerMethodField()
@@ -136,9 +136,9 @@ class MoathonDetailSerializer(serializers.ModelSerializer):
                 "type": badge.type,
                 "name": badge.name,
                 "description": badge.description,
-                "url": badge.badge_url, # 모델 필드명이 badge_url인지 image인지 확인 필요
+                "url": badge.badge_url,
                 "is_obtained": quantity > 0,
-                "quantity": quantity, # 프론트엔드 BadgeLibrary에서 xN 표시에 사용
+                "quantity": quantity,
             })
 
         # 4) 프로필 이미지 URL 처리

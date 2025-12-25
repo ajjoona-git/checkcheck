@@ -17,16 +17,16 @@
 </template>
 
 <script setup>
-  import ProfileForm from '@/components/user/ProfileForm.vue';
-  import { useRouter } from 'vue-router';
+import ProfileForm from '@/components/user/ProfileForm.vue';
+import { useRouter } from 'vue-router';
 
-  const router = useRouter()
+const router = useRouter()
 
-  const goHome = function () {
-    // alert 대신 더 부드러운 전환을 위해 바로 이동 (또는 토스트 메시지 추천)
-    alert('환영합니다! 가입이 완료되었습니다.')
-    router.push({ name: 'home' })
-  }
+// 프로필 작성 완료 후 홈으로 이동
+const goHome = function () {
+  alert('환영합니다! 가입이 완료되었습니다.')
+  router.push({ name: 'home' })
+}
 </script>
 
 <style scoped>
@@ -42,7 +42,7 @@
 .auth-card {
   background: white;
   width: 100%;
-  max-width: 600px; /* 프로필 폼은 내용이 많을 수 있으므로 더 넓게 */
+  max-width: 600px;
   padding: 48px;
   border-radius: 32px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
@@ -52,7 +52,7 @@
 .auth-title {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--text-primary); /* 여기선 검정 텍스트로 차분하게 */
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
@@ -71,15 +71,23 @@
 }
 
 .form-container {
-  /* ProfileForm 컴포넌트 내부 스타일과 어울리도록 여백 조정 */
   margin-top: 32px;
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 반응형 */
@@ -87,6 +95,7 @@
   .auth-card {
     padding: 24px;
   }
+
   .auth-title {
     font-size: 1.6rem;
   }

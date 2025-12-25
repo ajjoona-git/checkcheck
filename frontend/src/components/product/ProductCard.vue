@@ -1,6 +1,6 @@
 <template>
   <div class="product-card" @click="handleClick">
-    
+
     <div class="card-header-section">
       <span class="bank-name">{{ product.bank_name }}</span>
       <h3 class="product-name text-truncate-2">{{ product.fin_prdt_nm }}</h3>
@@ -37,10 +37,12 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
+// 카드 클릭 시 이벤트
 const handleClick = () => {
   emit('click')
 }
 
+// 가입 방법 파싱 함수
 const parseJoinWay = (way) => {
   if (!way) return ''
   const ways = way.split(',')

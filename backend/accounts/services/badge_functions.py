@@ -14,14 +14,14 @@ TRACK_50 = "반환점 터치"
 TRACK_75 = "막판 스퍼트!"
 TRACK_100 = "완주 트로피"
 
-# achieve (이미지/요구사항 기준)
+# achieve
 ACH_START = "시작이 반"
 ACH_DEPOSIT = "티끌 모아 태산"
 ACH_3DAYS = "작심삼일 탈출"
 ACH_PRO = "프로 완주러"
 ACH_BILLIONAIRE = "억만장자의 꿈"
 
-# social (이미지 기준)
+# social
 SOC_CHEERLEADER = "응원 단장"
 SOC_COMMENTS = "소통 요정"
 SOC_BELOVED = "인기 스타"
@@ -47,7 +47,7 @@ def award_achieve_badges_on_moathon_created(user, moathon: Moathon) -> None:
         if term_months is not None and term_months >= 36:
             _grant(user, "achieve", ACH_BILLIONAIRE)
 
-
+# 모아톤 진행률 기반 트랙 뱃지 지급
 def award_track_badges(user) -> None:
     today = date.today()
     moathons = Moathon.objects.filter(user=user).only("id", "start_date", "end_date")
@@ -65,7 +65,7 @@ def award_track_badges(user) -> None:
         if progress >= 100:
             _grant_track(user, "track", TRACK_100, moathon=m)
 
-
+# 달성일수 기반 뱃지 지급
 def award_achieve_badges(user) -> None:
     today = date.today()
     moathons = Moathon.objects.filter(user=user).only("id", "start_date", "end_date")
@@ -80,7 +80,7 @@ def award_achieve_badges(user) -> None:
     if expired_cnt >= 3:
         _grant(user, "achieve", ACH_PRO)
 
-
+# 소셜 뱃지 지급
 def award_social_badges(user) -> None:
     # 소통요정: 내가 작성한 댓글 5개 이상
     my_comment_cnt = MoathonComment.objects.filter(user=user).count()
@@ -102,7 +102,7 @@ def award_social_badges(user) -> None:
     if follower_cnt >= 10:
         _grant(user, "social", SOC_FOLLOWERS)
 
-
+# 모아톤 진행률 계산
 def _progress_rate(moathon: Moathon, today: date) -> int:
     total_days = (moathon.end_date - moathon.start_date).days
     elapsed_days = (today - moathon.start_date).days
@@ -112,7 +112,7 @@ def _progress_rate(moathon: Moathon, today: date) -> int:
         return 0
     return min(int((elapsed_days / total_days) * 100), 100)
 
-
+# 모아톤 유지 일수 계산
 def _maintained_days(moathon: Moathon, today: date) -> int:
     effective_end = min(today, moathon.end_date)
     return (effective_end - moathon.start_date).days
@@ -132,14 +132,14 @@ def _get_term_months_by_save_trm(moathon: Moathon) -> Optional[int]:
     except (TypeError, ValueError):
         return None
 
-
+# 뱃지 객체 조회
 def _get_badge(badge_type: str, badge_name: str) -> Optional[Badge]:
     try:
         return Badge.objects.get(type=badge_type, name=badge_name)
     except Badge.DoesNotExist:
         return None
 
-
+# 트랙 뱃지 지급
 def _grant_track(user, badge_type: str, badge_name: str, moathon=None) -> None:
     badge = _get_badge(badge_type, badge_name)
     if not badge:
@@ -150,6 +150,7 @@ def _grant_track(user, badge_type: str, badge_name: str, moathon=None) -> None:
     except IntegrityError:
         pass
 
+# 일반 뱃지 지급
 def _grant(user, badge_type: str, badge_name: str) -> None:
     badge = _get_badge(badge_type, badge_name)
     if not badge:

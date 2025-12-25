@@ -1,28 +1,15 @@
 <template>
   <div class="pagination" v-if="totalPages > 0">
-    <button 
-      :disabled="currentPage <= 1" 
-      @click="onPageChange(currentPage - 1)" 
-      class="page-btn prev"
-    >
+    <button :disabled="currentPage <= 1" @click="onPageChange(currentPage - 1)" class="page-btn prev">
       <i class="bi bi-chevron-left"></i>
     </button>
 
-    <button 
-      v-for="page in pageNumbers" 
-      :key="page" 
-      class="page-btn number"
-      :class="{ active: currentPage === page }"
-      @click="onPageChange(page)"
-    >
+    <button v-for="page in pageNumbers" :key="page" class="page-btn number" :class="{ active: currentPage === page }"
+      @click="onPageChange(page)">
       {{ page }}
     </button>
 
-    <button 
-      :disabled="currentPage >= totalPages" 
-      @click="onPageChange(currentPage + 1)" 
-      class="page-btn next"
-    >
+    <button :disabled="currentPage >= totalPages" @click="onPageChange(currentPage + 1)" class="page-btn next">
       <i class="bi bi-chevron-right"></i>
     </button>
   </div>
@@ -34,18 +21,19 @@ import { computed } from 'vue'
 const props = defineProps({
   currentPage: { type: Number, required: true },
   totalCount: { type: Number, required: true },
-  itemsPerPage: { type: Number, default: 24 }, // [중요] 그리드 개수와 일치 (12)
+  itemsPerPage: { type: Number, default: 24 },
   displayPageCount: { type: Number, default: 5 }
 })
 
 const emit = defineEmits(['change-page'])
 
+// 전체 페이지 수 계산 로직
 const totalPages = computed(() => {
   if (props.totalCount === 0) return 1
   return Math.ceil(props.totalCount / props.itemsPerPage)
 })
 
-// [핵심] 페이지 번호 계산 로직 (수정됨)
+// 표시할 페이지 번호 배열 계산 로직
 const pageNumbers = computed(() => {
   const total = totalPages.value
   const current = props.currentPage
@@ -60,13 +48,13 @@ const pageNumbers = computed(() => {
   let start = current - Math.floor(displayCount / 2)
   let end = start + displayCount - 1
 
-  // 3. [보정 1] 시작점이 1보다 작으면 -> 1로 강제 고정하고, 끝점을 다시 계산
+  // 3. 시작점이 1보다 작으면 -> 1로 강제 고정하고, 끝점을 다시 계산
   if (start < 1) {
     start = 1
     end = Math.min(total, start + displayCount - 1)
   }
 
-  // 4. [보정 2] 끝점이 전체 페이지를 넘으면 -> 전체 페이지로 강제 고정하고, 시작점을 역산
+  // 4. 끝점이 전체 페이지를 넘으면 -> 전체 페이지로 강제 고정하고, 시작점을 역산
   if (end > total) {
     end = total
     start = Math.max(1, end - displayCount + 1)
@@ -80,6 +68,7 @@ const pageNumbers = computed(() => {
   return pages
 })
 
+// 페이지 변경 이벤트 발생
 const onPageChange = (page) => {
   if (page < 1 || page > totalPages.value) return
   emit('change-page', page)

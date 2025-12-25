@@ -16,7 +16,7 @@
           <label for="email">이메일</label>
           <input type="email" id="email" v-model.trim="email" class="form-input" placeholder="example@moathon.com" />
         </div>
-        
+
         <div class="row">
           <div class="col-6 form-group">
             <label for="password1">비밀번호</label>
@@ -27,22 +27,22 @@
             <input type="password" id="password2" v-model.trim="password2" class="form-input" placeholder="비밀번호 확인" />
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="nickname">닉네임</label>
           <input type="text" id="nickname" v-model.trim="nickname" class="form-input" placeholder="커뮤니티에서 사용할 별명" />
         </div>
-        
+
         <div class="form-group">
           <label for="birth">생년월일</label>
           <input type="date" id="birth" v-model.trim="birth" class="form-input" />
         </div>
-        
+
         <button type="submit" class="submit-btn mt-4">가입하기</button>
       </form>
 
       <div class="auth-footer">
-        <p>이미 계정이 있으신가요? 
+        <p>이미 계정이 있으신가요?
           <router-link :to="{ name: 'login' }" class="link-text">로그인</router-link>
         </p>
       </div>
@@ -51,33 +51,33 @@
 </template>
 
 <script setup>
-  import { useAccountStore } from '@/stores/accounts';
-  import { ref } from 'vue';
+import { useAccountStore } from '@/stores/accounts';
+import { ref } from 'vue';
 
-  const username = ref(null)
-  const email = ref(null)
-  const password1 = ref(null)
-  const password2 = ref(null)
-  const nickname = ref(null)
-  const birth = ref(null)
+const username = ref(null)
+const email = ref(null)
+const password1 = ref(null)
+const password2 = ref(null)
+const nickname = ref(null)
+const birth = ref(null)
 
-  const accountStore = useAccountStore()
+const accountStore = useAccountStore()
 
-  const signUp = function () {
-    const payload = { 
-      username: username.value, 
-      email: email.value, 
-      password1: password1.value, 
-      password2: password2.value, 
-      nickname: nickname.value, 
-      birth: birth.value, 
-    }
-    accountStore.signUp(payload)
+// 회원가입 처리
+const signUp = function () {
+  const payload = {
+    username: username.value,
+    email: email.value,
+    password1: password1.value,
+    password2: password2.value,
+    nickname: nickname.value,
+    birth: birth.value,
   }
+  accountStore.signUp(payload)
+}
 </script>
 
 <style scoped>
-/* LoginView와 동일한 스타일을 적용하여 통일감 유지 */
 .auth-wrapper {
   background-color: var(--bg-secondary);
   min-height: calc(100vh - 80px);
@@ -90,7 +90,7 @@
 .auth-card {
   background: white;
   width: 100%;
-  max-width: 520px; /* 필드가 많아서 조금 더 넓게 */
+  max-width: 520px;
   padding: 48px;
   border-radius: 32px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
@@ -104,9 +104,13 @@
   margin-bottom: 8px;
 }
 
-.auth-subtitle { color: var(--text-secondary); }
+.auth-subtitle {
+  color: var(--text-secondary);
+}
 
-.form-group { margin-bottom: 20px; }
+.form-group {
+  margin-bottom: 20px;
+}
 
 .form-group label {
   display: block;
@@ -165,13 +169,29 @@
   margin-left: 4px;
 }
 
-/* Row/Col 유틸리티 (Bootstrap이 있다면 생략 가능하지만 명시적 스타일링) */
-.row { display: flex; gap: 16px; }
-.col-6 { flex: 1; }
+/* Row/Col 유틸리티 */
+.row {
+  display: flex;
+  gap: 16px;
+}
 
-.fade-in { animation: fadeIn 0.5s ease-out; }
+.col-6 {
+  flex: 1;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

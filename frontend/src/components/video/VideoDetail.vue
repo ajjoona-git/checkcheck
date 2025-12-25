@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <div class="container py-5 fade-in">
-      
+
       <div class="header-section mb-4">
         <button @click="router.back()" class="btn-back mb-3">
           <i class="bi bi-arrow-left me-2"></i>목록으로
@@ -9,21 +9,17 @@
       </div>
 
       <div v-if="video" class="video-detail-card shadow-lg">
-        
+
         <div class="video-wrapper">
-          <iframe
-            :src="`https://www.youtube.com/embed/${video.id}`" 
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen
-          ></iframe>
+          <iframe :src="`https://www.youtube.com/embed/${video.id}`" title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
         </div>
 
         <div class="card-body p-4 p-md-5">
           <div class="d-flex flex-column gap-3">
             <h1 class="video-title">{{ decodeHtml(video.snippet.title) }}</h1>
-            
+
             <div class="video-meta d-flex align-items-center gap-3 text-secondary">
               <span class="d-flex align-items-center gap-1">
                 <i class="bi bi-calendar-event"></i>
@@ -44,7 +40,7 @@
         </div>
 
       </div>
-      
+
       <div v-else class="loading-state">
         <div class="spinner-border text-primary" role="status"></div>
         <p class="mt-3 text-muted">영상을 불러오는 중입니다...</p>
@@ -55,52 +51,52 @@
 </template>
 
 <script setup>
-  import { useRoute, useRouter } from 'vue-router';
-  import { ref, onMounted } from 'vue';
-  import axios from 'axios';
-  import { useVideoStore } from '@/stores/videos';
+import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useVideoStore } from '@/stores/videos';
 
-  const route = useRoute()
-  const router = useRouter()
-  const video = ref(null)
-  const videoStore = useVideoStore()
+const route = useRoute()
+const router = useRouter()
+const video = ref(null)
+const videoStore = useVideoStore()
 
-  const decodeHtml = (raw) => {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(raw, 'text/html')
-    return doc.body.textContent || ""
-  }
+// HTML 엔티티 디코딩 함수
+const decodeHtml = (raw) => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(raw, 'text/html')
+  return doc.body.textContent || ""
+}
 
-  const getVideo = () => {
-    const videoId = route.params.id
-    axios({
-      method: 'get',
-      url: `${videoStore.YOUTUBE_API_URL}/videos`,
-      params: {
-        key: videoStore.YOUTUBE_API_KEY,
-        part: 'snippet',
-        id: videoId, 
-      }
-    })
-      .then(res => {
-        const item = res.data.items[0]
-        if (item?.snippet?.publishedAt) {
-           item.snippet.publishedAtFormatted = item.snippet.publishedAt.split('T')[0]
-        }
-
-        console.log('상세 정보 조회 성공:', item)
-        video.value = item
-      })
-      .catch(err =>{
-        console.log(err)
-        alert('영상을 불러올 수 없습니다.')
-        router.back()
-      })
-  }
-
-  onMounted(() => {
-    getVideo()
+// 영상 상세 정보 조회
+const getVideo = () => {
+  const videoId = route.params.id
+  axios({
+    method: 'get',
+    url: `${videoStore.YOUTUBE_API_URL}/videos`,
+    params: {
+      key: videoStore.YOUTUBE_API_KEY,
+      part: 'snippet',
+      id: videoId,
+    }
   })
+    .then(res => {
+      const item = res.data.items[0]
+      if (item?.snippet?.publishedAt) {
+        item.snippet.publishedAtFormatted = item.snippet.publishedAt.split('T')[0]
+      }
+      video.value = item
+    })
+    .catch(err => {
+      alert('영상을 불러올 수 없습니다.')
+      router.back()
+    })
+}
+
+// 컴포넌트 마운트 시 영상 정보 로드
+onMounted(() => {
+  getVideo()
+})
 </script>
 
 <style scoped>
@@ -116,15 +112,17 @@
 /* Back Button */
 .btn-back {
   background: white;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   padding: 8px 16px;
   border-radius: 50px;
   color: var(--text-secondary);
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s;
-  display: inline-flex; align-items: center;
+  display: inline-flex;
+  align-items: center;
 }
+
 .btn-back:hover {
   background: #f8f9fa;
   color: var(--text-primary);
@@ -136,7 +134,7 @@
   background: white;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 /* 16:9 Responsive Video Wrapper */
@@ -150,8 +148,10 @@
 
 .video-wrapper iframe {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Content Styles */
@@ -168,11 +168,14 @@
 }
 
 .vertical-divider {
-  width: 1px; height: 14px;
+  width: 1px;
+  height: 14px;
   background-color: #ddd;
 }
 
-.divider { border-color: rgba(0,0,0,0.05); }
+.divider {
+  border-color: rgba(0, 0, 0, 0.05);
+}
 
 /* Description Box */
 .description-box {
@@ -203,14 +206,29 @@
   color: var(--text-secondary);
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
-  .video-title { font-size: 1.4rem; }
-  .card-body { padding: 20px; }
+  .video-title {
+    font-size: 1.4rem;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
 }
 </style>

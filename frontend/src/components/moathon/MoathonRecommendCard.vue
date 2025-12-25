@@ -1,10 +1,10 @@
 <template>
   <div class="detail-card">
-    
+
     <div class="card-header-section text-center mb-4">
       <span class="bank-badge">{{ detail.bank_name }}</span>
       <h3 class="product-title text-truncate">{{ detail.product_name }}</h3>
-      
+
       <div class="rate-highlight mt-3">
         <span class="label">최고 금리</span>
         <span class="value">{{ detail.intr_rate2 }}%</span>
@@ -83,7 +83,7 @@ defineEmits(['create', 'retry'])
 
 /* Header */
 .bank-badge {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   color: var(--text-secondary);
   font-size: 0.85rem;
   padding: 4px 12px;
@@ -108,8 +108,17 @@ defineEmits(['create', 'retry'])
   padding: 8px 20px;
   border-radius: 99px;
 }
-.rate-highlight .label { font-size: 0.9rem; font-weight: 600; }
-.rate-highlight .value { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+
+.rate-highlight .label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.rate-highlight .value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
 
 /* Grid */
 .options-grid {
@@ -127,13 +136,39 @@ defineEmits(['create', 'retry'])
   border-radius: 16px;
 }
 
-.opt-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; }
-.opt-value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.opt-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.opt-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
 
 /* Text Section */
-.info-group { margin-bottom: 20px; }
-.info-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; }
-.info-desc { font-size: 0.95rem; color: #555; line-height: 1.6; margin: 0; background: #fff; }
+.info-group {
+  margin-bottom: 20px;
+}
+
+.info-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.info-desc {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  background: #fff;
+}
 
 .warning-box {
   background-color: #fff8e1;
@@ -142,8 +177,21 @@ defineEmits(['create', 'retry'])
   padding: 20px;
   border-radius: 16px;
 }
-.warning-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: center; }
-.warning-list { margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.5; }
+
+.warning-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.warning-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
 
 /* Buttons */
 .btn-action {
@@ -161,6 +209,7 @@ defineEmits(['create', 'retry'])
   color: white;
   box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
 }
+
 .btn-action.start:hover {
   background: #144a18;
   transform: translateY(-2px);
@@ -172,6 +221,7 @@ defineEmits(['create', 'retry'])
   color: var(--text-secondary);
   border: 1px solid #e0e0e0;
 }
+
 .btn-action.retry:hover {
   background: #f8f9fa;
   color: var(--text-primary);

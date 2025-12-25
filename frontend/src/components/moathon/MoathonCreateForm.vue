@@ -4,40 +4,20 @@
 
       <div class="form-group mb-4">
         <label for="title" class="form-label">모아톤 이름</label>
-        <input 
-          type="text" 
-          id="title" 
-          v-model="formData.title" 
-          class="form-control custom-input"
-          placeholder="예: 유럽 여행 가자!" 
-          required 
-        />
+        <input type="text" id="title" v-model="formData.title" class="form-control custom-input"
+          placeholder="예: 유럽 여행 가자!" required />
       </div>
 
       <div class="form-group mb-4">
         <label for="target_amount" class="form-label">목표 금액 (원)</label>
-        <input 
-          type="number" 
-          id="target_amount" 
-          v-model.number="formData.target_amount" 
-          class="form-control custom-input"
-          placeholder="목표 금액을 입력하세요"
-          required 
-          min="0" 
-        />
+        <input type="number" id="target_amount" v-model.number="formData.target_amount"
+          class="form-control custom-input" placeholder="목표 금액을 입력하세요" required min="0" />
       </div>
 
       <div class="form-group mb-4" v-if="!isEdit">
         <label for="start_amount" class="form-label">시작 금액 (원)</label>
-        <input 
-          type="number" 
-          id="start_amount" 
-          v-model.number="formData.start_amount" 
-          class="form-control custom-input"
-          placeholder="처음 입금할 금액을 입력하세요"
-          required 
-          min="0" 
-        />
+        <input type="number" id="start_amount" v-model.number="formData.start_amount" class="form-control custom-input"
+          placeholder="처음 입금할 금액을 입력하세요" required min="0" />
       </div>
 
       <div class="form-group mb-5">
@@ -85,6 +65,7 @@ const props = defineProps({
 
 const emit = defineEmits(['submit'])
 
+// 모아톤 데이터 
 const formData = reactive({
   title: '',
   purpose: 'GOAL',
@@ -92,6 +73,7 @@ const formData = reactive({
   start_amount: null
 })
 
+// 초기 데이터가 변경될 때마다 formData 업데이트
 watch(
   () => props.initialData,
   (newData) => {
@@ -104,6 +86,7 @@ watch(
   { immediate: true }
 )
 
+// 폼 제출 처리
 const submitForm = async () => {
   try {
     const payload = {
@@ -121,22 +104,23 @@ const submitForm = async () => {
       await accountStore.getProfile()
       router.push({ name: 'home' })
     }
-    
+
     emit('submit', payload)
-  } catch (err) {
-    console.error(err)
+  } catch (err) {  // 에러 처리
     if (err.response && err.response.status === 400) {
-        alert('입력 정보를 확인해주세요.')
-    } else {
-        const msg = props.isEdit ? '수정에 실패했습니다.' : '생성에 실패했습니다.'
-        alert(msg)
+      alert('입력 정보를 확인해주세요.')
+    } else {  // 서버 에러
+      const msg = props.isEdit ? '수정에 실패했습니다.' : '생성에 실패했습니다.'
+      alert(msg)
     }
   }
 }
 </script>
 
 <style scoped>
-.form-container { width: 100%; }
+.form-container {
+  width: 100%;
+}
 
 .form-label {
   display: block;
@@ -147,25 +131,29 @@ const submitForm = async () => {
 }
 
 /* 입력 필드 공통 스타일 */
-.custom-input, .custom-select {
+.custom-input,
+.custom-select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #e0e0e0;
-  border-radius: 16px; /* 둥근 모서리 */
+  border-radius: 16px;
   font-size: 1rem;
   background-color: #fcfcfc;
   transition: all 0.2s ease;
-  box-shadow: none; /* 부트스트랩 기본 쉐도우 제거 */
+  box-shadow: none;
 }
 
-.custom-input:focus, .custom-select:focus {
+.custom-input:focus,
+.custom-select:focus {
   border-color: var(--moathon-green);
   background-color: white;
-  box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1); /* 초록색 포커스 링 */
+  box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1);
 }
 
 /* placeholder 색상 */
-.custom-input::placeholder { color: #adb5bd; }
+.custom-input::placeholder {
+  color: #adb5bd;
+}
 
 /* 버튼 스타일 */
 .submit-btn {
