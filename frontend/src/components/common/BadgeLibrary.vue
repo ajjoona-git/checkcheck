@@ -70,14 +70,13 @@ const props = defineProps({
 const containerRef = ref(null)
 const currentPage = ref(0)
 const columns = ref(4)
-const itemsPerPage = computed(() => columns.value * 2) // 항상 2줄
+const itemsPerPage = computed(() => columns.value * 2)
 
 let resizeObserver = null
 
 const handleResize = (entries) => {
   for (const entry of entries) {
     const width = entry.contentRect.width
-    // 너비에 따라 컬럼 수 조정 (뱃지 하나당 약 100px~120px 확보)
     if (width < 300) {
       columns.value = 2
     } else if (width < 400) {
@@ -92,7 +91,6 @@ const handleResize = (entries) => {
       columns.value = 8
     }
     
-    // 페이지 리셋 (범위 초과 방지)
     if (currentPage.value >= totalPages.value) {
       currentPage.value = Math.max(0, totalPages.value - 1)
     }
@@ -123,7 +121,6 @@ const paginatedBadges = computed(() => {
 
 const emptySlots = computed(() => {
   const currentCount = paginatedBadges.value.length
-  // 마지막 페이지 등에서 빈 자리가 생기면 채워줌 (높이 유지)
   return Math.max(0, itemsPerPage.value - currentCount)
 })
 
@@ -146,16 +143,15 @@ const resolveImagePath = (path) => {
   box-shadow: 0 8px 24px rgba(0,0,0,0.03);
   background: white;
   transition: transform 0.2s ease;
-  width: 100%; /* 부모 요소에 꽉 차게 */
+  width: 100%;
 }
 
 .badge-grid {
   display: grid;
   gap: 16px;
   justify-items: center;
-  /* CSS 변수를 통해 동적으로 컬럼 수 설정 */
   grid-template-columns: repeat(var(--grid-cols, 4), 1fr);
-  min-height: 240px; /* 2줄 높이 확보 */
+  min-height: 240px;
 }
 
 .badge-item {
@@ -168,13 +164,11 @@ const resolveImagePath = (path) => {
 
 .badge-icon-wrapper {
   position: relative;
-  /* 아이콘 크기: 반응형으로 조정 가능하지만 고정값도 무난함 */
   width: 72px; 
   height: 72px;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* 뱃지 배경색을 없애거나 아주 연하게 (이미지가 돋보이도록) */
   background: transparent; 
   transition: transform 0.2s;
 }
@@ -187,7 +181,6 @@ const resolveImagePath = (path) => {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* 드롭 섀도우로 뱃지 입체감 살리기 */
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
 
@@ -214,7 +207,7 @@ const resolveImagePath = (path) => {
   color: var(--text-secondary);
   margin-top: 8px;
   font-weight: 600;
-  max-width: 80px; /* 이름 길면 말줄임 */
+  max-width: 80px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

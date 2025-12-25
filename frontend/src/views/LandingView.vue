@@ -51,7 +51,7 @@
             목표 달성의 순간들을 특별한 뱃지로 남겨보세요.<br>
             하나씩 채워가는 즐거움이 꾸준한 저축의 원동력이 됩니다.
           </p>
-          <div class="track-box">
+          <div class="badge-box">
             <BadgeLibrary :badges="mockBadgeCollection" />
           </div>
         </div>
@@ -70,7 +70,6 @@
         <div class="bento-item feature-card curation reveal">
           <div class="card-bg-icon"><i class="bi bi-stars"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-stars"></i></div>
             <h3>맞춤 큐레이션</h3>
             <p>내 자산과 연봉을 분석해<br>최적의 상품을 제안합니다.</p>
           </div>
@@ -79,7 +78,6 @@
         <div class="bento-item feature-card community reveal" style="transition-delay: 0.1s;">
           <div class="card-bg-icon"><i class="bi bi-people-fill"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-people-fill"></i></div>
             <h3>모아톤 커뮤니티</h3>
             <p>친구들과 목표를 공유하고<br>서로 응원하며 완주하세요.</p>
           </div>
@@ -88,7 +86,6 @@
         <div class="bento-item feature-card badge-feat reveal" style="transition-delay: 0.2s;">
           <div class="card-bg-icon"><i class="bi bi-award-fill"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-award-fill"></i></div>
             <h3>소셜 뱃지</h3>
             <p>저축 마일스톤을 달성하고<br>특별한 뱃지를 수집하세요.</p>
           </div>
@@ -97,7 +94,6 @@
         <div class="bento-item feature-card map reveal" style="transition-delay: 0.3s;">
           <div class="card-bg-icon"><i class="bi bi-geo-alt-fill"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
             <h3>금융 맵</h3>
             <p>내 주변 가까운 은행 지점과<br>ATM 위치를 찾아드립니다.</p>
           </div>
@@ -106,7 +102,6 @@
         <div class="bento-item feature-card learning reveal" style="transition-delay: 0.4s;">
           <div class="card-bg-icon"><i class="bi bi-play-circle-fill"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-play-circle-fill"></i></div>
             <h3>스마트 러닝</h3>
             <p>어려운 금융 용어와 상식을<br>영상으로 쉽게 배워보세요.</p>
           </div>
@@ -115,7 +110,6 @@
         <div class="bento-item feature-card asset reveal" style="transition-delay: 0.5s;">
           <div class="card-bg-icon"><i class="bi bi-graph-up-arrow"></i></div>
           <div class="content">
-            <div class="icon-box"><i class="bi bi-graph-up-arrow"></i></div>
             <h3>자산 시세</h3>
             <p>금, 은 등 주요 원자재의<br>실시간 시세를 확인하세요.</p>
           </div>
@@ -215,7 +209,6 @@ const mockBadgeCollection = ref([
 let observer = null
 
 onMounted(() => {
-  // 1. Scroll Reveal Animation
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -227,7 +220,6 @@ onMounted(() => {
   const revealElements = document.querySelectorAll('.reveal');
   revealElements.forEach(el => observer.observe(el));
 
-  // 2. Internal Anchor Smooth Scroll
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
       e.preventDefault();
@@ -371,7 +363,7 @@ onUnmounted(() => {
 
 .bento-item.wide {
   grid-column: span 6;
-    background: var(--bg-secondary);
+  background: var(--bg-secondary);
 }
 
 .bento-item.small {
@@ -392,23 +384,12 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-.icon-box {
-  position: absolute;
-  top: 48px;
-  right: 48px;
-  width: 64px;
-  height: 64px;
-  background: #fff;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-}
-
 .track-box {
   padding: 40px 16px 30px;
+}
+
+.badge-box {
+  padding: 30px 0;
 }
 
 .recommend-box {
@@ -466,21 +447,6 @@ onUnmounted(() => {
 .content {
   position: relative;
   z-index: 1;
-}
-
-/* 아이콘 박스 (작은 아이콘) */
-.icon-box {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-  color: white;
-  background: var(--moathon-deep);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .feature-card h3 {
