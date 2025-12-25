@@ -1,17 +1,28 @@
 <template>
-  <div class="recommend-view">
-    <div class="header">
-      <h1>모아톤 추천받기</h1>
-      <p>저축 목표를 입력하고 맞춤 상품을 추천받아 보세요.</p>
-    </div>
+  <div class="page-wrapper">
+    <div class="container fade-in">
+      
+      <div class="header text-center mb-5">
+        <h1 class="page-title">모아톤 추천받기</h1>
+        <p class="page-subtitle">저축 목표를 입력하고 <span class="highlight">AI 맞춤 상품</span>을 추천받아 보세요.</p>
+      </div>
 
-    <div v-if="!store.recommendationResult" class="card fade-in">
-      <MoathonRecommendForm :is-loading="store.isRecommending" @submit="handleRecommend" />
-    </div>
+      <div class="recommend-card-wrapper shadow-sm">
+        
+        <div v-if="!store.recommendationResult" class="form-section">
+          <MoathonRecommendForm :is-loading="store.isRecommending" @submit="handleRecommend" />
+        </div>
 
-    <div v-else class="result-section fade-in">
-      <MoathonRecommendCard :detail="detail" :warnings="warnings" @create="createWithProduct"
-        @retry="resetRecommendation" />
+        <div v-else class="result-section fade-in">
+          <MoathonRecommendCard 
+            :detail="detail" 
+            :warnings="warnings" 
+            @create="createWithProduct"
+            @retry="resetRecommendation" 
+          />
+        </div>
+
+      </div>
     </div>
   </div>
 </template>
@@ -38,7 +49,6 @@ const warnings = computed(() => {
   return store.recommendationResult?.final_recommendation?.warnings || []
 })
 
-// 1. 프로필 정보 확인 (onMounted)
 onMounted(async () => {
   if (!accountStore.user) {
     try { await accountStore.getProfile() } catch (e) { }
@@ -50,7 +60,6 @@ onMounted(async () => {
   }
 })
 
-// 2. 추천 요청 핸들러
 const handleRecommend = async (formData) => {
   savedFormData.value = { ...formData }
   try {
@@ -60,7 +69,6 @@ const handleRecommend = async (formData) => {
   }
 }
 
-// 3. '이걸로 시작' 핸들러 (바로 생성)
 const createWithProduct = async () => {
   if (!detail.value || !detail.value.product_name) {
     alert('상품 정보가 올바르지 않습니다. 다시 시도해주세요.')
@@ -77,7 +85,6 @@ const createWithProduct = async () => {
 
   try {
     const payload = {
-      // title: savedFormData.value.title,
       purpose: savedFormData.value.purpose,
       target_amount: savedFormData.value.target_amount,
       start_amount: savedFormData.value.start_amount,
@@ -91,7 +98,6 @@ const createWithProduct = async () => {
   }
 }
 
-// 4. '다시 추천 받기' 핸들러 (초기화)
 const resetRecommendation = () => {
   store.recommendationResult = null
   savedFormData.value = null
@@ -100,50 +106,54 @@ const resetRecommendation = () => {
 </script>
 
 <style scoped>
-/* View는 레이아웃과 컨테이너 스타일만 유지 */
-.recommend-view {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px 20px;
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 30px;
+.container {
+  max-width: 680px;
+  width: 100%;
 }
 
-.card {
+.page-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.highlight {
+  color: var(--moathon-green);
+  font-weight: 700;
+}
+
+.recommend-card-wrapper {
   background: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 40px;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
-.result-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+.bg-green-light { background-color: #e8f5e9; }
 
-.result-header h2 {
-  font-size: 1.4rem;
-  color: #2c3e50;
-  margin-bottom: 8px;
-}
-
-/* 애니메이션 */
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
+.fade-in { animation: fadeIn 0.6s ease-out; }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@media (max-width: 576px) {
+  .recommend-card-wrapper { padding: 24px; }
 }
 </style>

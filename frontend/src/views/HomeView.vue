@@ -223,15 +223,15 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 <style scoped>
 /* 전체 레이아웃 배경 */
 .home-wrapper {
-  background-color: var(--bg-secondary); /* #f5f5f7 */
-  min-height: calc(100vh - 80px); /* Navbar 높이 고려 */
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
   padding-bottom: 60px;
 }
 
 /* [SECTION 1] 대시보드 카드 스타일 (Bento Grid 스타일) */
 .dashboard-card {
   background-color: white;
-  border-radius: 32px !important; /* 더 둥글게 */
+  border-radius: 32px !important;
   border: 1px solid rgba(0, 0, 0, 0.04) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
   padding: 40px !important;
@@ -256,6 +256,7 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
   color: var(--text-primary);
   font-weight: 600;
   cursor: pointer;
+  padding-left: 16px;
 }
 .form-select:focus {
   border-color: var(--moathon-green);
@@ -276,7 +277,6 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 
 /* [SECTION 1] 히어로 배너 (진행 중인 모아톤 없을 때) */
 .hero-banner {
-  /* Green 계열의 은은한 그라데이션으로 변경 */
   background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%) !important;
   border: 1px solid rgba(27, 94, 32, 0.1) !important;
   border-radius: 32px !important;
@@ -315,7 +315,7 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 .hero-banner .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 30px rgba(27, 94, 32, 0.3) !important;
-  background-color: #144a18 !important; /* hover 시 조금 더 진하게 */
+  background-color: #144a18 !important; 
 }
 
 /* [SECTION 2] 친구들의 소식 섹션 */
