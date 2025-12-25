@@ -62,7 +62,6 @@
 
         <div v-else class="hero-banner text-center py-5 rounded-4 bg-primary-subtle border border-primary-subtle">
           <div class="py-2">
-            <span class="badge bg-primary mb-3 px-3 py-2 rounded-pill">Start Now</span>
             <h1 class="display-6 fw-bold text-dark mb-3">목돈 만들기, 시작이 반입니다!</h1>
             <p class="text-secondary mb-4">
               나에게 딱 맞는 예적금 상품을 추천받고<br>

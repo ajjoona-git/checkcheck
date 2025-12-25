@@ -1,69 +1,93 @@
 <template>
-  <div class="market-container">
-    <div class="header-section">
-      <h1>금/은 시세 조회</h1>
-      <p>원하는 기간의 시세 변동을 확인해보세요.</p>
-    </div>
+  <div class="page-wrapper">
+    <div class="container py-5 fade-in">
+      
+      <header class="page-header text-center mb-5">
+        <h1 class="header-title">금/은 시세 조회</h1>
+        <p class="header-subtitle">
+          원하는 기간의 <span class="highlight">시세 변동</span>을 한눈에 확인해보세요.
+        </p>
+      </header>
 
-    <div class="filter-controls">
-      <div class="date-group">
-        <label>기간:</label>
-        <input type="date" v-model="startDate" class="date-input" />
-        <span>~</span>
-        <input type="date" v-model="endDate" class="date-input" />
+      <div class="control-panel mb-4">
+        
+        <div class="tabs-group">
+          <button 
+            v-for="type in ['gold', 'silver']" 
+            :key="type"
+            @click="changeAssetType(type)"
+            :class="['tab-btn', { active: selectedAsset === type }]"
+          >
+            {{ type === 'gold' ? '금 (Gold)' : '은 (Silver)' }}
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <div class="date-inputs">
+            <input type="date" v-model="startDate" class="form-control date-input" />
+            <span class="tilde">~</span>
+            <input type="date" v-model="endDate" class="form-control date-input" />
+          </div>
+          <button @click="fetchMarketPrices(selectedAsset)" class="btn-search">
+            <i class="bi bi-search me-1"></i> 조회
+          </button>
+        </div>
       </div>
-      <button @click="fetchMarketPrices(selectedAsset)" class="search-btn">
-        조회
-      </button>
-    </div>
 
-    <div class="tabs">
-      <button 
-        v-for="type in ['gold', 'silver']" 
-        :key="type"
-        @click="changeAssetType(type)"
-        :class="['tab-btn', { active: selectedAsset === type }]"
-      >
-        {{ type === 'gold' ? '금 (Gold)' : '은 (Silver)' }}
-      </button>
-    </div>
-
-    <div class="chart-section">
-      <CommodityChart 
-        v-if="marketData.length > 0" 
-        :chartData="marketData" 
-        :type="selectedAsset" 
-      />
-      <div v-else-if="!isLoading" class="no-data">
-        선택한 기간에 데이터가 없습니다.
+      <div class="chart-card shadow-sm mb-5">
+        <div class="card-header-custom mb-3">
+          <h5 class="chart-title">
+            <i class="bi bi-graph-up-arrow me-2 text-success"></i>
+            {{ selectedAsset === 'gold' ? '금' : '은' }} 시세 차트
+          </h5>
+        </div>
+        
+        <div class="chart-body">
+          <CommodityChart 
+            v-if="marketData.length > 0" 
+            :chartData="marketData" 
+            :type="selectedAsset" 
+          />
+          <div v-else-if="!isLoading" class="empty-state">
+            <i class="bi bi-calendar-x fs-1 mb-2 opacity-50"></i>
+            <p>선택한 기간에 데이터가 없습니다.</p>
+          </div>
+          <div v-else class="loading-state">
+            <div class="spinner-border text-success" role="status"></div>
+          </div>
+        </div>
       </div>
-      <div v-else class="loading-indicator">로딩중...</div>
-    </div>
 
-    <div class="table-section" v-if="marketData.length > 0">
-      <h3>상세 시세표</h3>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>날짜</th>
-            <th>시가</th>
-            <th>고가</th>
-            <th>저가</th>
-            <th>종가</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in [...marketData].reverse()" :key="item.date">
-            <td>{{ item.date }}</td>
-            <td>{{ item.open.toLocaleString() }}</td>
-            <td class="high">{{ item.high.toLocaleString() }}</td>
-            <td class="low">{{ item.low.toLocaleString() }}</td>
-            <td :class="getPriceColor(item)">
-              {{ item.close_last.toLocaleString() }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-card shadow-sm" v-if="marketData.length > 0">
+        <div class="card-header-custom mb-3">
+          <h5 class="table-title">상세 시세표</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table custom-table">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>시가</th>
+                <th>고가</th>
+                <th>저가</th>
+                <th>종가</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in [...marketData].reverse()" :key="item.date">
+                <td>{{ item.date }}</td>
+                <td>{{ Number(item.open).toLocaleString() }}</td>
+                <td class="text-danger">{{ Number(item.high).toLocaleString() }}</td>
+                <td class="text-primary">{{ Number(item.low).toLocaleString() }}</td>
+                <td :class="getPriceColor(item)">
+                  {{ Number(item.close_last).toLocaleString() }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -84,17 +108,15 @@ const oneMonthAgo = new Date()
 oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 const lastMonth = oneMonthAgo.toISOString().split('T')[0]
 
-const startDate = ref(lastMonth)
+const startDate = ref('2023-01-01')
 const endDate = ref(today)
 
-// 상승/하락 색상 결정
 const getPriceColor = (item) => {
-  if (item.close_last > item.open) return 'rising'
-  if (item.close_last < item.open) return 'falling'
+  if (item.close_last > item.open) return 'text-danger fw-bold'
+  if (item.close_last < item.open) return 'text-primary fw-bold'
   return ''
 }
 
-// 데이터 조회 함수
 const fetchMarketPrices = async (assetType) => {
   if (startDate.value > endDate.value) {
     alert('종료일이 시작일보다 빠를 수 없습니다.')
@@ -102,10 +124,9 @@ const fetchMarketPrices = async (assetType) => {
   }
 
   isLoading.value = true
-  marketData.value = [] // 탭 전환 시 데이터 초기화 (깜빡임 방지)
+  marketData.value = []
   
   try {
-    // 백엔드 API 호출
     const response = await axios.get(`${accountStore.API_URL}/visualizations/commodities/prices`, {
       params: { 
         asset: assetType,
@@ -114,8 +135,6 @@ const fetchMarketPrices = async (assetType) => {
       }
     })
     
-    // 응답 예시: { asset: "gold", data: [ ... ] }
-    // 실제 차트에 필요한 데이터 배열만 추출
     if (response.data && response.data.data) {
       marketData.value = response.data.data
     }
@@ -126,7 +145,6 @@ const fetchMarketPrices = async (assetType) => {
   }
 }
 
-// 탭 변경 핸들러
 const changeAssetType = (type) => {
   selectedAsset.value = type
   fetchMarketPrices(type)
@@ -138,85 +156,179 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.market-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-.header-section { text-align: center; margin-bottom: 30px; }
-.filter-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 12px;
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
 }
 
-.date-group {
+/* Header Styles */
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--moathon-green) 0%, var(--moathon-deep) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.highlight {
+  color: var(--moathon-green);
+  font-weight: 800;
+}
+
+/* Control Panel */
+.control-panel {
+  padding: 20px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .control-panel {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+  }
+}
+
+/* Tabs */
+.tabs-group {
+  display: flex;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 50px;
+  width: fit-content;
+}
+
+.tab-btn {
+  padding: 8px 24px;
+  border-radius: 50px;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.tab-btn.active {
+  background: white;
+  color: var(--moathon-green);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-weight: 700;
+}
+
+/* Filters */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-inputs {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: bold;
-  color: #555;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
 }
 
 .date-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: inherit;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  padding: 4px;
+  width: auto;
 }
-.date-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: inherit;
-}
+.date-input:focus { box-shadow: none; }
 
-.search-btn {
-  padding: 8px 20px;
-  background-color: #2c3e50;
+.tilde { color: var(--text-secondary); }
+
+.btn-search {
+  padding: 10px 24px;
+  background-color: var(--moathon-green);
   color: white;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-
-.search-btn:hover {
-  background-color: #3e5871;
-}
-
-.tabs {
-  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
-}
-.tab-btn {
-  padding: 10px 24px; border-radius: 50px; border: 1px solid #ddd;
-  background: white; cursor: pointer; font-weight: 600; text-transform: capitalize;
+  border-radius: 12px;
+  font-weight: 600;
   transition: all 0.2s;
 }
-.tab-btn.active {
-  background: #2c3e50; color: white; border-color: #2c3e50;
+.btn-search:hover {
+  background-color: #144a18;
+  transform: translateY(-1px);
 }
-.chart-section { margin-bottom: 50px; min-height: 500px; }
-.no-data { text-align: center; padding: 50px; color: #888; }
-.table-section {
-  background: white; padding: 24px; border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+/* Charts & Table Cards */
+.chart-card, .table-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid rgba(0,0,0,0.02);
 }
-.data-table {
-  width: 100%; border-collapse: collapse; text-align: center;
+
+.chart-title, .table-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
-.data-table th {
-  background: #f8f9fa; padding: 12px; font-weight: bold; color: #495057;
+
+.empty-state, .loading-state {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
 }
-.data-table td { padding: 12px; border-bottom: 1px solid #eee; }
-.high { color: #fa5252; }
-.low { color: #4c6ef5; }
-.rising { color: #fa5252; font-weight: bold; }
-.falling { color: #4c6ef5; font-weight: bold; }
+
+/* Table Custom */
+.custom-table th {
+  background-color: #f8f9fa;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #eee;
+  padding: 16px;
+  text-align: center;
+}
+
+.custom-table td {
+  padding: 16px;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f1f3f5;
+  text-align: center;
+}
+
+.custom-table tr:last-child td { border-bottom: none; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-group { flex-direction: column; width: 100%; }
+  .date-inputs { width: 100%; justify-content: space-between; }
+  .btn-search { width: 100%; }
+  .tabs-group { width: 100%; }
+  .tab-btn { flex: 1; }
+}
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
