@@ -40,13 +40,11 @@ export const useProductStore = defineStore('product', () => {
       const response = await axios({
         method: 'get',
         url: `${API_URL}/products/${id}/`,
-        headers: {
-          Authorization: `Token ${accountStore.token}`,
-        },
       })
       productDetail.value = response.data
     } catch (error) {
       console.error('상품 상세 조회 실패:', error)
+      throw error
     }
   }
 
@@ -54,7 +52,7 @@ export const useProductStore = defineStore('product', () => {
     if (banks.value.length > 0) return
 
     try {
-      const response = await axios ({
+      const response = await axios({
         method: 'get',
         url: `${API_URL}/products/banklist/`,
       })

@@ -68,9 +68,13 @@
               나에게 딱 맞는 예적금 상품을 추천받고<br>
               친구들과 함께 저축 챌린지를 시작해보세요.
             </p>
-            <router-link :to="{ name: 'moathonCreate' }" class="btn btn-primary px-5 py-3 fw-bold shadow-sm rounded-pill">
+            <a 
+              href="#" 
+              @click.prevent="handleStartRecommendation" 
+              class="btn btn-primary px-5 py-3 fw-bold shadow-sm rounded-pill"
+            >
               내 맞춤 모아톤 만들기
-            </router-link>
+            </a>
           </div>
         </div>
       </section>
@@ -111,75 +115,94 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAccountStore } from '@/stores/accounts'
 import { useMoathonStore } from '@/stores/moathon'
 import MoathonCard from '@/components/moathon/MoathonCard.vue'
-import MoathonTrack from '@/components/moathon/MoathonTrack.vue' // [추가] 트랙 컴포넌트 임포트
-import defaultProfile from '/default-profile.png' // [추가] 기본 이미지
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue'
+import defaultProfile from '/default-profile.png'
 
+const router = useRouter()
 const accountStore = useAccountStore()
 const moathonStore = useMoathonStore()
-const API_URL = import.meta.env.VITE_API_URL // [추가] 환경 변수
+const API_URL = import.meta.env.VITE_API_URL
 
 const loading = ref(true)
 const selectedMoathonId = ref(null)
 
-// 1. 내 모아톤 상태
 const hasActiveMoathon = computed(() => {
   return accountStore.user?.moathons && accountStore.user.moathons.length > 0
 })
 const myActiveMoathons = computed(() => accountStore.user?.moathons || [])
 
-// 선택된 모아톤 객체
 const selectedMoathon = computed(() => {
   if (!selectedMoathonId.value) return myActiveMoathons.value[0]
   return myActiveMoathons.value.find(m => m.id === selectedMoathonId.value) || myActiveMoathons.value[0]
 })
 
-// [추가] 현재 선택된 모아톤의 진행률 (숫자로 변환)
 const currentProgress = computed(() => {
   if (!selectedMoathon.value) return 0
   return parseFloat(selectedMoathon.value.progress_rate || 0)
 })
 
-// [추가] 로그인한 유저의 닉네임
 const userNickname = computed(() => accountStore.user?.nickname || '회원')
 
-// [추가] 프로필 이미지 URL 계산 로직
 const userProfileImage = computed(() => {
   const path = accountStore.user?.profile_image
   if (!path) return defaultProfile
   if (path.startsWith('http')) return path
-  return `${API_URL}${path}` // 미디어 파일 경로 처리
+  return `${API_URL}${path}`
 })
 
-// 2. 팔로잉 모아톤 상태
 const followingMoathons = computed(() => moathonStore.followingMoathons || [])
+
 const fetchMoathonData = async () => {
   if (accountStore.isAuthenticated) {
-    // 혹시 user 정보가 없으면 채우기
     if (!accountStore.user) await accountStore.getProfile()
-    // 팔로잉 목록 가져오기
     await moathonStore.getFollowingMoathons()
   }
+}
+
+const handleStartRecommendation = () => {
+  if (!accountStore.isAuthenticated) {
+    const userConfirm = confirm('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')
+    if (userConfirm) {
+      router.push({ name: 'login' })
+    }
+    return
+  }
+
+  const user = accountStore.user
+  const isProfileIncomplete = user?.gender === null || user?.credit_score === null || user?.assets === null || user?.salary === null || user?.average_monthly_spend === null || user?.tender === null
+  if (isProfileIncomplete) {
+    const confirmMsg = confirm(
+      '상품 추천을 위해 추가 정보가 필요합니다.\n\n프로필 수정 페이지로 이동하여 정보를 입력하시겠습니까?'
+    )
+    if (confirmMsg) {
+      router.push({ 
+        name: 'mypage',
+        query: { edit: 'true' }
+      })
+    }
+    return
+  }
+
+  router.push({ name: 'moathonRecommend' })
 }
 
 onMounted(async () => {
   try {
     loading.value = true
-    // 이미 로그인이 되어있는 경우 (새로고침 등) 바로 실행
     if (accountStore.isAuthenticated) {
       await fetchMoathonData()
     }
   } catch (err) {
     console.error(err)
   } finally {
-    // 로그인이 안 되어 있어도 로딩은 꺼줘야 함 (Type A 화면을 위해)
     loading.value = false
   }
 })
 
-// 드롭다운 기본값 설정 watcher
 watch(myActiveMoathons, (newVal) => {
   if (newVal && newVal.length > 0 && !selectedMoathonId.value) {
     selectedMoathonId.value = newVal[0].id
@@ -192,7 +215,6 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
     if (!accountStore.user) {
       await accountStore.getProfile()
     }
-    // 팔로잉 데이터 등 메인 데이터 호출
     await fetchMoathonData()
   }
 }, { immediate: true })
