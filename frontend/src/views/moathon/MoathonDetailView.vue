@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-5" v-if="moathon">
+  <div class="container py-5" v-if="!isLoading && moathon">
 
     <header class="detail-header mb-5">
       <div class="d-flex justify-content-between align-items-end border-bottom pb-3">
@@ -38,7 +38,7 @@
         </section>
 
         <section class="product-section mb-5" v-if="mappedProduct">
-          <h5 class="fw-bold mb-3">사용 중인 금융 상품 🏦</h5>
+          <h5 class="fw-bold mb-3">사용 중인 금융 상품</h5>
           <ProductCard :product="mappedProduct" @click="goProductDetail" />
         </section>
 
@@ -51,7 +51,7 @@
             <span class="like-badge ms-2">{{ moathon.likes.count || 0 }}</span>
           </button>
         </section>
-        
+
         <hr class="d-lg-none my-5">
       </div>
 
@@ -85,16 +85,20 @@
       </div>
     </div>
 
-    <CommentSection 
-      :moathon-id="moathon.id" 
-      :comments="comments" 
-    />
+    <CommentSection :moathon-id="moathon.id" :comments="comments" />
 
   </div>
-  <div v-else class="loading-container d-flex justify-content-center align-items-center vh-100">
+
+  <div v-else-if="isLoading" class="loading-container d-flex justify-content-center align-items-center vh-100">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
+  </div>
+
+  <div v-else class="error-container d-flex flex-column justify-content-center align-items-center vh-100">
+    <h3 class="text-muted mb-3">모아톤 정보를 불러올 수 없습니다.</h3>
+    <p class="text-secondary mb-4">존재하지 않거나 삭제된 페이지일 수 있습니다.</p>
+    <button @click="router.push({ name: 'home' })" class="btn btn-primary px-4">홈으로 돌아가기</button>
   </div>
 </template>
 
@@ -118,6 +122,7 @@ const API_URL = import.meta.env.VITE_API_URL
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
 const currentProgress = ref(0)
+const isLoading = ref(true)
 
 const isOwner = computed(() => moathon.value?.user_info?.nickname === accountStore.user?.nickname)
 const isFollowing = computed(() => moathon.value?.user_info?.is_following)
@@ -137,7 +142,9 @@ const userProfileImage = computed(() => {
 
 const handleLike = async () => {
   if (!accountStore.isAuthenticated) {
-    if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) router.push({ name: 'login' })
+    if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+      router.push({ name: 'login' })
+    }
     return
   }
   await store.likeMoathon(route.params.id)
@@ -198,8 +205,26 @@ const handleDelete = async () => {
 // --- Watchers ---
 watch(() => route.params.id, async (newId) => {
   if (newId) {
+    isLoading.value = true // 로딩 시작
     store.clearMoathonDetail()
-    await store.fetchMoathonDetail(newId)
+
+    try {
+      await store.fetchMoathonDetail(newId)
+      isLoading.value = false
+    } catch (error) {
+      const status = error.response?.status
+
+      // CASE 1: 비로그인 유저 접근 (401 Unauthorized)
+      if (status === 401) {
+        alert("로그인이 필요한 서비스입니다.")
+        router.push({ name: 'login' })
+        return // 로딩 상태를 끄지 않고 페이지 이동
+      } else {
+        // [CASE 2] 기타 에러 (404 등) -> 에러 화면 표시
+        console.error("Detail Load Error:", error)
+        isLoading.value = false
+      }
+    }
   }
 }, { immediate: true })
 
@@ -211,54 +236,135 @@ onUnmounted(() => store.clearMoathonDetail())
 </script>
 
 <style scoped>
-/* 페이지 전체에 영향을 주는 주요 스타일만 남김 */
 .badge-purpose {
-  background-color: #e3f2fd; color: #0d6efd; 
-  padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700;
+  background-color: #e3f2fd;
+  color: #0d6efd;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
-.moathon-title { color: #333; margin-top: 0.5rem; }
+
+.moathon-title {
+  color: #333;
+  margin-top: 0.5rem;
+}
 
 .info-stats-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
+
 .stat-card {
-  background: #fff; border: 1px solid #eee; border-radius: 16px;
-  padding: 20px; text-align: center;
-  display: flex; flex-direction: column; gap: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
-.stat-card .label { font-size: 0.85rem; color: #888; font-weight: 600; }
-.stat-card .value { font-size: 1.1rem; font-weight: 800; color: #333; }
+
+.stat-card .label {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.stat-card .value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #333;
+}
 
 .btn-like-large {
-  width: 100%; padding: 18px;
-  background: white; border: 2px solid #eee; border-radius: 16px;
-  display: flex; justify-content: center; align-items: center;
-  transition: all 0.2s ease; cursor: pointer;
+  width: 100%;
+  padding: 18px;
+  background: white;
+  border: 2px solid #eee;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
-.btn-like-large:hover { background: #f8f9fa; border-color: #ddd; }
-.btn-like-large.active { background: #fff0f3; border-color: #ffc9db; color: #e0245e; }
-.like-badge { background: #f1f3f5; padding: 2px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
-.btn-like-large.active .like-badge { background: #ffe3e8; color: #e0245e; }
+
+.btn-like-large:hover {
+  background: #f8f9fa;
+  border-color: #ddd;
+}
+
+.btn-like-large.active {
+  background: #fff0f3;
+  border-color: #ffc9db;
+  color: #e0245e;
+}
+
+.like-badge {
+  background: #f1f3f5;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.btn-like-large.active .like-badge {
+  background: #ffe3e8;
+  color: #e0245e;
+}
 
 .user-profile-card {
-  background: #fff; border-radius: 20px; padding: 30px 20px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px 20px;
 }
+
 .profile-img-lg {
-  width: 100px; height: 100px; border-radius: 50%;
-  object-fit: cover; border: 4px solid #f8f9fa;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
+
 .btn-follow {
-  padding: 8px 24px; border-radius: 50px; border: none; font-weight: bold;
-  background: #0d6efd; color: white; transition: all 0.2s;
+  padding: 8px 24px;
+  border-radius: 50px;
+  border: none;
+  font-weight: bold;
+  background: #0d6efd;
+  color: white;
+  transition: all 0.2s;
 }
-.btn-follow:hover { background: #0b5ed7; }
-.btn-follow.following { background: #e9ecef; color: #495057; border: 1px solid #ced4da; }
-.btn-follow.following:hover { color: #dc3545; background: #ffeea1; border-color: #ffeea1; }
+
+.btn-follow:hover {
+  background: #0b5ed7;
+}
+
+.btn-follow.following {
+  background: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+.btn-follow.following:hover {
+  color: #dc3545;
+  background: #ffeea1;
+  border-color: #ffeea1;
+}
 
 @media (max-width: 991px) {
-  .info-stats-grid { grid-template-columns: 1fr; }
-  .sticky-top { position: static !important; }
+  .info-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky-top {
+    position: static !important;
+  }
 }
 </style>

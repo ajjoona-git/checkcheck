@@ -29,12 +29,21 @@ export const useMoathonStore = defineStore('moathon', () => {
 
   const fetchMoathons = async (page = 1) => {
     try {
-      const response = await axios.get(`${API_URL}/moathons/`, {
-        params: {
-          page: page,
-          page_size: itemsPerPage
-        }
-      })
+      const config = {
+         method: 'get',
+         url: `${API_URL}/moathons/`,
+         params: {
+           page: page,
+           page_size: itemsPerPage 
+         },
+         headers: {}
+      }
+      
+      if (accountStore.token) {
+        config.headers.Authorization = `Token ${accountStore.token}`
+      }
+      
+      const response = await axios(config)
 
       const { results, count: totalCount } = response.data
 
@@ -49,28 +58,37 @@ export const useMoathonStore = defineStore('moathon', () => {
 
   const fetchMoathonDetail = async (id) => {
     try {
-      const response = await axios({
+      const config = {
         method: 'get',
         url: `${API_URL}/moathons/${id}/`,
-        headers: {
-          Authorization: `Token ${accountStore.token}`,
-        }
-      })
+        headers: {}
+      }
+
+      if (accountStore.token) {
+        config.headers.Authorization = `Token ${accountStore.token}`
+      }
+
+      const response = await axios(config)
       moathonDetail.value = response.data
     } catch (error) {
       console.error('모아톤 상세 조회 실패:', error)
+      throw error
     }
   }
 
   const fetchComments = async (moathonId) => {
     try {
-      const response = await axios({
+      const config = {
         method: 'get',
         url: `${API_URL}/moathons/${moathonId}/comments/`,
-        headers: {
-          Authorization: `Token ${accountStore.token}`,
-        }
-      })
+        headers: {}
+      }
+
+      if (accountStore.token) {
+        config.headers.Authorization = `Token ${accountStore.token}`
+      }
+
+      const response = await axios(config)
       const commentList = response.data.results ? response.data.results : response.data
 
       if (moathonDetail.value) {
