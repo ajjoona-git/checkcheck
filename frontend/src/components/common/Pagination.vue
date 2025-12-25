@@ -5,7 +5,7 @@
       @click="onPageChange(currentPage - 1)" 
       class="page-btn prev"
     >
-      &lt;
+      <i class="bi bi-chevron-left"></i>
     </button>
 
     <button 
@@ -23,7 +23,7 @@
       @click="onPageChange(currentPage + 1)" 
       class="page-btn next"
     >
-      &gt;
+      <i class="bi bi-chevron-right"></i>
     </button>
   </div>
 </template>
@@ -31,55 +31,55 @@
 <script setup>
 import { computed } from 'vue'
 
-// 부모로부터 받아야 할 데이터
 const props = defineProps({
-  currentPage: {
-    type: Number,
-    required: true
-  },
-  totalCount: {
-    type: Number,
-    required: true
-  },
-  itemsPerPage: {
-    type: Number,
-    default: 10 // 기본값 10개
-  },
-  displayPageCount: {
-    type: Number,
-    default: 5 // 한 번에 보여줄 페이지 번호 개수 (예: 1 2 3 4 5)
-  }
+  currentPage: { type: Number, required: true },
+  totalCount: { type: Number, required: true },
+  itemsPerPage: { type: Number, default: 24 }, // [중요] 그리드 개수와 일치 (12)
+  displayPageCount: { type: Number, default: 5 }
 })
 
-// 부모에게 알릴 이벤트
 const emit = defineEmits(['change-page'])
 
-// 전체 페이지 수 계산
 const totalPages = computed(() => {
+  if (props.totalCount === 0) return 1
   return Math.ceil(props.totalCount / props.itemsPerPage)
 })
 
-// 보여줄 페이지 번호 배열 계산 (예: [1, 2, 3, 4, 5])
+// [핵심] 페이지 번호 계산 로직 (수정됨)
 const pageNumbers = computed(() => {
-  const pages = []
-  const half = Math.floor(props.displayPageCount / 2)
-  
-  // 현재 페이지를 중심으로 범위 계산
-  let start = Math.max(1, props.currentPage - half)
-  let end = Math.min(totalPages.value, start + props.displayPageCount - 1)
+  const total = totalPages.value
+  const current = props.currentPage
+  const displayCount = props.displayPageCount
 
-  // 끝부분이 모자라면 앞부분을 더 채움
-  if (end - start + 1 < props.displayPageCount) {
-    start = Math.max(1, end - props.displayPageCount + 1)
+  // 1. 전체 페이지가 보여줄 개수(5)보다 적으면 -> 그냥 1부터 끝까지 다 보여줌
+  if (total <= displayCount) {
+    return Array.from({ length: total }, (_, i) => i + 1)
   }
 
+  // 2. 현재 페이지를 기준으로 시작과 끝 계산 (중앙 정렬)
+  let start = current - Math.floor(displayCount / 2)
+  let end = start + displayCount - 1
+
+  // 3. [보정 1] 시작점이 1보다 작으면 -> 1로 강제 고정하고, 끝점을 다시 계산
+  if (start < 1) {
+    start = 1
+    end = Math.min(total, start + displayCount - 1)
+  }
+
+  // 4. [보정 2] 끝점이 전체 페이지를 넘으면 -> 전체 페이지로 강제 고정하고, 시작점을 역산
+  if (end > total) {
+    end = total
+    start = Math.max(1, end - displayCount + 1)
+  }
+
+  // 5. 배열 생성
+  const pages = []
   for (let i = start; i <= end; i++) {
     pages.push(i)
   }
   return pages
 })
 
-// 페이지 변경 요청
 const onPageChange = (page) => {
   if (page < 1 || page > totalPages.value) return
   emit('change-page', page)
@@ -92,40 +92,42 @@ const onPageChange = (page) => {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 30px;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .page-btn {
-  min-width: 40px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 8px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.95rem;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #f8f9fa;
-  border-color: #bbb;
+  background: var(--bg-secondary);
+  color: var(--moathon-green);
+  transform: translateY(-2px);
 }
 
 .page-btn.active {
-  background: #2c3e50;
+  background: var(--moathon-green);
   color: white;
-  border-color: #2c3e50;
+  box-shadow: 0 4px 10px rgba(27, 94, 32, 0.3);
 }
 
 .page-btn:disabled {
-  background: #f5f5f5;
-  color: #ccc;
+  color: #e0e0e0;
   cursor: not-allowed;
-  border-color: #eee;
+  background: transparent;
 }
 </style>
