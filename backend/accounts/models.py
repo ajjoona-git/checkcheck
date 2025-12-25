@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from challenges.models import Moathon
 from django.db.models import Q
 
-# Create your models here.
+# Django 기본 User 모델을 확장한 커스텀 사용자 모델
 class User(AbstractUser):
     nickname = models.CharField(max_length=20, unique=True) # 필수: 닉네임
     birth = models.DateField(max_length=100) # 필수: 생년월일
@@ -41,6 +41,7 @@ class User(AbstractUser):
         related_name="subscribed_users",  # Product 입장에서 "이 상품 가입한 유저들"
     )
 
+# 사용자가 획득 가능한 뱃지 정보 저장
 class Badge(models.Model):
     # 뱃지 타입 구분 (track, achieve, social)
     type = models.CharField(max_length=20)
@@ -52,12 +53,13 @@ class Badge(models.Model):
     badge_url = models.CharField()
 
 
+# 사용자가 획득한 뱃지 기록 (사용자-뱃지 매핑)
 class UserBadge(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='badges')
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
 
-    # [핵심] 트랙 뱃지인 경우, 어떤 모아톤에서 획득했는지 연결
-    # 일반 뱃지(팔로워 10명 등)인 경우 null=True
+    # TRACK 뱃지인 경우, 어떤 모아톤에서 획득했는지 연결
+    # ACHIEVE, SOCIAL 뱃지인 경우 null=True
     moathon = models.ForeignKey(Moathon, on_delete=models.CASCADE, null=True, blank=True)
 
     obtained_at = models.DateTimeField(auto_now_add=True)
@@ -65,7 +67,7 @@ class UserBadge(models.Model):
     class Meta:
         constraints = [
             # 같은 모아톤에서 같은 뱃지(예: 50% 뱃지)를 중복해서 받을 수 없음
-            # 하지만 다른 모아톤에서는 같은 50% 뱃지를 또 받을 수 있음! (이게 중요)
+            # 하지만 다른 모아톤에서는 같은 50% 뱃지를 또 받을 수 있음
             models.UniqueConstraint(
                 fields=['user', 'badge', 'moathon'],
                 name='unique_badge_per_moathon'
@@ -78,6 +80,7 @@ class UserBadge(models.Model):
             ),
         ]
 
+# 사용자 간 팔로우 관계 기록
 class UserFollow(models.Model):
     follower = models.ForeignKey(
         settings.AUTH_USER_MODEL,

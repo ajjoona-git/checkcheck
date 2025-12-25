@@ -1,25 +1,21 @@
 <template>
   <div class="page-wrapper">
     <div class="container fade-in">
-      
+
       <div class="header text-center mb-5">
         <h1 class="page-title">모아톤 추천받기</h1>
         <p class="page-subtitle">저축 목표를 입력하고 <span class="highlight">AI 맞춤 상품</span>을 추천받아 보세요.</p>
       </div>
 
       <div class="recommend-container">
-        
+
         <div v-if="!store.recommendationResult" class="form-section">
           <MoathonRecommendForm :is-loading="store.isRecommending" @submit="handleRecommend" />
         </div>
 
         <div v-else class="result-section fade-in">
-          <MoathonRecommendCard 
-            :detail="detail" 
-            :warnings="warnings" 
-            @create="createWithProduct"
-            @retry="resetRecommendation" 
-          />
+          <MoathonRecommendCard :detail="detail" :warnings="warnings" @create="createWithProduct"
+            @retry="resetRecommendation" />
         </div>
 
       </div>
@@ -41,14 +37,17 @@ const accountStore = useAccountStore()
 
 const savedFormData = ref(null)
 
+// 추천된 상품 상세 정보
 const detail = computed(() => {
   return store.recommendationResult?.final_recommendation?.option_detail || {}
 })
 
+// 추천 시 주의사항
 const warnings = computed(() => {
   return store.recommendationResult?.final_recommendation?.warnings || []
 })
 
+// 프로필 정보 확인 및 리다이렉트
 onMounted(async () => {
   if (!accountStore.user) {
     try { await accountStore.getProfile() } catch (e) { }
@@ -60,6 +59,7 @@ onMounted(async () => {
   }
 })
 
+// 추천 요청 처리
 const handleRecommend = async (formData) => {
   savedFormData.value = { ...formData }
   try {
@@ -69,6 +69,7 @@ const handleRecommend = async (formData) => {
   }
 }
 
+// 추천된 상품으로 모아톤 생성
 const createWithProduct = async () => {
   if (!detail.value || !detail.value.product_name) {
     alert('상품 정보가 올바르지 않습니다. 다시 시도해주세요.')
@@ -88,7 +89,7 @@ const createWithProduct = async () => {
       purpose: savedFormData.value.purpose,
       target_amount: savedFormData.value.target_amount,
       start_amount: savedFormData.value.start_amount,
-      product_option: detail.value.option_id 
+      product_option: detail.value.option_id
     }
 
     await store.createMoathon(payload)
@@ -98,6 +99,7 @@ const createWithProduct = async () => {
   }
 }
 
+// 추천 결과 초기화
 const resetRecommendation = () => {
   store.recommendationResult = null
   savedFormData.value = null
@@ -141,11 +143,23 @@ const resetRecommendation = () => {
   width: 100%;
 }
 
-.bg-green-light { background-color: #e8f5e9; }
+.bg-green-light {
+  background-color: #e8f5e9;
+}
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

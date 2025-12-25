@@ -1,12 +1,13 @@
 from django.db import models
 
-# Create your models here.
+# 원자재 종류(금, 은 등) 기록
 class CommodityAsset(models.Model):
     asset = models.CharField(
         max_length=20,
         primary_key=True,  
     )
-
+    
+# 원자재 가격 내역 기록
 class CommodityPrice(models.Model):
     commodity = models.ForeignKey(
         CommodityAsset,

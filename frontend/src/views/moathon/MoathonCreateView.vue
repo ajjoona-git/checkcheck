@@ -1,30 +1,28 @@
 <template>
   <div class="create-view page-wrapper">
     <div class="container fade-in">
-      
+
       <div class="header text-center mb-5">
         <h1 class="page-title">모아톤 시작하기</h1>
         <p class="page-subtitle">선택하신 금융 상품으로 새로운 도전을 시작합니다.</p>
       </div>
 
       <div class="create-card shadow-sm">
-        
+
         <div v-if="productId" class="selected-product-info mb-4">
           <div class="d-flex align-items-center justify-content-center gap-2">
             <i class="bi bi-check-circle-fill text-success"></i>
             <span>선택된 상품 옵션 ID: <strong>{{ productId }}</strong></span>
           </div>
         </div>
-        
-        <div v-else class="alert alert-warning d-flex align-items-center justify-content-center gap-2 mb-4" role="alert">
+
+        <div v-else class="alert alert-warning d-flex align-items-center justify-content-center gap-2 mb-4"
+          role="alert">
           <i class="bi bi-exclamation-triangle-fill"></i>
           <div>주의: 상품 정보가 선택되지 않았습니다.</div>
         </div>
 
-        <MoathonCreateForm 
-          :is-edit="false" 
-          :initial-data="{ product_option: Number(productId) }"
-        />
+        <MoathonCreateForm :is-edit="false" :initial-data="{ product_option: Number(productId) }" />
       </div>
     </div>
   </div>
@@ -69,13 +67,13 @@ const productId = computed(() => route.query.productId)
 .create-card {
   background: white;
   padding: 40px;
-  border-radius: 32px; /* 둥근 모서리 */
+  border-radius: 32px;
   border: 1px solid rgba(0, 0, 0, 0.02);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 .selected-product-info {
-  background: #e8f5e9; /* 연한 초록 배경 */
+  background: #e8f5e9;
   color: var(--moathon-green);
   padding: 16px;
   border-radius: 16px;
@@ -91,9 +89,19 @@ const productId = computed(() => route.query.productId)
   color: #856404;
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

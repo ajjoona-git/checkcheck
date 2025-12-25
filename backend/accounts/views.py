@@ -211,7 +211,7 @@ def profile(request):
     all_badges = Badge.objects.all()
 
     obtained_stats = (
-        user.badges  # Prefetch로 로드된 UserBadge related manager
+        user.badges
         .values("badge")
         .annotate(count=Count("id"))
     )
@@ -266,7 +266,7 @@ def profile_update(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# 온보딩 최종 제출
 @extend_schema(
     tags=["Accounts"],
     summary="온보딩 최종 제출(PUT)",
@@ -302,6 +302,7 @@ def onboarding(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+# 뱃지 컬렉션 조회
 @extend_schema(summary="뱃지 컬렉션 조회")
 @api_view(['GET'])
 def badge_collection(request):
@@ -335,6 +336,7 @@ def badge_collection(request):
         "collection": collection_data
     })
 
+# 팔로우/언팔로우 토글
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def follow_toggle(request, user_pk):

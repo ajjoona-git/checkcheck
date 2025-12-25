@@ -3,6 +3,7 @@ from .models import CommodityAsset
 from datetime import date
 from typing import Optional
 
+# 원자재 가격 시계열 조회 시리얼라이저
 class CommodityPriceQuerySerializer(serializers.Serializer):
     asset = serializers.CharField(required=True)  # 'gold'/'silver'
     start = serializers.DateField(required=False)  # YYYY-MM-DD

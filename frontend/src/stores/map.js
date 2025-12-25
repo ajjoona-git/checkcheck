@@ -1,9 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
+// Kakao 지도 API 로드 및 상태 관리
 export const useMapStore = defineStore('map', () => {
   const isScriptLoaded = ref(false)
 
+  // Kakao 지도 API 스크립트 동적 로드
   const loadKakaoMapScript = () => {
     return new Promise((resolve, reject) => {
       if (window.kakao && window.kakao.maps) {

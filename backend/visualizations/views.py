@@ -8,6 +8,7 @@ from .models import CommodityAsset, CommodityPrice
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
+#
 def serialize_prices(qs):
     out = []
     for p in qs:
@@ -21,6 +22,7 @@ def serialize_prices(qs):
         })
     return out
 
+# 원자재 가격 시계열 내역 조회
 @extend_schema(
     tags=["Visualizations"],
     summary="원자재 가격 시계열 조회",

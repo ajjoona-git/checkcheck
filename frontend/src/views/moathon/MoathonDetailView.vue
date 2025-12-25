@@ -137,9 +137,9 @@ import { useMoathonStore } from '@/stores/moathon'
 import { useAccountStore } from '@/stores/accounts'
 import ProductCard from '@/components/product/ProductCard.vue'
 import BadgeLibrary from '@/components/common/BadgeLibrary.vue'
-import MoathonTrack from '@/components/moathon/MoathonTrack.vue';
-import CommentSection from '@/components/moathon/CommentSection.vue';
-import defaultProfile from '/default-profile.png';
+import MoathonTrack from '@/components/moathon/MoathonTrack.vue'
+import CommentSection from '@/components/moathon/CommentSection.vue'
+import defaultProfile from '/default-profile.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -150,60 +150,21 @@ const API_URL = import.meta.env.VITE_API_URL
 const isLoading = ref(true)
 const currentProgress = ref(0)
 
+// 모아톤 데이터 및 상태 조회
 const moathon = computed(() => store.moathonDetail)
 const comments = computed(() => moathon.value?.comments || [])
 const isOwner = computed(() => moathon.value?.user_info?.nickname === accountStore.user?.nickname)
 const isFollowing = computed(() => moathon.value?.user_info?.is_following)
 
-const fetchData = async (id) => {
-  if (!id) return
-
-  isLoading.value = true
-  store.clearMoathonDetail()
-
-  try {
-    await store.fetchMoathonDetail(id)
-  } catch (error) {
-    console.error("Detail Load Error:", error)
-    if (error.response?.status === 401) {
-      alert("로그인이 필요한 서비스입니다.")
-      router.push({ name: 'login' })
-    }
-  } finally {
-    isLoading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchData(route.params.id)
-})
-
-watch(() => route.params.id, (newId) => {
-  fetchData(newId)
-})
-
-watch(moathon, (newData) => {
-  if (newData?.progress_rate) {
-    currentProgress.value = newData.progress_rate
-  }
-})
-
-onUnmounted(() => store.clearMoathonDetail())
-
-// --- Helpers & Computed ---
-const getImageUrl = (path) => {
-  if (!path) return defaultProfile
-  if (path.startsWith('http')) return path
-  return `${API_URL}${path}`
-}
-
+// 사용자 프로필 이미지 URL 조회
 const userProfileImage = computed(() => {
   if (moathon.value?.user_info?.profile_image) {
     return getImageUrl(moathon.value.user_info.profile_image)
   }
-  return defaultProfile;
-});
+  return defaultProfile
+})
 
+// 상품 정보 변환 (ProductCard 컴포넌트용)
 const mappedProduct = computed(() => {
   if (!moathon.value?.product_option) return null
   const opt = moathon.value.product_option
@@ -216,7 +177,8 @@ const mappedProduct = computed(() => {
   }
 })
 
-const dDay = computed(() => {
+// 목표까지 남은 일수 (D-day 계산)
+const dDayText = computed(() => {
   if (!moathon.value) return ''
   const end = new Date(moathon.value.end_date)
   const today = new Date()
@@ -224,19 +186,70 @@ const dDay = computed(() => {
   const diffTime = end.getTime() - today.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-  return diffDays >= 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`
+  const result = diffDays >= 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`
+  return result
 })
 
-const dDayText = computed(() => {
-  return dDay.value.replace('D', 'D-').replace('--', '+')
+// 컴포넌트 마운트 시 모아톤 상세 데이터 조회
+onMounted(() => {
+  fetchData(route.params.id)
 })
 
+// 라우트 변경 시 데이터 재조회
+watch(() => route.params.id, (newId) => {
+  fetchData(newId)
+})
+
+// 진도율 업데이트 감시
+watch(moathon, (newData) => {
+  if (newData?.progress_rate) {
+    currentProgress.value = newData.progress_rate
+  }
+})
+
+// 컴포넌트 언마운트 시 상태 초기화
+onUnmounted(() => store.clearMoathonDetail())
+
+// 프로필 이미지 URL 처리 (절대경로/상대경로 호환)
+const getImageUrl = (path) => {
+  if (!path) return defaultProfile
+  if (path.startsWith('http')) return path
+  return `${API_URL}${path}`
+}
+
+// 모아톤 목적 텍스트 포맷팅
 const formatPurpose = (code) => {
-  const map = { 'GOAL': '목돈 만들기', 'SHORT': '단기 여유자금', 'SAFE': '안정적 자산 보관', 'YIELD': '이자 극대화', 'HABIT': '저축 습관 형성' }
+  const map = {
+    'GOAL': '목돈 만들기',
+    'SHORT': '단기 여유자금',
+    'SAFE': '안정적 자산 보관',
+    'YIELD': '이자 극대화',
+    'HABIT': '저축 습관 형성'
+  }
   return map[code] || code
 }
 
-// --- Actions ---
+// 모아톤 상세 정보 조회 (라우트 ID 기반)
+const fetchData = async (id) => {
+  if (!id) return
+
+  isLoading.value = true
+  store.clearMoathonDetail()
+
+  try {
+    await store.fetchMoathonDetail(id)
+  } catch (error) {
+    console.error('Detail Load Error:', error)
+    if (error.response?.status === 401) {
+      alert('로그인이 필요한 서비스입니다.')
+      router.push({ name: 'login' })
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 좋아요 토글 (인증 확인)
 const handleLike = async () => {
   if (!accountStore.isAuthenticated) {
     if (confirm('로그인이 필요한 서비스입니다.')) router.push({ name: 'login' })
@@ -245,26 +258,31 @@ const handleLike = async () => {
   await store.likeMoathon(route.params.id)
 }
 
+// 팔로우 토글 (데이터 갱신 포함)
 const handleFollow = async () => {
   if (!accountStore.isAuthenticated) {
     if (confirm('로그인이 필요한 서비스입니다.')) router.push({ name: 'login' })
     return
   }
-  if (!moathon.value?.user_info) return;
+  if (!moathon.value?.user_info) return
   const result = await accountStore.followUser(moathon.value.user_info.id)
   if (result) {
-    // 팔로우 후 데이터 갱신 (화면 깜빡임 방지 위해 로딩 없이 갱신)
     await store.fetchMoathonDetail(moathon.value.id)
     await accountStore.getProfile()
   }
 }
 
+// 상품 상세 페이지로 이동
 const goProductDetail = () => {
-  if (mappedProduct.value?.id) router.push({ name: 'productDetail', params: { id: mappedProduct.value.id } })
+  if (mappedProduct.value?.id) {
+    router.push({ name: 'productDetail', params: { id: mappedProduct.value.id } })
+  }
 }
 
+// 모아톤 수정 페이지로 이동
 const handleEdit = () => router.push({ name: 'moathonUpdate', params: { id: moathon.value.id } })
 
+// 모아톤 삭제 (확인 후 수행)
 const handleDelete = async () => {
   if (confirm('정말 삭제하시겠습니까?')) {
     await store.deleteMoathon(moathon.value.id)
@@ -285,8 +303,15 @@ const handleDelete = async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .detail-header {
@@ -326,7 +351,7 @@ const handleDelete = async () => {
 
 .btn-icon:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .info-card {
@@ -374,7 +399,6 @@ const handleDelete = async () => {
   word-break: keep-all;
 }
 
-/* 상품 카드는 하단에 꽉 차게 배치 */
 .product-embedded {
   grid-column: span 3;
   background-color: white;
@@ -466,7 +490,8 @@ const handleDelete = async () => {
   font-weight: 700;
 }
 
-.loading-container, .error-container {
+.loading-container,
+.error-container {
   background-color: var(--bg-secondary);
 }
 
@@ -479,6 +504,7 @@ const handleDelete = async () => {
   .stats-grid {
     grid-template-columns: 1fr;
   }
+
   .product-embedded {
     grid-column: span 1;
   }

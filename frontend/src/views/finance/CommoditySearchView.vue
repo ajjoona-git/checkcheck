@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <div class="container py-5 fade-in">
-      
+
       <header class="page-header text-center mb-5">
         <h1 class="header-title">금/은 시세 조회</h1>
         <p class="header-subtitle">
@@ -10,14 +10,10 @@
       </header>
 
       <div class="control-panel mb-4">
-        
+
         <div class="tabs-group">
-          <button 
-            v-for="type in ['gold', 'silver']" 
-            :key="type"
-            @click="changeAssetType(type)"
-            :class="['tab-btn', { active: selectedAsset === type }]"
-          >
+          <button v-for="type in ['gold', 'silver']" :key="type" @click="changeAssetType(type)"
+            :class="['tab-btn', { active: selectedAsset === type }]">
             {{ type === 'gold' ? '금 (Gold)' : '은 (Silver)' }}
           </button>
         </div>
@@ -41,13 +37,9 @@
             {{ selectedAsset === 'gold' ? '금' : '은' }} 시세 차트
           </h5>
         </div>
-        
+
         <div class="chart-body">
-          <CommodityChart 
-            v-if="marketData.length > 0" 
-            :chartData="marketData" 
-            :type="selectedAsset" 
-          />
+          <CommodityChart v-if="marketData.length > 0" :chartData="marketData" :type="selectedAsset" />
           <div v-else-if="!isLoading" class="empty-state">
             <i class="bi bi-calendar-x fs-1 mb-2 opacity-50"></i>
             <p>선택한 기간에 데이터가 없습니다.</p>
@@ -104,19 +96,17 @@ const selectedAsset = ref('gold')
 const isLoading = ref(false)
 
 const today = new Date().toISOString().split('T')[0]
-const oneMonthAgo = new Date()
-oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
-const lastMonth = oneMonthAgo.toISOString().split('T')[0]
-
 const startDate = ref('2023-01-01')
 const endDate = ref(today)
 
+// 종가 색상 반환 함수
 const getPriceColor = (item) => {
   if (item.close_last > item.open) return 'text-danger fw-bold'
   if (item.close_last < item.open) return 'text-primary fw-bold'
   return ''
 }
 
+// 시세 데이터 조회 함수
 const fetchMarketPrices = async (assetType) => {
   if (startDate.value > endDate.value) {
     alert('종료일이 시작일보다 빠를 수 없습니다.')
@@ -125,16 +115,16 @@ const fetchMarketPrices = async (assetType) => {
 
   isLoading.value = true
   marketData.value = []
-  
+
   try {
     const response = await axios.get(`${accountStore.API_URL}/visualizations/commodities/prices`, {
-      params: { 
+      params: {
         asset: assetType,
         start: startDate.value,
         end: endDate.value
       }
     })
-    
+
     if (response.data && response.data.data) {
       marketData.value = response.data.data
     }
@@ -145,11 +135,13 @@ const fetchMarketPrices = async (assetType) => {
   }
 }
 
+// 선택된 자산 타입 변경
 const changeAssetType = (type) => {
   selectedAsset.value = type
   fetchMarketPrices(type)
 }
 
+// 컴포넌트 마운트 시 시세 데이터 조회
 onMounted(() => {
   fetchMarketPrices(selectedAsset.value)
 })
@@ -226,7 +218,7 @@ onMounted(() => {
 .tab-btn.active {
   background: white;
   color: var(--moathon-green);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   font-weight: 700;
 }
 
@@ -255,9 +247,14 @@ onMounted(() => {
   padding: 4px;
   width: auto;
 }
-.date-input:focus { box-shadow: none; }
 
-.tilde { color: var(--text-secondary); }
+.date-input:focus {
+  box-shadow: none;
+}
+
+.tilde {
+  color: var(--text-secondary);
+}
 
 .btn-search {
   padding: 10px 24px;
@@ -268,26 +265,30 @@ onMounted(() => {
   font-weight: 600;
   transition: all 0.2s;
 }
+
 .btn-search:hover {
   background-color: #144a18;
   transform: translateY(-1px);
 }
 
 /* Charts & Table Cards */
-.chart-card, .table-card {
+.chart-card,
+.table-card {
   background: white;
   border-radius: 24px;
   padding: 32px;
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
-.chart-title, .table-title {
+.chart-title,
+.table-title {
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
-.empty-state, .loading-state {
+.empty-state,
+.loading-state {
   height: 400px;
   display: flex;
   flex-direction: column;
@@ -315,20 +316,48 @@ onMounted(() => {
   text-align: center;
 }
 
-.custom-table tr:last-child td { border-bottom: none; }
+.custom-table tr:last-child td {
+  border-bottom: none;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
-  .filter-group { flex-direction: column; width: 100%; }
-  .date-inputs { width: 100%; justify-content: space-between; }
-  .btn-search { width: 100%; }
-  .tabs-group { width: 100%; }
-  .tab-btn { flex: 1; }
+  .filter-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .date-inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .btn-search {
+    width: 100%;
+  }
+
+  .tabs-group {
+    width: 100%;
+  }
+
+  .tab-btn {
+    flex: 1;
+  }
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

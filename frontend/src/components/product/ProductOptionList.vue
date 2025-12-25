@@ -4,11 +4,11 @@
       <div class="opt-content">
         <div class="badge-group">
           <span class="badge term">{{ option.save_trm }}개월</span>
-          
+
           <span v-if="option.rsrv_type_nm" class="badge type">
             {{ option.rsrv_type_nm }}
           </span>
-          
+
           <span v-if="option.intr_rate_type_nm" class="badge type">
             {{ option.intr_rate_type_nm }}
           </span>
@@ -26,7 +26,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="opt-action">
         <button @click="$emit('select-option', option.id)" class="create-btn">
           이 옵션으로 시작하기 <i class="bi bi-arrow-right-circle ms-2"></i>
@@ -64,12 +64,12 @@ defineEmits(['select-option'])
   padding: 24px 32px;
   background: white;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .option-card:hover {
   border-color: #2c3e50;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -171,12 +171,12 @@ defineEmits(['select-option'])
     gap: 20px;
     padding: 24px;
   }
-  
+
   .opt-action {
     display: flex;
     justify-content: flex-end;
   }
-  
+
   .create-btn {
     width: 100%;
     justify-content: space-between;

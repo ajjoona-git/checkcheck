@@ -1,7 +1,7 @@
 <template>
   <div class="form-container form-card">
     <form @submit.prevent="submitForm">
-      
+
       <div class="form-group mb-4">
         <label for="purpose" class="form-label">저축 목적</label>
         <div class="select-wrapper">
@@ -18,38 +18,20 @@
 
       <div class="form-group mb-4">
         <label for="target_amount" class="form-label">목표 금액 (원)</label>
-        <input 
-          type="number" 
-          id="target_amount" 
-          v-model.number="formData.target_amount" 
-          class="form-control custom-input"
-          placeholder="예: 10000000"
-          required 
-        />
+        <input type="number" id="target_amount" v-model.number="formData.target_amount"
+          class="form-control custom-input" placeholder="예: 10000000" required />
       </div>
 
       <div class="form-group mb-4">
         <label for="start_amount" class="form-label">시작 금액 (원)</label>
-        <input 
-          type="number" 
-          id="start_amount" 
-          v-model.number="formData.start_amount" 
-          class="form-control custom-input"
-          placeholder="예: 2000000"
-          required 
-        />
+        <input type="number" id="start_amount" v-model.number="formData.start_amount" class="form-control custom-input"
+          placeholder="예: 2000000" required />
       </div>
 
       <div class="form-group mb-5">
         <label for="term_months" class="form-label">저축 기간 (개월)</label>
-        <input 
-          type="number" 
-          id="term_months" 
-          v-model.number="formData.term_months" 
-          class="form-control custom-input"
-          placeholder="예: 12" 
-          required 
-        />
+        <input type="number" id="term_months" v-model.number="formData.term_months" class="form-control custom-input"
+          placeholder="예: 12" required />
       </div>
 
       <button type="submit" class="submit-btn" :disabled="isLoading">
@@ -69,6 +51,7 @@ const props = defineProps({
 
 const emit = defineEmits(['submit'])
 
+// 폼 데이터
 const formData = reactive({
   purpose: 'GOAL',
   target_amount: null,
@@ -76,6 +59,7 @@ const formData = reactive({
   term_months: 12
 })
 
+// 폼 제출 처리
 const submitForm = () => {
   emit('submit', { ...formData })
 }
@@ -99,7 +83,8 @@ const submitForm = () => {
   font-size: 0.95rem;
 }
 
-.custom-input, .custom-select {
+.custom-input,
+.custom-select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #e0e0e0;
@@ -110,7 +95,8 @@ const submitForm = () => {
   box-shadow: none;
 }
 
-.custom-input:focus, .custom-select:focus {
+.custom-input:focus,
+.custom-select:focus {
   border-color: var(--moathon-green);
   background-color: white;
   box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1);

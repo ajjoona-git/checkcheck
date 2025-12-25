@@ -4,7 +4,9 @@ import { ref } from 'vue'
 const isLoaded = ref(false)
 const isLoading = ref(false)
 
+// Google Charts 라이브러리 로드 및 캐싱 관리
 export const useGoogleCharts = () => {
+  // Google Charts 스크립트 동적 로드 (중복 로드 방지)
   const loadCharts = () => {
     return new Promise((resolve, reject) => {
       // 1. 이미 로드가 완료된 경우 즉시 반환
@@ -38,9 +40,7 @@ export const useGoogleCharts = () => {
           return
         }
 
-        // 'corechart' 패키지에는 LineChart, BarChart, CandlestickChart 등이 포함됨
         window.google.charts.load('current', { packages: ['corechart'] })
-        
         window.google.charts.setOnLoadCallback(() => {
           isLoaded.value = true
           isLoading.value = false

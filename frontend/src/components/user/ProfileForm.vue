@@ -1,35 +1,24 @@
 <template>
   <div class="profile-form-container">
     <form @submit.prevent="submitForm" enctype="multipart/form-data">
-      
+
       <div class="form-group mb-4 text-center">
         <label class="form-label d-block mb-3">프로필 사진</label>
-        
+
         <div class="profile-upload-wrapper">
           <div class="image-preview-box">
-            <img 
-              v-if="previewImage" 
-              :src="previewImage" 
-              class="preview-img" 
-              alt="프로필 미리보기" 
-            />
+            <img v-if="previewImage" :src="previewImage" class="preview-img" alt="프로필 미리보기" />
             <div v-else class="preview-placeholder">
               <i class="bi bi-person-fill"></i>
             </div>
           </div>
-            
+
           <label for="profile_image" class="upload-btn">
             <i class="bi bi-camera-fill"></i>
           </label>
-          <input 
-            type="file" 
-            id="profile_image" 
-            class="d-none" 
-            accept="image/*" 
-            @change="onFileChange" 
-          />
+          <input type="file" id="profile_image" class="d-none" accept="image/*" @change="onFileChange" />
         </div>
-        
+
         <p class="text-muted small mt-2">클릭하여 사진을 변경하세요</p>
       </div>
 
@@ -45,22 +34,26 @@
 
         <div class="col-md-6 form-group">
           <label for="credit_score" class="form-label">신용 점수<span class="required">*</span></label>
-          <input type="number" id="credit_score" class="form-control custom-input" v-model.number="credit_score" placeholder="예: 850" required min="0" max="1000" />
+          <input type="number" id="credit_score" class="form-control custom-input" v-model.number="credit_score"
+            placeholder="예: 850" required min="0" max="1000" />
         </div>
 
         <div class="col-md-6 form-group">
           <label for="assets" class="form-label">자산 (원)<span class="required">*</span></label>
-          <input type="number" id="assets" class="form-control custom-input" v-model.number="assets" placeholder="예: 100000000" required min="0" />
+          <input type="number" id="assets" class="form-control custom-input" v-model.number="assets"
+            placeholder="예: 100000000" required min="0" />
         </div>
 
         <div class="col-md-6 form-group">
           <label for="salary" class="form-label">연봉 (원)<span class="required">*</span></label>
-          <input type="number" id="salary" class="form-control custom-input" v-model.number="salary" placeholder="예: 34000000" required min="0" />
+          <input type="number" id="salary" class="form-control custom-input" v-model.number="salary"
+            placeholder="예: 34000000" required min="0" />
         </div>
 
         <div class="col-md-12 form-group">
           <label for="average_monthly_spend" class="form-label">평균 월 지출 (원)<span class="required">*</span></label>
-          <input type="number" id="average_monthly_spend" class="form-control custom-input" v-model.number="average_monthly_spend" placeholder="예: 880000" required min="0" />
+          <input type="number" id="average_monthly_spend" class="form-control custom-input"
+            v-model.number="average_monthly_spend" placeholder="예: 880000" required min="0" />
         </div>
 
         <div class="col-md-12 form-group mb-4">
@@ -87,14 +80,6 @@
 import { ref, onMounted, watch } from 'vue';
 import { useAccountStore } from '@/stores/accounts';
 
-const props = defineProps({
-  isEdit: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['success'])
 const accountStore = useAccountStore()
 
 const profile_image = ref(null)
@@ -106,6 +91,16 @@ const salary = ref(null)
 const average_monthly_spend = ref(null)
 const tender = ref('')
 
+const props = defineProps({
+  isEdit: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['success'])
+
+// 이미지 URL 가져오기
 const getImageUrl = (path) => {
   if (!path) return null
   if (path.startsWith('http')) return path
@@ -113,36 +108,40 @@ const getImageUrl = (path) => {
   return `${API_URL}${path}`
 }
 
+// 기존 프로필 데이터로 폼 채우기
 const fillFormData = () => {
   if (props.isEdit && accountStore.user) {
     const u = accountStore.user
-    
+
     gender.value = u.gender !== null ? String(u.gender) : ''
     credit_score.value = u.credit_score
     assets.value = u.assets
     salary.value = u.salary
     average_monthly_spend.value = u.average_monthly_spend
     tender.value = u.tender !== null ? String(u.tender) : ''
-    
+
     if (u.profile_image) {
       previewImage.value = getImageUrl(u.profile_image)
     }
   }
 }
 
+// 컴포넌트 마운트 시 및 사용자 데이터 변경 시 폼 채우기
 onMounted(() => {
   fillFormData()
 })
 
+// 사용자 데이터 변경 시 폼 채우기
 watch(() => accountStore.user, () => {
   fillFormData()
 })
 
+// 프로필 이미지 변경 시 미리보기 업데이트
 const onFileChange = (event) => {
   const files = event.target.files;
   if (files.length > 0) {
     profile_image.value = files[0];
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImage.value = e.target.result;
@@ -153,6 +152,7 @@ const onFileChange = (event) => {
   }
 };
 
+// 폼 제출 처리
 const submitForm = async function () {
   const formData = new FormData();
 
@@ -176,7 +176,7 @@ const submitForm = async function () {
     }
     emit('success');
   } catch (error) {
-    console.error(error); 
+    console.error(error);
     alert(props.isEdit ? '수정에 실패했습니다.' : '저장에 실패했습니다.');
   }
 }
@@ -224,9 +224,9 @@ const submitForm = async function () {
   height: 100%;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   background-color: #f1f3f5;
-  overflow: hidden; /* 이미지는 여기서 잘림 */
+  overflow: hidden;
 }
 
 .preview-img {
@@ -259,8 +259,8 @@ const submitForm = async function () {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid white; /* 흰색 테두리로 이미지와 구분 */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 입체감 */
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
   z-index: 10;
 }

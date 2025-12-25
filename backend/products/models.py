@@ -1,7 +1,6 @@
 from django.db import models
-import hashlib
 
-# Create your models here.
+# 금융 기관 정보
 class Bank(models.Model):
     fin_co_no = models.CharField(max_length=20, unique=True)  # 금융회사 코드
     kor_co_nm = models.CharField(max_length=100)
@@ -63,7 +62,9 @@ class Product(models.Model):
         return f"[{self.get_product_type_display()}] {self.fin_prdt_nm} - {self.bank.kor_co_nm}"
 
 class ProductOption(models.Model):
-    """상품별 기간/금리 옵션"""
+    """
+    금융 상품별 기간/금리 옵션 단위
+    """
 
     product = models.ForeignKey(
         Product,

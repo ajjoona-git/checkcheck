@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Product, ProductOption, Bank
 
-# 모아톤 상세 페이지에 사용할 금융 상품 정보
+# 모아토른 상세 페이지 줄한 금융 상품 정보 식별
 class ProductOptionSimpleSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.fin_prdt_nm', read_only=True)
     product_type = serializers.CharField(source='product.product_type', read_only=True)
@@ -18,7 +18,7 @@ class ProductOptionSimpleSerializer(serializers.ModelSerializer):
             'product_id',    # 상품 ID
         ]
 
-# 금융 상품 전체 조회
+# 금융 상품 전체 목록 조회 및 최고 잤닼 금리 검색
 class ProductListSerializer(serializers.ModelSerializer):
     class ProductOptionSerializer(serializers.ModelSerializer):
         class Meta:
@@ -57,7 +57,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         rates = [opt.intr_rate2 for opt in options if opt.intr_rate2 is not None]
         return max(rates) if rates else None
 
-# 금융 상품 상세 조회
+# 금융 상품 상세 단계 조회
 class ProductDetailSerializer(serializers.ModelSerializer):
     class ProductOptionSerializer(serializers.ModelSerializer):
         class Meta:

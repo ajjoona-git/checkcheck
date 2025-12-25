@@ -2,23 +2,12 @@
   <div class="badge-library card" ref="containerRef">
     <div class="card-body p-4">
       <div class="badge-grid" :style="{ '--grid-cols': columns }">
-        <div 
-          v-for="badge in paginatedBadges" 
-          :key="badge.id" 
-          class="badge-item"
-        >
+        <div v-for="badge in paginatedBadges" :key="badge.id" class="badge-item">
           <div class="badge-icon-wrapper mb-2" :title="badge.description">
-            <img 
-              :src="resolveImagePath(badge.url)" 
-              :alt="badge.name"
-              class="badge-img"
-              :class="{ 'is-inactive': badge.quantity === 0 }"
-            />
-            
-            <span 
-              v-if="badge.quantity >= 2" 
-              class="badge-count"
-            >
+            <img :src="resolveImagePath(badge.url)" :alt="badge.name" class="badge-img"
+              :class="{ 'is-inactive': badge.quantity === 0 }" />
+
+            <span v-if="badge.quantity >= 2" class="badge-count">
               x{{ badge.quantity }}
             </span>
           </div>
@@ -27,32 +16,20 @@
             {{ badge.name }}
           </p>
         </div>
-        
-        <div 
-          v-for="n in emptySlots" 
-          :key="`empty-${n}`" 
-          class="badge-item empty"
-        ></div>
+
+        <div v-for="n in emptySlots" :key="`empty-${n}`" class="badge-item empty"></div>
       </div>
     </div>
 
     <div class="card-footer bg-white border-0 d-flex justify-content-center pb-4" v-if="totalPages > 1">
       <div class="pagination-controls">
-        <button 
-          class="nav-btn" 
-          @click="prevPage" 
-          :disabled="currentPage === 0"
-        >
+        <button class="nav-btn" @click="prevPage" :disabled="currentPage === 0">
           <i class="bi bi-chevron-left"></i>
         </button>
-        
+
         <span class="page-indicator">{{ currentPage + 1 }} / {{ totalPages }}</span>
-        
-        <button 
-          class="nav-btn" 
-          @click="nextPage" 
-          :disabled="currentPage >= totalPages - 1"
-        >
+
+        <button class="nav-btn" @click="nextPage" :disabled="currentPage >= totalPages - 1">
           <i class="bi bi-chevron-right"></i>
         </button>
       </div>
@@ -74,6 +51,7 @@ const itemsPerPage = computed(() => columns.value * 2)
 
 let resizeObserver = null
 
+// 컨테이너 크기 변경 시 그리드 컬럼 수 조정
 const handleResize = (entries) => {
   for (const entry of entries) {
     const width = entry.contentRect.width
@@ -90,13 +68,14 @@ const handleResize = (entries) => {
     } else {
       columns.value = 8
     }
-    
+
     if (currentPage.value >= totalPages.value) {
       currentPage.value = Math.max(0, totalPages.value - 1)
     }
   }
 }
 
+// 컨테이너 크기 변경 감지
 onMounted(() => {
   if (containerRef.value) {
     resizeObserver = new ResizeObserver(handleResize)
@@ -104,21 +83,25 @@ onMounted(() => {
   }
 })
 
+// 컨테이너 해제 시 리사이즈 옵저버 해제
 onUnmounted(() => {
   if (resizeObserver) resizeObserver.disconnect()
 })
 
+// 페이지네이션
 const totalPages = computed(() => {
   if (!props.badges || props.badges.length === 0) return 1
   return Math.ceil(props.badges.length / itemsPerPage.value)
 })
 
+// 현재 페이지에 해당하는 뱃지 목록
 const paginatedBadges = computed(() => {
   const start = currentPage.value * itemsPerPage.value
   const end = start + itemsPerPage.value
   return props.badges.slice(start, end)
 })
 
+// 빈 슬롯 수 계산
 const emptySlots = computed(() => {
   const currentCount = paginatedBadges.value.length
   return Math.max(0, itemsPerPage.value - currentCount)
@@ -127,6 +110,7 @@ const emptySlots = computed(() => {
 const prevPage = () => { if (currentPage.value > 0) currentPage.value-- }
 const nextPage = () => { if (currentPage.value < totalPages.value - 1) currentPage.value++ }
 
+// 이미지 경로
 const resolveImagePath = (path) => {
   if (!path) return '/assets/badges/default.png'
   if (path.startsWith('frontend/')) {
@@ -138,9 +122,9 @@ const resolveImagePath = (path) => {
 
 <style scoped>
 .badge-library {
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
   background: white;
   transition: transform 0.2s ease;
   width: 100%;
@@ -160,16 +144,19 @@ const resolveImagePath = (path) => {
   align-items: center;
   width: 100%;
 }
-.badge-item.empty { visibility: hidden; }
+
+.badge-item.empty {
+  visibility: hidden;
+}
 
 .badge-icon-wrapper {
   position: relative;
-  width: 72px; 
+  width: 72px;
   height: 72px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: transparent; 
+  background: transparent;
   transition: transform 0.2s;
 }
 
@@ -181,7 +168,7 @@ const resolveImagePath = (path) => {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .badge-img.is-inactive {
@@ -198,7 +185,7 @@ const resolveImagePath = (path) => {
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: 2px solid white;
 }
 
@@ -232,8 +219,15 @@ const resolveImagePath = (path) => {
   display: flex;
   align-items: center;
 }
-.nav-btn:disabled { color: #d0d0d0; cursor: not-allowed; }
-.nav-btn:hover:not(:disabled) { color: var(--moathon-green); }
+
+.nav-btn:disabled {
+  color: #d0d0d0;
+  cursor: not-allowed;
+}
+
+.nav-btn:hover:not(:disabled) {
+  color: var(--moathon-green);
+}
 
 .page-indicator {
   font-size: 0.8rem;

@@ -42,6 +42,7 @@ def _build_final_option_detail(option_id: int) -> Dict[str, Any]:
         "mtrt_int": p.mtrt_int, # 만기 후 이자율 
     }
 
+# Stage1(XGB) + Stage2(LLM) 단계의 금융 여로 추천
 @extend_schema(
     tags=["Recommendations"],
     summary="금융상품 추천 (Stage1 XGB + Stage2 LLM)",

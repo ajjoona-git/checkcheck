@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from datetime import date, timedelta
 
-# Create your models here.
+# 모아톤 챌린지 모델
 class Moathon(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -76,6 +76,7 @@ class Moathon(models.Model):
 
         super().save(*args, **kwargs)
 
+# 모아톤 게시물에 달린 댓글
 class MoathonComment(models.Model):
     moathon = models.ForeignKey(
         "challenges.Moathon",
@@ -98,6 +99,7 @@ class MoathonComment(models.Model):
             models.Index(fields=["moathon", "created_at"]),
         ]
 
+# 모아톤 응원하기(좋아요)
 class MoathonLike(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

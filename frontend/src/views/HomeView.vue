@@ -7,27 +7,24 @@
     </div>
 
     <div v-else class="container py-5">
-      
+
       <section class="personal-section mb-5">
-        
+
         <div v-if="hasActiveMoathon" class="dashboard-card bg-white p-4 rounded-4 shadow-sm border">
           <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
               <h5 class="text-muted small mb-1">MY MOATHON</h5>
               <h2 class="fw-bold m-0">나의 목표 달성 현황</h2>
             </div>
-            
+
             <div class="d-flex gap-2 align-items-center">
-              <select 
-                v-if="myActiveMoathons.length > 1" 
-                v-model="selectedMoathonId" 
-                class="form-select form-select-sm w-auto"
-              >
+              <select v-if="myActiveMoathons.length > 1" v-model="selectedMoathonId"
+                class="form-select form-select-sm w-auto">
                 <option v-for="m in myActiveMoathons" :key="m.id" :value="m.id">
                   {{ m.title }}
                 </option>
               </select>
-              
+
               <router-link :to="{ name: 'moathonCreate' }" class="btn btn-sm btn-outline-primary fw-bold text-nowrap">
                 + 추가
               </router-link>
@@ -37,11 +34,7 @@
           <div class="row g-4 align-items-center">
             <div class="col-lg-7 col-md-12">
               <div class="p-3">
-                <MoathonTrack 
-                  :percent="currentProgress" 
-                  :profile-image="userProfileImage"
-                  :duration="2.5" 
-                />
+                <MoathonTrack :percent="currentProgress" :profile-image="userProfileImage" :duration="2.5" />
                 <p class="text-center mt-3 mb-0 text-muted fw-bold small">
                   목표까지 힘내세요, {{ userNickname }}님! 🏃‍♂️
                 </p>
@@ -50,11 +43,7 @@
 
             <div class="col-lg-5 col-md-12">
               <div class="main-card-wrapper h-100">
-                <MoathonCard 
-                  v-if="selectedMoathon" 
-                  :moathon="selectedMoathon" 
-                  :is-highlight="true" 
-                />
+                <MoathonCard v-if="selectedMoathon" :moathon="selectedMoathon" :is-highlight="true" />
               </div>
             </div>
           </div>
@@ -67,11 +56,8 @@
               나에게 딱 맞는 예적금 상품을 추천받고<br>
               친구들과 함께 저축 챌린지를 시작해보세요.
             </p>
-            <a 
-              href="#" 
-              @click.prevent="handleStartRecommendation" 
-              class="btn btn-primary px-5 py-3 fw-bold shadow-sm rounded-pill"
-            >
+            <a href="#" @click.prevent="handleStartRecommendation"
+              class="btn btn-primary px-5 py-3 fw-bold shadow-sm rounded-pill">
               내 맞춤 모아톤 만들기
             </a>
           </div>
@@ -85,11 +71,7 @@
         </div>
 
         <div v-if="followingMoathons.length > 0" class="row g-4">
-          <div 
-            v-for="moathon in followingMoathons" 
-            :key="moathon.id" 
-            class="col-12 col-md-6 col-lg-4"
-          >
+          <div v-for="moathon in followingMoathons" :key="moathon.id" class="col-12 col-md-6 col-lg-4">
             <MoathonCard :moathon="moathon" />
           </div>
         </div>
@@ -129,23 +111,28 @@ const API_URL = import.meta.env.VITE_API_URL
 const loading = ref(true)
 const selectedMoathonId = ref(null)
 
+// 진행 중인 모아톤이 있는지 여부
 const hasActiveMoathon = computed(() => {
   return accountStore.user?.moathons && accountStore.user.moathons.length > 0
 })
+// 내가 진행 중인 모아톤 리스트
 const myActiveMoathons = computed(() => accountStore.user?.moathons || [])
 
+// 선택된 모아톤 객체
 const selectedMoathon = computed(() => {
   if (!selectedMoathonId.value) return myActiveMoathons.value[0]
   return myActiveMoathons.value.find(m => m.id === selectedMoathonId.value) || myActiveMoathons.value[0]
 })
 
+// 현재 진행률
 const currentProgress = computed(() => {
   if (!selectedMoathon.value) return 0
   return parseFloat(selectedMoathon.value.progress_rate || 0)
 })
 
+// 사용자 닉네임
 const userNickname = computed(() => accountStore.user?.nickname || '회원')
-
+// 사용자 프로필 이미지
 const userProfileImage = computed(() => {
   const path = accountStore.user?.profile_image
   if (!path) return defaultProfile
@@ -153,8 +140,9 @@ const userProfileImage = computed(() => {
   return `${API_URL}${path}`
 })
 
+// 팔로잉 중인 모아톤 리스트
 const followingMoathons = computed(() => moathonStore.followingMoathons || [])
-
+// 모아톤 데이터 불러오기
 const fetchMoathonData = async () => {
   if (accountStore.isAuthenticated) {
     if (!accountStore.user) await accountStore.getProfile()
@@ -162,7 +150,9 @@ const fetchMoathonData = async () => {
   }
 }
 
+// 맞춤 추천 시작 처리
 const handleStartRecommendation = () => {
+  // 로그인 여부 확인
   if (!accountStore.isAuthenticated) {
     const userConfirm = confirm('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')
     if (userConfirm) {
@@ -171,6 +161,7 @@ const handleStartRecommendation = () => {
     return
   }
 
+  // 프로필 정보 완성 여부 확인
   const user = accountStore.user
   const isProfileIncomplete = user?.gender === null || user?.credit_score === null || user?.assets === null || user?.salary === null || user?.average_monthly_spend === null || user?.tender === null
   if (isProfileIncomplete) {
@@ -178,7 +169,7 @@ const handleStartRecommendation = () => {
       '상품 추천을 위해 추가 정보가 필요합니다.\n\n프로필 수정 페이지로 이동하여 정보를 입력하시겠습니까?'
     )
     if (confirmMsg) {
-      router.push({ 
+      router.push({
         name: 'mypage',
         query: { edit: 'true' }
       })
@@ -189,6 +180,7 @@ const handleStartRecommendation = () => {
   router.push({ name: 'moathonRecommend' })
 }
 
+// 모아톤 데이터 로드
 onMounted(async () => {
   try {
     loading.value = true
@@ -202,12 +194,14 @@ onMounted(async () => {
   }
 })
 
+// 선택된 모아톤 ID 초기화
 watch(myActiveMoathons, (newVal) => {
   if (newVal && newVal.length > 0 && !selectedMoathonId.value) {
     selectedMoathonId.value = newVal[0].id
   }
 }, { immediate: true })
 
+// 로그인 상태 변경 감지
 watch(() => accountStore.isAuthenticated, async (newValue) => {
   if (newValue) {
     console.log('로그인 완료 감지 -> 데이터 로드 시작')
@@ -227,7 +221,7 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
   padding-bottom: 60px;
 }
 
-/* [SECTION 1] 대시보드 카드 스타일 (Bento Grid 스타일) */
+/* 대시보드 카드 스타일 (Bento Grid 스타일) */
 .dashboard-card {
   background-color: white;
   border-radius: 32px !important;
@@ -257,6 +251,7 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
   cursor: pointer;
   padding-left: 16px;
 }
+
 .form-select:focus {
   border-color: var(--moathon-green);
   box-shadow: 0 0 0 0.25rem rgba(27, 94, 32, 0.1);
@@ -269,12 +264,13 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
   border-radius: 12px;
   transition: all 0.2s;
 }
+
 .btn-outline-primary:hover {
   background-color: var(--moathon-green);
   color: white;
 }
 
-/* [SECTION 1] 히어로 배너 (진행 중인 모아톤 없을 때) */
+/* 히어로 배너 (진행 중인 모아톤 없을 때) */
 .hero-banner {
   background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%) !important;
   border: 1px solid rgba(27, 94, 32, 0.1) !important;
@@ -314,10 +310,10 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
 .hero-banner .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 30px rgba(27, 94, 32, 0.3) !important;
-  background-color: #144a18 !important; 
+  background-color: #144a18 !important;
 }
 
-/* [SECTION 2] 친구들의 소식 섹션 */
+/* 친구들의 소식 섹션 */
 .social-section h3 {
   color: var(--text-primary);
   font-weight: 800;
@@ -364,11 +360,11 @@ watch(() => accountStore.isAuthenticated, async (newValue) => {
     padding: 24px !important;
     border-radius: 24px !important;
   }
-  
+
   .hero-banner {
     padding: 40px 20px !important;
   }
-  
+
   .hero-banner h1 {
     font-size: 1.8rem;
   }

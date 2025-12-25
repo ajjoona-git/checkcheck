@@ -1,10 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from .models import Product, Bank
 from .serializers import ProductListSerializer
 
@@ -65,5 +65,10 @@ def product_detail(request, product_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def bank_list(request):
+    """
+    은행 목록 조회 API
+
+    GET /banklist/
+    """
     banklist = Bank.objects.all().order_by("kor_co_nm").values_list("kor_co_nm", flat=True).distinct()
     return Response(list(banklist))

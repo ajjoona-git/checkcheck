@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper">
     <div class="container py-5 fade-in">
-      
+
       <header class="page-header text-center mb-5">
         <h1 class="header-title">내 주변 은행 찾기</h1>
         <p class="header-subtitle">
@@ -10,7 +10,7 @@
       </header>
 
       <div class="content-wrapper shadow-lg">
-        
+
         <div class="search-panel">
           <div class="panel-header mb-4">
             <h5 class="fw-bold m-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>지역 선택</h5>
@@ -21,11 +21,7 @@
             <div class="select-wrapper">
               <select v-model="selectedProvince" @change="onProvinceChange" class="form-select custom-select">
                 <option value="">지역을 선택하세요</option>
-                <option 
-                  v-for="area in jsonData.mapInfo" 
-                  :key="area.name" 
-                  :value="area.name"
-                >
+                <option v-for="area in jsonData.mapInfo" :key="area.name" :value="area.name">
                   {{ area.name }}
                 </option>
               </select>
@@ -76,23 +72,26 @@ import jsonData from '@/assets/data.json'
 const mapStore = useMapStore()
 
 const map = ref(null)
-const markers = ref([]) 
-const infowindow = ref(null) 
+const markers = ref([])
+const infowindow = ref(null)
 
 const selectedProvince = ref("")
 const selectedCity = ref("")
 const selectedBank = ref("")
 
+// 선택된 광역시/도의 세부 지역 목록 계산
 const availableCities = computed(() => {
   if (!selectedProvince.value) return []
   const targetArea = jsonData.mapInfo.find(area => area.name === selectedProvince.value)
   return targetArea ? targetArea.countries : []
 })
 
+// 광역시/도 변경 시 세부 지역 초기화
 const onProvinceChange = () => {
   selectedCity.value = ""
 }
 
+// 카카오 지도 API 스크립트 로드 및 지도 초기화
 onMounted(async () => {
   if (!mapStore.isScriptLoaded) {
     await mapStore.loadKakaoMapScript()
@@ -100,6 +99,7 @@ onMounted(async () => {
   initMap()
 })
 
+// 지도 초기화 함수
 const initMap = () => {
   const container = document.getElementById('map')
   const options = {
@@ -110,6 +110,7 @@ const initMap = () => {
   infowindow.value = new kakao.maps.InfoWindow({ zIndex: 1 })
 }
 
+// 장소 검색 함수
 const searchPlaces = () => {
   if (!selectedProvince.value || !selectedCity.value || !selectedBank.value) {
     alert("지역과 은행을 모두 선택해주세요.")
@@ -123,6 +124,7 @@ const searchPlaces = () => {
   ps.keywordSearch(keyword, placesSearchCB)
 }
 
+// 장소 검색 콜백 함수
 const placesSearchCB = (data, status, pagination) => {
   if (status === kakao.maps.services.Status.OK) {
     const bounds = new kakao.maps.LatLngBounds()
@@ -139,6 +141,7 @@ const placesSearchCB = (data, status, pagination) => {
   }
 }
 
+// 마커 표시 함수
 const displayMarker = (place) => {
   const marker = new kakao.maps.Marker({
     map: map.value,
@@ -147,7 +150,8 @@ const displayMarker = (place) => {
 
   markers.value.push(marker)
 
-  kakao.maps.event.addListener(marker, 'click', function() {
+  // 마커 클릭 이벤트 핸들러
+  kakao.maps.event.addListener(marker, 'click', function () {
     const content = `
       <div style="padding:16px;width:240px;background:white;border-radius:8px;">
         <h5 style="margin:0 0 4px;font-size:14px;font-weight:bold;color:#1b5e20;">${place.place_name}</h5>
@@ -160,6 +164,7 @@ const displayMarker = (place) => {
   })
 }
 
+// 마커 및 인포윈도우 제거 함수
 const removeMarker = () => {
   if (infowindow.value) {
     infowindow.value.close()
@@ -177,7 +182,7 @@ const removeMarker = () => {
   min-height: calc(100vh - 80px);
 }
 
-/* Header Styles (Unified) */
+/* Header Styles */
 .header-title {
   font-size: 2.5rem;
   font-weight: 800;
@@ -207,7 +212,7 @@ const removeMarker = () => {
   background: white;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .search-panel {
@@ -236,6 +241,7 @@ const removeMarker = () => {
   background-color: #fcfcfc;
   cursor: pointer;
 }
+
 .custom-select:focus {
   border-color: var(--moathon-green);
   box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1);
@@ -254,6 +260,7 @@ const removeMarker = () => {
   transition: all 0.2s;
   width: 100%;
 }
+
 .btn-search:hover {
   background-color: #144a18;
   transform: translateY(-2px);
@@ -270,19 +277,31 @@ const removeMarker = () => {
     flex-direction: column;
     height: auto;
   }
+
   .search-panel {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #f1f3f5;
   }
+
   .map-area {
     height: 400px;
   }
 }
 
-.fade-in { animation: fadeIn 0.6s ease-out; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
