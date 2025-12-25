@@ -8,7 +8,7 @@ from .models import CommodityAsset, CommodityPrice
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
-#
+# 금/은 시세
 def serialize_prices(qs):
     out = []
     for p in qs:
