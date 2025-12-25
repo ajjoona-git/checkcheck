@@ -1,48 +1,69 @@
 <template>
-  <div class="container">
-    <h1 class="page-title">은행 찾기</h1>
-    
-    <div class="content-wrapper">
-      <div class="search-panel">
+  <div class="page-wrapper">
+    <div class="container py-5 fade-in">
+      
+      <header class="page-header text-center mb-5">
+        <h1 class="header-title">내 주변 은행 찾기</h1>
+        <p class="header-subtitle">
+          원하는 지역의 <span class="highlight">은행 위치</span>를 쉽고 빠르게 찾아보세요.
+        </p>
+      </header>
+
+      <div class="content-wrapper shadow-lg">
         
-        <div class="form-group">
-          <label>광역시 / 도</label>
-          <select v-model="selectedProvince" @change="onProvinceChange">
-            <option value="">선택하세요</option>
-            <option 
-              v-for="area in jsonData.mapInfo" 
-              :key="area.name" 
-              :value="area.name"
-            >
-              {{ area.name }}
-            </option>
-          </select>
+        <div class="search-panel">
+          <div class="panel-header mb-4">
+            <h5 class="fw-bold m-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>지역 선택</h5>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label">광역시 / 도</label>
+            <div class="select-wrapper">
+              <select v-model="selectedProvince" @change="onProvinceChange" class="form-select custom-select">
+                <option value="">지역을 선택하세요</option>
+                <option 
+                  v-for="area in jsonData.mapInfo" 
+                  :key="area.name" 
+                  :value="area.name"
+                >
+                  {{ area.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label">시 / 군 / 구</label>
+            <div class="select-wrapper">
+              <select v-model="selectedCity" class="form-select custom-select" :disabled="!selectedProvince">
+                <option value="">세부 지역을 선택하세요</option>
+                <option v-for="city in availableCities" :key="city" :value="city">
+                  {{ city }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="form-label">은행 선택</label>
+            <div class="select-wrapper">
+              <select v-model="selectedBank" class="form-select custom-select">
+                <option value="">은행을 선택하세요</option>
+                <option v-for="bank in jsonData.bankInfo" :key="bank" :value="bank">
+                  {{ bank }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button @click="searchPlaces" class="btn-search">
+            <i class="bi bi-search me-2"></i>검색하기
+          </button>
         </div>
 
-        <div class="form-group">
-          <label>시 / 군 / 구</label>
-          <select v-model="selectedCity">
-            <option value="">선택하세요</option>
-            <option v-for="city in availableCities" :key="city" :value="city">
-              {{ city }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>은행</label>
-          <select v-model="selectedBank">
-            <option value="">은행을 선택하세요</option>
-            <option v-for="bank in jsonData.bankInfo" :key="bank" :value="bank">
-              {{ bank }}
-            </option>
-          </select>
-        </div>
-
-        <button @click="searchPlaces" class="search-btn">찾기</button>
+        <div id="map" class="map-area"></div>
       </div>
 
-      <div id="map" class="map-area"></div>
     </div>
   </div>
 </template>
@@ -58,9 +79,9 @@ const map = ref(null)
 const markers = ref([]) 
 const infowindow = ref(null) 
 
-const selectedProvince = ref("") // 선택된 광역시/도 (예: 서울특별시)
-const selectedCity = ref("")     // 선택된 시/군/구 (예: 강남구)
-const selectedBank = ref("")     // 선택된 은행 (예: 국민은행)
+const selectedProvince = ref("")
+const selectedCity = ref("")
+const selectedBank = ref("")
 
 const availableCities = computed(() => {
   if (!selectedProvince.value) return []
@@ -82,7 +103,7 @@ onMounted(async () => {
 const initMap = () => {
   const container = document.getElementById('map')
   const options = {
-    center: new kakao.maps.LatLng(37.566826, 126.9786567), // 서울 시청 중심
+    center: new kakao.maps.LatLng(37.566826, 126.9786567),
     level: 3
   }
   map.value = new kakao.maps.Map(container, options)
@@ -128,11 +149,10 @@ const displayMarker = (place) => {
 
   kakao.maps.event.addListener(marker, 'click', function() {
     const content = `
-      <div style="padding:10px;font-size:12px;width:200px;">
-        <strong style="display:block;margin-bottom:5px;">${place.place_name}</strong>
-        <span style="color:gray;">${place.road_address_name || place.address_name}</span>
-        <br>
-        <a href="${place.place_url}" target="_blank" style="color:blue;">상세보기</a>
+      <div style="padding:16px;width:240px;background:white;border-radius:8px;">
+        <h5 style="margin:0 0 4px;font-size:14px;font-weight:bold;color:#1b5e20;">${place.place_name}</h5>
+        <p style="margin:0 0 8px;font-size:12px;color:#666;">${place.road_address_name || place.address_name}</p>
+        <a href="${place.place_url}" target="_blank" style="display:inline-block;padding:4px 8px;background:#e8f5e9;color:#1b5e20;text-decoration:none;font-size:11px;border-radius:4px;font-weight:bold;">상세보기 <span style="font-size:10px;">></span></a>
       </div>
     `
     infowindow.value.setContent(content)
@@ -152,74 +172,117 @@ const removeMarker = () => {
 </script>
 
 <style scoped>
-.container {
-  width: 80%;
-  margin: 0 auto;
-  padding: 20px;
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
 }
 
-.page-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 10px;
+/* Header Styles (Unified) */
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--moathon-green) 0%, var(--moathon-deep) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
+.header-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.highlight {
+  color: var(--moathon-green);
+  font-weight: 800;
+}
+
+/* Content Styles */
 .content-wrapper {
   display: flex;
-  gap: 20px;
   height: 600px;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.02);
 }
 
 .search-panel {
-  width: 300px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  width: 320px;
+  padding: 32px 24px;
+  background-color: #ffffff;
+  border-right: 1px solid #f1f3f5;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  flex-shrink: 0;
+  z-index: 2;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
 }
 
-label {
-  font-weight: bold;
-  font-size: 14px;
+.custom-select {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  font-size: 0.95rem;
+  background-color: #fcfcfc;
+  cursor: pointer;
+}
+.custom-select:focus {
+  border-color: var(--moathon-green);
+  box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.1);
 }
 
-select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.search-btn {
+.btn-search {
   margin-top: auto;
-  padding: 15px;
-  background-color: #E86A33;
+  padding: 14px;
+  background-color: var(--moathon-green);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.2s;
+  width: 100%;
 }
-
-.search-btn:hover {
-  background-color: #d55a26;
+.btn-search:hover {
+  background-color: #144a18;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
 }
 
 .map-area {
   flex-grow: 1;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  background-color: #f1f3f5;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+    height: auto;
+  }
+  .search-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .map-area {
+    height: 400px;
+  }
+}
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
