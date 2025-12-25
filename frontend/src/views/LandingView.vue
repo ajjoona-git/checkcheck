@@ -66,30 +66,61 @@
       </div>
 
       <div class="bento-grid mt-4">
-        <div class="bento-item small reveal">
-          <h3>맞춤 큐레이션</h3>
-          <p>성향과 목적을 분석한 추천.</p>
+
+        <div class="bento-item feature-card curation reveal">
+          <div class="card-bg-icon"><i class="bi bi-stars"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-stars"></i></div>
+            <h3>맞춤 큐레이션</h3>
+            <p>내 자산과 연봉을 분석해<br>최적의 상품을 제안합니다.</p>
+          </div>
         </div>
-        <div class="bento-item small reveal" style="transition-delay: 0.1s;">
-          <h3>모아톤 커뮤니티</h3>
-          <p>모아톤 현황으로 소통</p>
+
+        <div class="bento-item feature-card community reveal" style="transition-delay: 0.1s;">
+          <div class="card-bg-icon"><i class="bi bi-people-fill"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-people-fill"></i></div>
+            <h3>모아톤 커뮤니티</h3>
+            <p>친구들과 목표를 공유하고<br>서로 응원하며 완주하세요.</p>
+          </div>
         </div>
-        <div class="bento-item small reveal" style="transition-delay: 0.2s;">
-          <h3>소셜 뱃지</h3>
-          <p>성취를 기록하고 공유.</p>
+
+        <div class="bento-item feature-card badge-feat reveal" style="transition-delay: 0.2s;">
+          <div class="card-bg-icon"><i class="bi bi-award-fill"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-award-fill"></i></div>
+            <h3>소셜 뱃지</h3>
+            <p>저축 마일스톤을 달성하고<br>특별한 뱃지를 수집하세요.</p>
+          </div>
         </div>
-        <div class="bento-item small reveal" style="transition-delay: 0.3s;">
-          <h3>금융 맵</h3>
-          <p>가까운 은행 지점 찾기.</p>
+
+        <div class="bento-item feature-card map reveal" style="transition-delay: 0.3s;">
+          <div class="card-bg-icon"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
+            <h3>금융 맵</h3>
+            <p>내 주변 가까운 은행 지점과<br>ATM 위치를 찾아드립니다.</p>
+          </div>
         </div>
-        <div class="bento-item small reveal" style="transition-delay: 0.4s;">
-          <h3>스마트 러닝</h3>
-          <p>금융 상식을 영상으로 만나보세요.</p>
+
+        <div class="bento-item feature-card learning reveal" style="transition-delay: 0.4s;">
+          <div class="card-bg-icon"><i class="bi bi-play-circle-fill"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-play-circle-fill"></i></div>
+            <h3>스마트 러닝</h3>
+            <p>어려운 금융 용어와 상식을<br>영상으로 쉽게 배워보세요.</p>
+          </div>
         </div>
-        <div class="bento-item small reveal" style="transition-delay: 0.5s;">
-          <h3>자산 시세</h3>
-          <p>금·은 실시간 흐름 파악.</p>
+
+        <div class="bento-item feature-card asset reveal" style="transition-delay: 0.5s;">
+          <div class="card-bg-icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <div class="content">
+            <div class="icon-box"><i class="bi bi-graph-up-arrow"></i></div>
+            <h3>자산 시세</h3>
+            <p>금, 은 등 주요 원자재의<br>실시간 시세를 확인하세요.</p>
+          </div>
         </div>
+
       </div>
     </section>
 
@@ -327,11 +358,12 @@ onUnmounted(() => {
   grid-column: span 6;
   grid-row: span 2;
   min-height: 540px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #e1fdf0 100%);
+  background: linear-gradient(135deg, #1b5e1f2c 0%, #1b5e1f33 100%);
 }
 
 .bento-item.wide {
   grid-column: span 6;
+    background: var(--bg-secondary);
 }
 
 .bento-item.small {
@@ -375,6 +407,94 @@ onUnmounted(() => {
   padding: 40px 0;
 }
 
+/* --- Feature Card Styles (Core Section) --- */
+.feature-card {
+  grid-column: span 4;
+  min-height: 260px;
+  position: relative;
+  overflow: hidden;
+
+  background: var(--bg-secondary);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  border-radius: 24px;
+
+  transition: var(--transition-base, all 0.4s ease);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+}
+
+/* Hover 시 효과 */
+.feature-card:hover {
+  transform: translateY(-8px);
+  background: var(--card-bg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  border-color: rgba(27, 94, 32, 0.1);
+}
+
+/* 배경에 깔리는 거대 아이콘 */
+.card-bg-icon {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 10rem;
+  color: var(--moathon-deep);
+  opacity: 0.1;
+  transform: rotate(-10deg);
+  transition: all 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hover 시 배경 아이콘 애니메이션 */
+.feature-card:hover .card-bg-icon {
+  transform: rotate(0deg) scale(1.1);
+  opacity: 0.15;
+  color: var(--moathon-green);
+}
+
+/* 카드 내용물 */
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* 아이콘 박스 (작은 아이콘) */
+.icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: white;
+  background: var(--moathon-deep);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 반응형 처리 */
+@media (max-width: 992px) {
+  .feature-card {
+    grid-column: span 6;
+  }
+}
+
 @media (max-width: 768px) {
 
   .bento-item.tall,
@@ -389,6 +509,12 @@ onUnmounted(() => {
 
   .hero-title {
     font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .feature-card {
+    grid-column: span 12;
   }
 }
 </style>
