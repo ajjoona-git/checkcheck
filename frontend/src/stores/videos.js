@@ -22,11 +22,11 @@ export const useVideoStore = defineStore('video', () => {
       }
     })
       .then(res => {
-        console.log('검색 성공:', res.data.items)
         videos.value = res.data.items
       })
       .catch(err =>{
-        console.log(err)
+        // 동영상 검색 실패 처리
+        throw err
       })
   }
 

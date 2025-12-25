@@ -23,12 +23,15 @@ export const useAccountStore = defineStore('account', () => {
       }
     })
       .then(res => {
-        console.log('회원가입이 완료되었습니다.')
+        // 회원가입 완료, 자동 로그인 시작
         const password = password1
         logIn({ username, email, password })
         router.push({ name: 'onboarding' })
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        // 회원가입 실패 처리
+        throw err
+      })
   }
 
   // 사용자 로그인 및 토큰 저장
@@ -41,14 +44,13 @@ export const useAccountStore = defineStore('account', () => {
         url: `${API_URL}/accounts/login/`,
         data: { username, email, password }
       })
-      console.log('로그인 성공, 토큰 저장 중...')
-
+      // 로그인 성공, 토큰 저장 중
       const newToken = res.data.key
       token.value = newToken
       localStorage.setItem('token', newToken) 
       await getProfile()
     } catch (err) {
-      console.error('로그인 에러:', err)
+      // 로그인 실패 처리
       throw err
     }
   }
@@ -67,10 +69,10 @@ export const useAccountStore = defineStore('account', () => {
       })
 
       user.value = response.data
-      console.log('유저 정보 로드 완료:', user.value)
+      // 유저 정보 로드 완료
       return response.data
     } catch (error) {
-      console.error('유저 정보 로드 실패:', error)
+      // 유저 정보 로드 실패 처리
       throw error
     }
   }
@@ -88,17 +90,15 @@ export const useAccountStore = defineStore('account', () => {
             Authorization: `Token ${token.value}`
           }
         })
-        console.log('백엔드 로그아웃 성공')
       }
     } catch (err) {
       // 2. 401 에러가 나더라도(이미 만료됨 등) 프론트에서는 무시하고 진행
-      console.warn('백엔드 로그아웃 실패(무시하고 진행):', err)
     } finally {
       // 3. 성공하든 실패하든 프론트엔드 정보는 무조건 삭제
       token.value = null
       user.value = null
       localStorage.removeItem('token')
-      console.log('프론트엔드 상태 초기화 완료')
+      // 프론트엔드 상태 초기화 완료
     }
   }
 
@@ -120,12 +120,10 @@ export const useAccountStore = defineStore('account', () => {
         }
       })
 
-      console.log('온보딩 정보 저장 완료:', response.data)
       await getProfile()
-
       return response.data
     } catch (error) {
-      console.error('온보딩 저장 실패:', error)
+      // 온보딩 저장 실패 처리
       throw error
     }
   }
@@ -142,12 +140,11 @@ export const useAccountStore = defineStore('account', () => {
           'Content-Type': 'multipart/form-data'
         }
       })
-      console.log('프로필 수정 완료:', res.data)
-
+      // 프로필 수정 완료
       await getProfile()
       return res.data
     } catch (err) {
-      console.error('프로필 수정 실패:', err)
+      // 프로필 수정 실패 처리
       throw err
     }
   }
@@ -164,7 +161,7 @@ export const useAccountStore = defineStore('account', () => {
       })
       return res.data
     } catch (err) {
-      console.error('팔로우 요청 실패:', err)
+      // 팔로우 요청 실패 처리
       alert('팔로우 요청 중 오류가 발생했습니다.')
       throw err
     }

@@ -54,7 +54,8 @@ export const useMoathonStore = defineStore('moathon', () => {
       currentPage.value = page
 
     } catch (error) {
-      console.error('모아톤 목록 조회 실패:', error)
+      // 모아톤 목록 조회 실패 처리
+      throw error
     }
   }
 
@@ -74,7 +75,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       const response = await axios(config)
       moathonDetail.value = response.data
     } catch (error) {
-      console.error('모아톤 상세 조회 실패:', error)
+      // 모아톤 상세 조회 실패 처리
       throw error
     }
   }
@@ -99,7 +100,8 @@ export const useMoathonStore = defineStore('moathon', () => {
         moathonDetail.value.comments = commentList
       }
     } catch (error) {
-      console.error('댓글 조회 실패:', error)
+      // 댓글 목록 조회 실패 처리
+      throw error
     }
   }
 
@@ -117,7 +119,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       router.push({ name: 'moathonDetail', params: { id: response.data.id } })
       return response.data
     } catch (error) {
-      console.error('모아톤 생성 실패:', error)
+      // 모아톤 생성 실패 처리
       throw error
     }
   }
@@ -135,7 +137,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       })
       moathonDetail.value = response.data
     } catch (error) {
-      console.error('모아톤 수정 실패:', error)
+      // 모아톤 수정 실패 처리
       throw error
     }
   }
@@ -151,7 +153,7 @@ export const useMoathonStore = defineStore('moathon', () => {
         }
       })
     } catch (err) {
-      console.error('모아톤 삭제 실패:', err)
+      // 모아톤 삭제 실패 처리
       throw err
     }
   }
@@ -180,7 +182,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       }
 
     } catch (err) {
-      console.error('응원하기 실패:', err)
+      // 모아톤 좋아요 실패 처리
       if (err.response?.status === 401) {
         alert('로그인이 필요합니다.')
       }
@@ -200,7 +202,8 @@ export const useMoathonStore = defineStore('moathon', () => {
       })
       await fetchComments(moathonId)
     } catch (error) {
-      console.error('댓글 작성 실패:', error)
+      // 댓글 작성 실패 처리
+      throw error
     }
   }
 
@@ -217,7 +220,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       })
       await fetchComments(moathonId)
     } catch (error) {
-      console.error('댓글 수정 실패:', error)
+      // 댓글 수정 실패 처리
       throw error
     }
   }
@@ -234,7 +237,8 @@ export const useMoathonStore = defineStore('moathon', () => {
       })
       await fetchComments(moathonId)
     } catch (err) {
-      console.error('댓글 삭제 실패:', err)
+      // 댓글 삭제 실패 처리
+      throw err
     }
   }
 
@@ -254,7 +258,7 @@ export const useMoathonStore = defineStore('moathon', () => {
       recommendationResult.value = response.data
       return response.data
     } catch (error) {
-      console.error('추천 요청 실패:', error)
+      // 추천 요청 실패 처리
       throw error
     } finally {
       isRecommending.value = false
@@ -281,10 +285,8 @@ export const useMoathonStore = defineStore('moathon', () => {
       })
 
       followingMoathons.value = res.data
-      console.log('팔로잉 모아톤 로드 성공:', res.data)
-
     } catch (err) {
-      console.error('팔로잉 모아톤 로드 실패:', err)
+      // 팔로잉 모아톤 로드 실패 처리
       followingMoathons.value = []
     }
   }
@@ -294,7 +296,6 @@ export const useMoathonStore = defineStore('moathon', () => {
     moathons.value = []
     followingMoathons.value = []
     moathonDetail.value = null
-    console.log('Moathon Store 초기화 완료')
   }
 
   return {

@@ -30,7 +30,6 @@ export const useProductStore = defineStore('product', () => {
   const getProducts = async (forceRefresh = false) => {
     // 캐시가 유효하고 강제 갱신이 아니면 저장된 데이터 사용
     if (!forceRefresh && products.value.length > 0 && isCacheValid('products')) {
-      console.log('스토어: 저장된 상품 데이터 사용 (유효함)')
       return
     }
 
@@ -39,7 +38,6 @@ export const useProductStore = defineStore('product', () => {
     let nextUrl = `${API_URL}/products/`
 
     try {
-      console.log('스토어: 서버에서 상품 데이터 업데이트 중...')
       // 페이지네이션된 모든 상품 데이터 조회
       while (nextUrl) {
         const response = await axios.get(nextUrl)
@@ -52,7 +50,8 @@ export const useProductStore = defineStore('product', () => {
       lastFetched.value.products = new Date().getTime()
 
     } catch (err) {
-      console.error('상품 로딩 실패:', err)
+      // 상품 목록 조회 실패 처리
+      throw err
     } finally {
       isLoading.value = false
     }
@@ -67,7 +66,7 @@ export const useProductStore = defineStore('product', () => {
       })
       productDetail.value = response.data
     } catch (error) {
-      console.error('상품 상세 조회 실패:', error)
+      // 상품 상세 조회 실패 처리
       throw error
     }
   }
@@ -88,7 +87,8 @@ export const useProductStore = defineStore('product', () => {
       // 조회 시간 갱신
       lastFetched.value.banks = new Date().getTime()
     } catch (error) {
-      console.error('은행 목록 조회 실패:', error)
+      // 은행 목록 조회 실패 처리
+      throw error
     }
   }
 
