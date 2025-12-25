@@ -1,45 +1,61 @@
 <template>
-  <div class="detail-container" v-if="product">
-    <div class="product-info-section">
-      <span class="bank-badge">{{ product.bank_name }}</span>
-      <span class="type-badge" :class="product.product_type">
-        {{ product.product_type === 'DEPOSIT' ? '예금' : '적금' }}
-      </span>
-      <h1 class="title">{{ product.fin_prdt_nm }}</h1>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <h4>가입 방법</h4>
-          <p>{{ product.join_way || '영업점, 인터넷, 스마트폰' }}</p>
-        </div>
-        <div class="info-item">
-          <h4>가입 대상</h4>
-          <p>{{ product.join_member || '실명의 개인' }}</p>
-        </div>
-        <div class="info-item full-width" v-if="product.etc_note">
-          <h4>유의 사항</h4>
-          <p>{{ product.etc_note }}</p>
+  <div class="page-wrapper" v-if="product">
+    <div class="container py-5 fade-in">
+      
+      <div class="header-section text-center mb-5">
+        <h1 class="product-title">{{ product.fin_prdt_nm }}</h1>
+        <div class="badges mb-3 d-flex justify-content-center gap-2">
+          <span class="bank-badge">{{ product.bank_name }}</span>
+          <span class="type-badge" :class="product.product_type">
+            {{ product.product_type === 'DEPOSIT' ? '예금' : '적금' }}
+          </span>
         </div>
       </div>
-    </div>
 
-    <hr class="divider" />
+      <div class="info-grid mb-5">
+        <div class="info-card">
+          <h4 class="info-label">가입 대상</h4>
+          <p class="info-value">{{ product.join_member || '실명의 개인' }}</p>
+        </div>
 
-    <div class="options-section">
-      <h2>금리 및 기간 옵션</h2>
-      <p class="desc">원하는 조건을 선택하여 저축 챌린지를 시작해보세요.</p>
+        <div class="info-card">
+          <h4 class="info-label">가입 방법</h4>
+          <p class="info-value">{{ product.join_way || '영업점, 인터넷, 스마트폰' }}</p>
+        </div>
 
-      <ProductOptionList v-if="product.options && product.options.length > 0" :options="product.options"
-        @select-option="goMoathonCreate" />
+        <div class="info-card full-width" v-if="product.etc_note">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-info-circle-fill text-secondary"></i>
+            <h4 class="info-label m-0">유의 사항</h4>
+          </div>
+          <p class="info-value text-secondary">{{ product.etc_note }}</p>
+        </div>
+      </div>
 
-      <div v-else class="empty-options">
-        <p>상세 옵션 정보가 없습니다.</p>
+      <hr class="divider my-5">
+
+      <div class="options-section">
+        <div class="text-center mb-4">
+          <h2 class="section-title">금리 및 기간 옵션</h2>
+          <p class="section-desc">원하는 조건을 선택하여 저축 챌린지를 시작해보세요.</p>
+        </div>
+
+        <ProductOptionList 
+          v-if="product.options && product.options.length > 0" 
+          :options="product.options"
+          @select-option="goMoathonCreate" 
+        />
+
+        <div v-else class="empty-state">
+          <p>상세 옵션 정보가 없습니다.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div v-else class="loading">
-    <p>상품 정보를 불러오는 중입니다...</p>
+  <div v-else class="loading-state">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">상품 정보를 불러오는 중입니다...</p>
   </div>
 </template>
 
@@ -78,9 +94,8 @@ watch(
 )
 
 const goMoathonCreate = (optionId) => {
-  if (!accountStore.isLogin) {
+  if (!accountStore.isAuthenticated) {
     const userConfirm = confirm('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')
-    
     if (userConfirm) {
       router.push({ name: 'login' })
     }
@@ -95,102 +110,110 @@ const goMoathonCreate = (optionId) => {
 </script>
 
 <style scoped>
-.detail-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 40px 20px;
+.page-wrapper {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 80px);
 }
 
-.loading {
-  text-align: center;
-  padding: 50px;
-  color: #888;
-}
+.container { max-width: 1000px; }
 
-.product-info-section {
-  text-align: center;
-  margin-bottom: 30px;
+/* Header */
+.product-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: 10px;
+  line-height: 1.3;
 }
 
 .bank-badge {
-  background: #e3f2fd;
-  color: #1565c0;
-  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  color: var(--text-secondary);
+  padding: 6px 14px;
   border-radius: 20px;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
 .type-badge {
-  display: inline-block;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
+.type-badge.DEPOSIT { background-color: #e3f2fd; color: #1976d2; }
+.type-badge.SAVING { background-color: #f3e5f5; color: #7b1fa2; }
 
-.type-badge.DEPOSIT {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-
-.type-badge.SAVING {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
-}
-
-.title {
-  font-size: 2rem;
-  margin: 16px 0 30px;
-  color: #333;
-}
-
+/* Info Grid */
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  background: #f8f9fa;
-  padding: 24px;
-  border-radius: 16px;
-  text-align: left;
+  gap: 24px;
 }
 
-.info-item h4 {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 8px;
+.info-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid rgba(0,0,0,0.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.info-item p {
+.full-width { grid-column: 1 / -1; }
+
+.icon-circle {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.bg-blue-light { background: #e3f2fd; }
+.bg-green-light { background: #e8f5e9; }
+
+.info-label {
   font-size: 1rem;
-  color: #333;
-  line-height: 1.5;
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
-
-.divider {
-  border: 0;
-  height: 1px;
-  background: #eee;
-  margin: 40px 0;
-}
-
-.options-section h2 {
+  font-weight: 700;
+  color: var(--text-primary);
   margin-bottom: 8px;
-  color: #2c3e50;
 }
 
-.desc {
-  color: #666;
-  margin-bottom: 24px;
+.info-value {
+  font-size: 1.1rem;
+  color: #495057;
+  line-height: 1.6;
+  margin: 0;
+  word-break: keep-all;
 }
 
-.empty-options {
-  color: #888;
-  text-align: center;
-  padding: 20px;
+/* Options Section */
+.section-title { font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+.section-desc { color: var(--text-secondary); font-size: 1.1rem; }
+
+.divider { border-color: rgba(0,0,0,0.05); }
+
+/* Loading State */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 50vh; color: var(--text-secondary);
+}
+
+.empty-state {
+  text-align: center; padding: 40px;
+  background: white; border-radius: 24px; color: var(--text-secondary);
+}
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .info-grid { grid-template-columns: 1fr; }
+  .product-title { font-size: 2rem; }
 }
 </style>
