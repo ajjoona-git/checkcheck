@@ -1,62 +1,38 @@
 <template>
-  <div class="user-profile card mb-4">
-    <div class="card-body p-4">
-      <div class="d-flex justify-content-between align-items-start mb-4">
+  <div class="user-profile card">
+    <div class="card-body p-4 p-lg-5">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start gap-4">
+        
         <div class="d-flex gap-4 align-items-center">
-          <img :src="profileImage" class="profile-img-lg" alt="프로필" />
+          <div class="profile-img-wrapper">
+            <img :src="profileImage" class="profile-img" alt="프로필" />
+          </div>
           
           <div class="info-text">
-            <h2 class="mb-1 fw-bold">
-              {{ user.nickname }} 
-              <span class="badge bg-primary ms-2" style="font-size: 0.6em; vertical-align: middle;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h2 class="m-0 fw-bold user-name">{{ user.nickname }}</h2>
+              <span class="status-badge" :class="tenderClass">
                 {{ tenderText }}
               </span>
-            </h2>
-            <p class="text-muted mb-2">{{ user.email }}</p>
+            </div>
             
-            <div class="social-stats small text-secondary">
-              팔로워 <b class="text-dark">{{ user.follower_count || 0 }}</b> · 
-              팔로잉 <b class="text-dark">{{ user.following_count || 0 }}</b>
+            <p class="user-email">{{ user.email }}</p>
+            
+            <div class="social-stats">
+              <span>팔로워 <b class="text-dark">{{ user.follower_count || 0 }}</b></span>
+              <span class="divider">·</span>
+              <span>팔로잉 <b class="text-dark">{{ user.following_count || 0 }}</b></span>
             </div>
           </div>
         </div>
 
-        <button class="btn btn-outline-secondary btn-sm" @click="$emit('toggle-edit')">
+        <button class="btn btn-outline-custom" @click="$emit('toggle-edit')">
+          <i class="bi" :class="isEditing ? 'bi-x-lg' : 'bi-pencil-fill'"></i>
           {{ isEditing ? '취소' : '정보 수정' }}
         </button>
       </div>
-
-      <hr class="my-4 opacity-25">
-
-      <h5 class="mb-3 fw-bold text-dark">상세 정보</h5>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">생년월일</span>
-          <span class="value">{{ user.birth || '미입력' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">성별</span>
-          <span class="value">{{ genderText }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">신용점수</span>
-          <span class="value fw-bold text-primary">{{ user.credit_score }}점</span>
-        </div>
-
-        <div class="info-item">
-          <span class="label">총 자산</span>
-          <span class="value">{{ formatMoney(user.assets) }}원</span>
-        </div>
-        <div class="info-item">
-          <span class="label">연봉</span>
-          <span class="value">{{ formatMoney(user.salary) }}원</span>
-        </div>
-        <div class="info-item">
-          <span class="label">월 평균 지출</span>
-          <span class="value">{{ formatMoney(user.average_monthly_spend) }}원</span>
-        </div>
+      
       </div>
-    </div>
   </div>
 </template>
 
@@ -64,85 +40,95 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-    default: () => ({})
-  },
+  user: { type: Object, required: true, default: () => ({}) },
   isEditing: Boolean
 })
 
 defineEmits(['toggle-edit'])
 
-// 이미지 경로 처리 (기존 로직 유지 또는 helper 함수 사용)
 const profileImage = computed(() => {
   if (!props.user.profile_image) return '/default-profile.png'
   if (props.user.profile_image.startsWith('http')) return props.user.profile_image
-  // .env 설정을 가져오거나 직접 입력 (상황에 맞게 조정하세요)
   const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
   return `${API_URL}${props.user.profile_image}`
 })
 
-// [매핑] 성별 (0: 남성, 1: 여성) - ProfileForm 기준
-const genderText = computed(() => {
-  if (props.user.gender === undefined || props.user.gender === null) return '-'
-  const map = { '0': '남성', '1': '여성' }
-  // DB에서 숫자로 올 수도 있고 문자로 올 수도 있어 String 변환 후 매핑
-  return map[String(props.user.gender)] || '기타'
-})
-
-// [매핑] 투자 성향 (1~5) - ProfileForm 기준
 const tenderText = computed(() => {
   const map = {
-    '1': '안정형 (매우 보수적)',
-    '2': '안정추구형 (보수적)',
-    '3': '위험중립형 (보통)',
-    '4': '적극투자형 (공격적)',
-    '5': '공격투자형 (매우 공격적)'
+    '1': '안정형', '2': '안정추구형', '3': '위험중립형',
+    '4': '적극투자형', '5': '공격투자형'
   }
-  return map[String(props.user.tender)] || '투자 성향 미설정'
+  return map[String(props.user.tender)] || '미설정'
 })
 
-// [유틸] 금액 포맷팅 (세 자리 콤마)
-const formatMoney = (value) => {
-  if (value === undefined || value === null) return '0'
-  return Number(value).toLocaleString()
-}
+const tenderClass = computed(() => {
+  const t = String(props.user.tender)
+  if (t === '1' || t === '2') return 'safe'
+  if (t === '4' || t === '5') return 'danger'
+  return 'neutral'
+})
 </script>
 
 <style scoped>
-.profile-img-lg {
-  width: 90px;
-  height: 90px;
+.user-profile.card {
+  border: none;
+  border-radius: 32px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  background: white;
+}
+
+.profile-img-wrapper {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  padding: 4px;
+  border: 2px solid rgba(27, 94, 32, 0.1);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #dee2e6;
 }
 
-/* 그리드 레이아웃: 반응형으로 2열 or 3열 배치 */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  background-color: #f8f9fa; /* 연한 회색 배경 */
-  padding: 20px;
+.user-name {
+  color: var(--text-primary);
+  font-size: 1.8rem;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.status-badge.safe { background-color: #e8f5e9; color: var(--moathon-green); }
+.status-badge.danger { background-color: #ffebee; color: #d32f2f; }
+.status-badge.neutral { background-color: #f5f5f5; color: var(--text-secondary); }
+
+.user-email { color: var(--text-secondary); margin-bottom: 8px; }
+
+.social-stats {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+.divider { margin: 0 8px; color: #dee2e6; }
+
+.btn-outline-custom {
+  border: 1px solid #e0e0e0;
+  color: var(--text-primary);
   border-radius: 12px;
-}
-
-.info-item {
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
-
-.label {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 4px;
-}
-
-.value {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
+.btn-outline-custom:hover {
+  background-color: var(--bg-secondary);
+  border-color: #d0d0d0;
 }
 </style>
