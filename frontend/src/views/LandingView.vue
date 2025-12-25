@@ -171,9 +171,9 @@ const mockMoathon = ref({
 
 const mockBadgeCollection = ref([
   {
-    name: '저축의 시작',
+    name: "반환점 터치",
     quantity: 3,
-    url: '/src/assets/badges/badge_achieve_3days.png'
+    url: '/src/assets/badges/badge_track_50.png'
   },
   {
     name: '완주 트로피',
@@ -196,9 +196,19 @@ const mockBadgeCollection = ref([
     url: "frontend/src/assets/badges/badge_social_cheerleader.png"
   },
   {
+    name: "프로 완주러",
+    quantity: 1,
+    url: "frontend/src/assets/badges/badge_achieve_3moathons.png"
+  },
+  {
     name: "티끌 모아 태산",
     quantity: 1,
     url: "frontend/src/assets/badges/badge_achieve_deposit.png"
+  },
+  {
+    name: "팔로팔로미",
+    quantity: 1,
+    url: "frontend/src/assets/badges/badge_social_followers.png"
   }
 ])
 
@@ -238,8 +248,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Page Specific Styles */
-
 /* Hero Section */
 .hero {
   height: 100vh;

@@ -7,7 +7,7 @@
         <p class="page-subtitle">저축 목표를 입력하고 <span class="highlight">AI 맞춤 상품</span>을 추천받아 보세요.</p>
       </div>
 
-      <div class="recommend-card-wrapper shadow-sm">
+      <div class="recommend-container">
         
         <div v-if="!store.recommendationResult" class="form-section">
           <MoathonRecommendForm :is-loading="store.isRecommending" @submit="handleRecommend" />
@@ -137,12 +137,8 @@ const resetRecommendation = () => {
   font-weight: 700;
 }
 
-.recommend-card-wrapper {
-  background: white;
-  padding: 40px;
-  border-radius: 32px;
-  border: 1px solid rgba(0, 0, 0, 0.02);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+.recommend-container {
+  width: 100%;
 }
 
 .bg-green-light { background-color: #e8f5e9; }
@@ -151,9 +147,5 @@ const resetRecommendation = () => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 576px) {
-  .recommend-card-wrapper { padding: 24px; }
 }
 </style>

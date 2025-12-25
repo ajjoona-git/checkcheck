@@ -1,5 +1,5 @@
 <template>
-  <div class="form-container">
+  <div class="form-container form-card">
     <form @submit.prevent="submitForm">
       
       <div class="form-group mb-4">
@@ -82,7 +82,14 @@ const submitForm = () => {
 </script>
 
 <style scoped>
-.form-container { width: 100%; }
+.form-card {
+  width: 100%;
+  background: white;
+  padding: 40px;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
 
 .form-label {
   display: block;

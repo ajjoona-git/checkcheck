@@ -74,6 +74,11 @@ defineEmits(['create', 'retry'])
 <style scoped>
 .detail-card {
   width: 100%;
+  background: white;
+  padding: 40px;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 /* Header */
