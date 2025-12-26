@@ -1,22 +1,32 @@
-# MOATHON (모아톤)
+# MOATHON (모아톤): 함께 완주하는 저축 마라톤
 
-> 모아톤은 추천시스템으로 개인 맞춤 예·적금 상품/옵션을 제안하고, 마라톤처럼 목표 달성까지 꾸준히 달리도록 커뮤니티와 리워드로 완주를 돕는 금융 루틴 서비스입니다.
-> 
+### *"고르는 스트레스는 줄이고, 달리는 재미는 더하고"*
+
+모아톤은 개인 맞춤형 예·적금 상품을 AI로 추천하고, 마라톤처럼 목표 달성까지 커뮤니티와 리워드를 통해 완주를 돕는 **금융 루틴 서비스**입니다. 단순히 상품을 가입하는 것을 넘어, 사용자가 설정한 저축 목표를 끝까지 달성할 수 있도록 돕는 **페이스메이커** 역할을 지향합니다.
 
 ---
 
-## 1. 팀원 정보 및 역할 분담
-
-### 1.1 역할 분담
+## 0. 팀원 정보 및 역할 분담
 
 | 박준아(팀장) | 정환승(팀원) |
-| --- | --- |
+| :--- | :--- |
 | PM, FE, API 연결 | AI, BE, DB |
-| - GitHub 관리- 모아톤(게시글) CRUD API 구현- 카카오맵, 유튜브 API 활용한 기능 구현- 프론트엔드 - 백엔드 API 연결- 컴포넌트 아키텍처- 페이지 디자인 | - AI 추천 시스템 구현- 데이터 생성 및 외부 API 연결- ERD- 서버 API 구성- 기획서 및  발표 자료 |
+| - GitHub 관리<br/>- 모아톤(게시글) CRUD API 구현<br/>- 카카오맵, 유튜브 API 활용한 기능 구현<br/>- 프론트엔드<br/> - 백엔드 API 연결<br/>- 컴포넌트 아키텍처<br/>- 페이지 디자인 | - AI 추천 시스템 구현<br/>- 데이터 생성 및 외부 API 연결<br/>- ERD<br/>- 서버 API 구성<br/>- 기획서 및  발표 자료 |
 
----
+• 협업 방식: Git Flow 전략(Main-Dev-Feat)을 준수하며 기능별 Issue 관리와 PR 의무화를 통해 코드의 품질을 관리했습니다.
 
-## 2. 서비스 주요 기능 설명
+<br>
+
+## 1. 기술 스택 및 아키텍처
+
+• **Frontend**: Vue 3 (Composition API), Pinia, Axios, Bootstrap, Google Charts.
+• **Backend**: Django REST Framework (DRF), SQLite.
+• **AI/Data**: XGBoost (ML), GPT-5-mini (LLM), Joblib, Scikit-learn.
+• **External APIs**: 금융감독원(FSS) FinLife API, Kakao Map API, YouTube Data API v3.
+
+<br>
+
+## 2. 서비스 주요 기능
 
 ### 2.1 금융상품 추천 시스템
 
@@ -105,7 +115,7 @@
     - **동시성 대응**
         - **동시 요청에서도 1회만 지급**되도록 처리
 
----
+<br>
 
 ## 3. 금융 상품 추천 알고리즘 기술적 설명
 
@@ -145,7 +155,7 @@ Stage 1은 **정형화 가능한 특성**을 중심으로 모델 입력을 구�
     - 출력 확률을 추천 점수로 사용해 **랭킹(정렬) 문제로 변환**
 
 > 대규모 후보군에 대해 모델이 추정한 선택 가능성 점수를 계산하고, 점수가 높은 상품을 Top-10 추천 후보로 선정
-> 
+>
 
 ### 학습 데이터 구성 방식
 
@@ -217,9 +227,9 @@ Stage 1은 정답 1개를 맞추는 정확도보다 **추천 후보군 품질**�
             - 우선순위:
                 1. 목표 `term_months`와 `save_trm`이 같거나 가장 가까운 옵션
                 2. `purpose == YIELD`면 `intr_rate2` 우선(단, 기간이 너무 어긋나면 감점)
-                    
+
                     그 외 목적은 기간 최우선 + 금리 tie-break
-                    
+
                 3. `product_texts`의 `spcl_cnd / etc_note / mtrt_int`에서 리스크/제약을 뽑아 `warnings`에 요약
     - **(2) 출력 안정화**
         - `reasons`/`warnings`는 리스트 형태로 강제하고 공백 제거
@@ -253,61 +263,60 @@ Stage 1은 정답 1개를 맞추는 정확도보다 **추천 후보군 품질**�
 - **성능/비용/지연 최적화**: 전체 상품(수백)·옵션(수천)을 매번 LLM로 평가하면 비용과 응답 시간이 급증합니다. Stage 1(XGBoost)이 **Top-10 상품으로 후보군을 압축**해 LLM 입력 크기와 호출 비용을 안정적으로 통제합니다.
 - **역할 분리로 품질 향상**: Stage 1은 정형·수치 피처 기반으로 “선택될 가능성이 높은 후보”를 빠르게 추리고, Stage 2는 **정성 텍스트와 목적 맥락**을 반영해 최종 옵션을 결정합니다.
 
----
+<br>
 
 ## 4. 생성형 AI 활용 내용 (추천 로직)
 
 GMS의 **gpt-5-mini**를 추천 로직(Stage 2)에 적용해, Stage 1에서 추린 Top-10 후보 중에서 사용자 목표·성향과 상품 텍스트 정보(우대조건/유의사항 등)를 함께 고려하여 **최종 상품·옵션 1개를 선택**하고, 선택 이유와 주의사항을 **구조화된 JSON 형태**로 반환하도록 구성했습니다.
 
----
+<br>
 
 ## 5. 소감
 | 박준아 | 정환승 |
-| --- | --- |
+| :--- | :--- |
 | 프론트와 백엔드가 어떻게 데이터를 주고 받는지 확실하게 배웠습니다. 규모가 작은 프로젝트에서는 프론트의 역할과 책임이 훨씬 무겁다고 느꼈습니다. 기능 단위가 가볍기 때문에 백엔드에서 데이터를 생성하고 DB에서 가져오고 조립하는 과정이 복잡하지는 않았습니다. 오히려 RESTful API로 데이터를 주고 받는 과정에서 오류 처리를 어떻게 해야하고, 응답받은 데이터를 화면에 구현하는 과정이 훨씬 어려웠습니다. 기능 단위가 커지고 프로젝트 규모가 커진다면 백엔드 로직이 훨씬 복잡하고 어려워지고, 반면에 프론트엔드의 작업은 프로젝트의 규모와 상관없을 것 같다고 느꼈습니다. <br> 3주만에 기획-개발-테스트를 모두 해냈다는 사실이 무척 뿌듯합니다. 그럼에도 아직 구현하지 못한 기능이 많기 때문에 더 공부해서 도전해보고 싶은 마음입니다. 대표적으로 뱃지를 획득한 경우, django의 signals에서 조건이 충족되면 자동으로 발급되어 DB에 기록됩니다. 하지만 프론트에서 DB의 내용을 가져오려면 API를 호출하는 방법밖에 없습니다. 때문에 뱃지가 발급됨과 동시에 유저에게 알림을 주기 위해서는 polling이나 socket을 도입해야 합니다. 이 기능과 배포까지 완성해보고 싶습니다. | ML 모델을 학습할 때 페이크 데이터 기반으로 진행한 점은 조금 아쉬웠습니다. 실제 사용자 데이터가 있었다면 추천 품질을 더 현실적으로 검증할 수 있었고, 특히 뱃지 같은 리워드/커뮤니티 활동 지표도 유저 성향을 보여주는 좋은 피처가 될 것 같았는데 시간적 제약 때문에 학습 단계에까지 반영해보지 못한 점이 아쉽습니다. 그래도 “사용자 기반 추천시스템”을 직접 설계해보고자 ML 모델로 후보를 좁히는 구조를 만들고, 생성형 AI를 함께 활용해 최종 상품·옵션을 선택하고 근거를 생성하는 흐름까지 구현하면서 추천 시스템을 서비스 관점에서 설계하는 방법을 배울 수 있었습니다. 또한 추천 결과가 실제 기능으로 자연스럽게 이어지도록 REST API를 리소스 단위로 설계·구현하며 인증/권한/정책을 정리하는 과정에서, 단순히 기능을 만드는 것을 넘어 운영 가능한 형태로 구조화하는 경험을 할 수 있었습니다. |
 
+<br>
 
----
+## 6. QUICK START
 
-## 6. 프로젝트 실행하는 방법
+### 6.1 환경변수 설정
 
-### frontend/.env.local
-
-```
-VITE_API_URL='http://127.0.0.1:8000'
-
-VITE_YOUTUBE_API_KEY=''
-VITE_YOUTUBE_API_URL='https://www.googleapis.com/youtube/v3'
-
-VITE_KAKAO_API_KEY=''
-
-```
-
-### backend/.env
+#### `frontend/.env.local`
 
 ```bash
-DJANGO_SECRET_KEY=""
+VITE_API_URL='http://127.0.0.1:8000'
+
+VITE_YOUTUBE_API_KEY='YOUR_YOUTUBE_API_KEY_HERE'
+VITE_YOUTUBE_API_URL='https://www.googleapis.com/youtube/v3'
+
+VITE_KAKAO_API_KEY='YOUR_KAKAO_API_KEY_HERE'
+
+```
+
+#### `backend/.env`
+
+```bash
+DJANGO_SECRET_KEY="YOUR_DJANGO_SECRET_KEY_HERE"
 
 # 개발 환경에서는 True
 # 운영 환경에서는 반드시 False
 DJANGO_DEBUG=True
 
 # 금감원 api
-FSS_API_KEY=
+FSS_API_KEY=YOUR_FSS_API_KEY_HERE
 
-EMAIL_HOST_USER=ajjoona@gmail.com
-EMAIL_HOST_PASSWORD=
+EMAIL_HOST_USER=YOUR_EMAIL_HERE
+EMAIL_HOST_PASSWORD=YOUR_PASSWORD_HERE
 
 # GMS_KEY
-GMS_KEY=
+GMS_KEY=YOUR_GMS_KEY_HERE
 
 ```
 
----
+### 6.2 프론트엔드 (Vue.js) 초기 설정
 
-## 프론트엔드 (Vue.js) 초기 설정
-
-### 서버 실행
+#### 서버 실행
 
 ```bash
 cd ../frontend
@@ -315,11 +324,9 @@ npm install
 npm run dev
 ```
 
----
+### 6.3 백엔드 (Django) 초기 설정
 
-## 백엔드 (Django) 초기 설정
-
-### 가상환경 설정
+#### 가상환경 설정
 
 ```bash
 cd ../backend
@@ -328,7 +335,7 @@ source venv/Script/activate
 pip install -r requirements.txt
 ```
 
-### DB 설정(데이터 적재)
+#### DB 설정 (데이터 적재)
 
 ```bash
 python manage.py makemigrations
@@ -352,7 +359,7 @@ python manage.py loaddata accounts/accounts_social.json
 python manage.py loaddata challenges/challenges_social.json
 ```
 
-### 서버 실행
+#### 서버 실행
 
 ```bash
 python manage.py runserver
