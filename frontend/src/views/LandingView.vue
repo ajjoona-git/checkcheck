@@ -156,42 +156,42 @@ const mockBadgeCollection = ref([
   {
     name: "반환점 터치",
     quantity: 3,
-    url: '/src/assets/badges/badge_track_50.png'
+    url: '/badges/badge_track_50.png'
   },
   {
     name: '완주 트로피',
     quantity: 2,
-    url: '/src/assets/badges/badge_track_100.png'
+    url: '/badges/badge_track_100.png'
   },
   {
     name: "시작이 반",
     quantity: 1,
-    url: "/src/assets/badges/badge_achieve_start.png"
+    url: "/badges/badge_achieve_start.png"
   },
   {
     name: "억만장자의 꿈",
     quantity: 1,
-    url: "/src/assets/badges/badge_achieve_billionaire.png"
+    url: "/badges/badge_achieve_billionaire.png"
   },
   {
     name: "응원 단장",
     quantity: 0,
-    url: "frontend/src/assets/badges/badge_social_cheerleader.png"
+    url: "/badges/badge_social_cheerleader.png"
   },
   {
     name: "프로 완주러",
     quantity: 1,
-    url: "frontend/src/assets/badges/badge_achieve_3moathons.png"
+    url: "/badges/badge_achieve_3moathons.png"
   },
   {
     name: "티끌 모아 태산",
     quantity: 1,
-    url: "frontend/src/assets/badges/badge_achieve_deposit.png"
+    url: "/badges/badge_achieve_deposit.png"
   },
   {
     name: "팔로팔로미",
     quantity: 1,
-    url: "frontend/src/assets/badges/badge_social_followers.png"
+    url: "/badges/badge_social_followers.png"
   }
 ])
 

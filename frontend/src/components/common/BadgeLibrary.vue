@@ -112,10 +112,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value - 1) currentPa
 
 // 이미지 경로
 const resolveImagePath = (path) => {
-  if (!path) return '/assets/badges/default.png'
-  if (path.startsWith('frontend/')) {
-    return '/' + path.substring('frontend/'.length)
-  }
+  if (!path) return '/badges/default.png'
   return path
 }
 </script>
