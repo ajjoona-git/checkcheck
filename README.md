@@ -46,6 +46,12 @@
 
 ## 주요 기능 시연 (Service Demo)
 
+<p align="center">
+  <a href="https://d314hr75zv7jjv.cloudfront.net/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Service-바로가기-4CAF50?style=for-the-badge" />
+  </a>
+</p>
+
 ### 1. 시작 및 온보딩 (Onboarding)
 사용자에게 첫인상을 주는 랜딩 페이지와 회원가입, 그리고 초기 데이터를 수집하는 온보딩 과정입니다.
 
