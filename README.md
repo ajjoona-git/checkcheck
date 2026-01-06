@@ -1,336 +1,236 @@
-# MOATHON (모아톤)
+# MOATHON (모아톤): 함께 완주하는 저축 마라톤
 
-> 모아톤은 추천시스템으로 개인 맞춤 예·적금 상품/옵션을 제안하고, 마라톤처럼 목표 달성까지 꾸준히 달리도록 커뮤니티와 리워드로 완주를 돕는 금융 루틴 서비스입니다.
-> 
+### *"고르는 스트레스는 줄이고, 달리는 재미는 더하고"*
 
----
+모아톤은 개인 맞춤형 예·적금 상품을 AI로 추천하고, 마라톤처럼 목표 달성까지 커뮤니티와 리워드를 통해 완주를 돕는 **금융 루틴 서비스**입니다. 단순히 상품을 가입하는 것을 넘어, 사용자가 설정한 저축 목표를 끝까지 달성할 수 있도록 돕는 **페이스메이커** 역할을 지향합니다.
 
-## 1. 팀원 정보 및 역할 분담
+## 기술 스택 (Tech Stack)
 
-### 1.1 역할 분담
+### Frontend
+![Vue.js](https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)
+![Pinia](https://img.shields.io/badge/Pinia-FFE162?style=for-the-badge&logo=pinia&logoColor=black)
+![Bootstrap](https://img.shields.io/badge/Bootstrap5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
+![GSAP](https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge&logo=greensock&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
 
-| 박준아(팀장) | 정환승(팀원) |
-| --- | --- |
-| PM, FE, API 연결 | AI, BE, DB |
-| - GitHub 관리- 모아톤(게시글) CRUD API 구현- 카카오맵, 유튜브 API 활용한 기능 구현- 프론트엔드 - 백엔드 API 연결- 컴포넌트 아키텍처- 페이지 디자인 | - AI 추천 시스템 구현- 데이터 생성 및 외부 API 연결- ERD- 서버 API 구성- 기획서 및  발표 자료 |
+### Backend
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/Django_REST_Framework-A30000?style=for-the-badge&logo=django&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
----
+### AI & Data
+![Scikit-Learn](https://img.shields.io/badge/scikit_learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
-## 2. 서비스 주요 기능 설명
+### External APIs
+![KakaoMap](https://img.shields.io/badge/Kakao_Map_API-FFCD00?style=for-the-badge&logo=kakao&logoColor=black)
+![Youtube](https://img.shields.io/badge/Youtube_Data_API-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
+![FSS](https://img.shields.io/badge/Financial_Supervisory_Service-1D4F91?style=for-the-badge&logo=bank&logoColor=white)
 
-### 2.1 금융상품 추천 시스템
+### Collaboration & Tools
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
+
+<br><br>
+
+## 서비스 아키텍처
+
+**Vue3 Composition API**와 **Django REST Framework**를 활용하여 **RESTful API** 기반으로 서비스를 구축했습니다. 특히 AI 추천 시스템을 백엔드 로직에 통합하여 실시간으로 개인화된 상품을 제안하도록 설계했습니다.
+
+![시스템 아키텍처](./docs/diagrams/system-architecture.png)
+
+<br><br>
+
+## 주요 기능 시연 (Service Demo)
+
+<p align="center">
+  <a href="https://d314hr75zv7jjv.cloudfront.net/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Service-바로가기-4CAF50?style=for-the-badge" />
+  </a>
+</p>
+
+### 1. 시작 및 온보딩 (Onboarding)
+사용자에게 첫인상을 주는 랜딩 페이지와 회원가입, 그리고 초기 데이터를 수집하는 온보딩 과정입니다.
+
+| Landing Page | Signup | Onboarding |
+| :---: | :---: | :---: |
+| <img src="./docs/result_gifs/Landing.gif" width="250" /> | <img src="./docs/result_gifs/SignUp.gif" width="250" /> | <img src="./docs/result_gifs/Onboarding.gif" width="250" /> |
+| **서비스 소개 및 진입** | **회원가입** | **초기 투자 성향/목표 설정** |
+
+<br>
+
+### 2. AI 상품 추천 및 모아톤 생성 (AI Recommend)
+사용자의 프로필과 목표를 기반으로 AI가 최적의 상품을 추천하고, 이를 바탕으로 '모아톤(저축 챌린지)'을 생성합니다.
+
+| AI Recommendation | Moathon Create | Moathon Update |
+| :---: | :---: | :---: |
+| <img src="./docs/result_gifs/MoathonRecommend.gif" width="250" /> | <img src="./docs/result_gifs/Recommend-MoathonCreate.gif" width="250" /> | <img src="./docs/result_gifs/MoathonUpdate.gif" width="250" /> |
+| **목표 설정 및 AI 맞춤 상품 추천** | **추천 상품으로 모아톤 생성** | **모아톤 정보 수정** |
+
+<br>
+
+### 3. 금융 상품 조회 및 가입 (Products)
+AI 추천 외에도 전체 예·적금 상품을 직접 비교하고 선택하여 모아톤을 시작할 수 있습니다.
+
+| Product List | Product Detail | Create with Option |
+| :---: | :---: | :---: |
+| <img src="./docs/result_gifs/Products.gif" width="250" /> | <img src="./docs/result_gifs/ProductDetail.gif" width="250" /> | <img src="./docs/result_gifs/ProductOption-MoathonCreate.gif" width="250" /> |
+| **전체 금융 상품 조회/필터링** | **상품 상세 금리/조건 확인** | **옵션 선택 후 모아톤 시작** |
+
+<br>
+
+### 4. 커뮤니티 및 프로필 (Community & Profile)
+다른 유저들과 함께 저축 현황을 공유하고 응원하며, 나의 활동 내역(뱃지)을 관리합니다.
+
+| Moathon Detail | User Following | Profile & Badges |
+| :---: | :---: | :---: |
+| <img src="./docs/result_gifs/MoathonDetail.gif" width="250" /> | <img src="./docs/result_gifs/Following.gif" width="250" /> | <img src="./docs/result_gifs/Profile.gif" width="250" /> |
+| **모아톤 상세 정보 / 댓글 / 좋아요** | **유저 팔로우 및 피드** | **마이페이지 / 뱃지 콜렉션** |
+
+<br>
+
+### 5. 금융 유틸리티 (Utilities)
+사용자의 금융 생활을 돕는 부가 기능 모음입니다.
+
+| Bank Map | Commodity Chart | Finance Tube |
+| :---: | :---: | :---: |
+| <img src="./docs/result_gifs/BankMap.gif" width="250" /> | <img src="./docs/result_gifs/CommodityChart.gif" width="250" /> | <img src="./docs/result_gifs/FinanceTube.gif" width="250" /> |
+| **내 주변 은행 찾기 (Kakao Map)** | **금/은 시세 차트 (Chart.js)** | **금융튜브 (Youtube API)** |
+
+<br><br>
+
+
+## 서비스 상세 기능
+
+### 1. 금융상품 추천 시스템 (Personalized Recommendation)
+사용자의 자산 현황과 재무 목표를 분석하여 최적의 예·적금 상품을 제안합니다.
 
 - **기능 요약:**
-    - 사용자가 입력한 **시작금액(Start amount) · 목표금액(Target amount) · 목표기간(Term_months) · 목적(Purpose)**과 사용자 프로필 정보를 결합해 **개인화 추천**을 수행합니다.
-    - **Stage 1 (ML 랭킹)**: 정형·수치 피처 기반으로 추천 가능성이 높은 후보 상품을 **Top-10으로 압축**합니다.
-    - **Stage 2 (LLM 의미적 재랭킹)**: 사용자의 목적·성향을 자연어 수준에서 해석해 Top-10 후보를 **적합도 기준으로 재정렬**하고, 최종 **금융상품 1개 + 세부 옵션 1개**를 선택합니다.
-    - 최종 결과로 **추천 상품/옵션**과 함께, 선택 근거(요약)를 제공해 **설명 가능한 추천**을 목표로 합니다.
-- **사용자 입력:**
-    - Target amount : 목표하는 금액
-    - Start amount : 초기 투자 가능 금액
-    - Term_months : 목표 기간(개월)
-    - Purpose : 목적
-        - 목돈 마련
-        - 단기 여유자금
-        - 안정적 자산 보관
-        - 저축 습관 형성
-        - 이자 극대화
-- **추천 결과:** 금융 상품 및 옵션 최종 1개
-- **예외 처리:**
-    - **LLM 단계 장애 대응 :** LLM 타임아웃·형식 깨짐·응답 실패 시 **규칙 기반 옵션 선택**으로 폴백하여 서비스 중단을 방지
+    - **개인화 추천:** 사용자 프로필(나이, 자산, 소비패턴 등)과 목표(금액, 기간, 용도)를 결합하여 분석
+    - **설명 가능한 추천(XAI):** 단순 상품 나열이 아닌, *"왜 이 상품이 적합한지"*에 대한 구체적인 근거(Summary) 제공
+    - **예외 처리(Fallback):** AI 모델/LLM 장애 발생 시에도 서비스가 중단되지 않도록 규칙 기반(Rule-based) 폴백 시스템 가동
 
----
+- **사용자 입력 정보:**
+    - **목표:** 목표 금액(Target), 시작 금액(Start), 기간(개월 수)
+    - **목적(Purpose):** 목돈 마련, 단기 여유자금, 안정적 자산 보관, 저축 습관 형성, 이자 극대화
 
-### 2.2 모아톤 커뮤니티
+### 2. 모아톤 커뮤니티 (Moathon Community)
+저축을 혼자 하는 것이 아니라, '함께' 하는 챌린지 형태로 만들어 동기 부여를 제공합니다.
 
-- **기능 요약**
-    - 사용자가 자신의 **모아톤**을 공유하고, 다른 사용자와 **응원·피드백·상호작용**을 하며 즐거운 저축을 돕는 커뮤니티 기능입니다.
-- **주요 화면/기능**
-    - **모아톤 CRUD**
-        - 모아톤 **작성**: 추천받은 상품/옵션(또는 선택한 상품)을 바탕으로 목표/기간/목적 설정 후 게시
-        - 모아톤 **목록 조회**: 전체 모아톤 리스트
-        - 모아톤 **상세 조회**: 작성자 정보, 목표/기간/진행률, 선택 상품/옵션, 댓글/좋아요 등 확인
-        - 모아톤 **수정/삭제**: 목표/설명 등 일부 항목 수정 및 게시글 삭제
-    - **댓글**
-        - 댓글 **목록 조회/작성**
-        - 댓글 **수정/삭제**
-    - **좋아요**
-        - 모아톤 **좋아요 등록/취소**
-        - 좋아요 수 표시
-    - **팔로우**
-        - 사용자 **팔로우/언팔로우**
-        - 메인 페이지에서 내가 팔로우한 사용자의 모아톤을 확인할 수 있음
-- **권한/정책**
-    - **로그인 필수**
-        - 모아톤 작성/상세 조회/수정/삭제, 댓글 작성/수정/삭제, 좋아요, 팔로우 기능은 **인증된 사용자만** 가능
-        - 목록 조회는 비로그인 허용
-    - **작성자 권한**
-        - 모아톤 **수정/삭제는 작성자만** 허용
-        - 댓글 **수정/삭제는 댓글 작성자만** 허용
-    - **좋아요 정책**
-        - 사용자 1명은 특정 모아톤에 **1회만 좋아요 가능**
-        - 중복 좋아요 방지
+- **모아톤(게시글) 관리:**
+    - 추천받은 상품으로 '모아톤' 챌린지 생성 (목표 및 다짐 작성)
+    - 진행률(%) 시각화 및 상세 정보(옵션/금리) 공유
+- **소셜 인터랙션:**
+    - **응원하기(좋아요):** 서로의 목표 달성을 응원 (중복 방지 적용)
+    - **댓글/피드백:** 금융 꿀팁 공유 및 격려 메시지 작성
+    - **팔로우:** 관심 있는 유저의 모아톤 활동을 메인 피드에서 확인
+- **권한 및 정책:**
+    - 비로그인 유저: 목록 조회만 가능 (Eye-shopping)
+    - 로그인 유저: 작성, 수정, 삭제, 좋아요, 팔로우 등 모든 상호작용 가능 (작성자 본인 확인 로직 포함)
 
----
+### 3. 게이미피케이션 & 리워드 (Badge System)
+사용자의 활동에 따라 뱃지를 지급하여 지속적인 서비스 이용을 유도합니다.
 
-### 2.3 뱃지 리워드
+- **뱃지 카테고리:**
+    - **Track (진행률):** 첫 숨 고르기(25%), 반환점(50%), 막판 스퍼트(75%), 완주 트로피(100%)
+    - **Achieve (성취):** 작심삼일 탈출(3일 유지), 억만장자의 꿈(장기 적금), 프로 완주러 등
+    - **Social (소통):** 응원 단장(좋아요), 소통 요정(댓글), 인기 스타, 팔로팔로미
+- **기술적 특징:**
+    - **동시성 제어:** 따닥(Double Click) 이슈 방지를 위한 중복 지급 방지 로직 적용
+    - **트리거:** 회원가입, 로그인, 특정 이벤트(좋아요/생성) 발생 시 즉시 조건 검사 및 지급
 
-- **기능 요약**
-    - 사용자의 행동(모아톤 생성/참여, 커뮤니티 활동 등)에 따라 **뱃지를 지급**하여, 저축 루틴을 **지속·완주**하도록 동기를 부여하는 리워드 시스템입니다.
-    - 뱃지는 마이페이지/프로필 등에 노출되어 **성취 기록**이 되고, 커뮤니티 내에서 **사회적 동기(인정/응원)**를 강화합니다.
-- **뱃지 종류**
-    - **track**
-        - 첫 번째 숨 고르기: 모아톤 1/4지점 도달
-        - 반환점 터치: 모아톤 절반 도달
-        - 막판 스퍼트!: 모아톤 3/4지점 도달
-        - 완주 트로피: 모아톤 만기 달성
-    - **achieve**
-        - 시작이 반: 모아톤 첫 회원가입 시
-        - 티끌 모아 태산: 첫 번째 모아톤을 생성 시
-        - 작심삼일 탈출: 모아톤을 생성하고 3일 이상 유지
-        - 프로 완주러: 모아톤을 3회 이상 완주
-        - 억만장자의 꿈: 만기가 36개월 이상인 모아톤 시작
-    - **소통·커뮤니티 뱃지**
-        - 응원 단장: 좋아요 10회 누르기
-        - 소통 요정: 댓글 5회 누적
-        - 인기 스타: 모아톤 좋아요 20개 받기
-        - 팔로팔로미: 팔로워 10명 달성
-- **트리거**
-    - **회원가입 시**
-    - **로그인 시**
-    - **이벤트(모아톤 생성, 좋아요, 팔로우) 발생 시**
-- **중복 지급 방지 로직**
-    - **DB 레벨 중복 방지**
-    - **이벤트 중복 트리거 방지**
-    - **동시성 대응**
-        - **동시 요청에서도 1회만 지급**되도록 처리
 
----
+## 2-Stage 하이브리드 추천 알고리즘
 
-## 3. 금융 상품 추천 알고리즘 기술적 설명
-
-### 3.1 전체 구조 개요 (2-Stage)
-
-모아톤 추천은 **ML 기반 후보 압축(Stage 1)** + **LLM 기반 의미 재랭킹(Stage 2)**을 결합한 하이브리드 구조입니다.
+모아톤은 **안정성(ML)**과 **해석력(LLM)**을 모두 잡기 위해 **2-Stage 파이프라인**을 자체 구축했습니다.
 
 핵심 목표는 **(1) 정형 피쳐를 활용해 안정적으로 후보를 좁힌 뒤 (2) 사용자 맥락을 반영해 최종 1개 옵션을 선택**하는 것입니다.
 
 - Stage 1: ML(XGBoost) 기반 랭킹(Top-10 후보 생성)
 - Stage 2: LLM(gpt-5-mini) 기반 의미적 재랭킹(최종 1개 옵션 선택 + 설명 생성)
 
----
-
-### 3.2 Stage 1: ML 랭킹(후보 압축)
-
-### 사용 피처
+### Stage 1: ML 랭킹(후보 압축)
 
 Stage 1은 **정형화 가능한 특성**을 중심으로 모델 입력을 구성합니다.
 
-- **사용자/목표 기반 피처**
-    - 목표 금액/시작 금액
-    - 목표 기간
-    - 목적(Purpose: GOAL/SHORT/SAFE/HABIT/YIELD)
-- **사용자 프로필 피처**
-    - 나이/성별/신용등급/자산/연봉/한 달 평균 소비액/리스크 성향
-- **상품/옵션 정형 피처**
-    - 금리
-    - 기간
-    - 금리유형(단리/복리)
-    - 적립유형(정액적립식/자유적립식)
+- **모델**: XGBoost Classifier (Ranking)
 
-### 모델
+- **활용 데이터:**
 
-- **XGBoost (XGBClassifier)**
-    - 멀티클래스 확률 예측을 활용해 상품을 점수화
-    - 출력 확률을 추천 점수로 사용해 **랭킹(정렬) 문제로 변환**
+    - **User**: 나이, 자산, 연봉, 소비패턴, 리스크 성향 등 정형 데이터
 
-> 대규모 후보군에 대해 모델이 추정한 선택 가능성 점수를 계산하고, 점수가 높은 상품을 Top-10 추천 후보로 선정
-> 
+    - **Product**: 금리, 기간, 단리/복리, 적립 유형
 
-### 학습 데이터 구성 방식
+- **역할**: 전체 상품군 → 확률 점수 기반 **Top-10 후보군 추출** (Hit@K 지표로 성능 검증)
 
-- **학습 단위**
-    - `user_input + user_features + productoption_features → product_id`
-- **라벨 설계**
-    - Stage 1은 **상품(Product) 단위 라벨**로 먼저 학습하여 후보군을 만들고,
-    - 세부 옵션은 Stage 2에서 “텍스트/맥락”을 반영해 최종 결정
-- **데이터 소스**
-    - 금융감독원 예·적금 상품/옵션 데이터
-    - 사용자 데이터(페이크)
+### Stage 2: LLM 의미적 재랭킹(최종 선택)
+압축된 후보군 중에서 사용자의 '목적(Purpose)'과 텍스트 맥락을 고려해 최종 결정을 내립니다.
 
-### 추론 파이프라인
+- **모델**: GPT-5-mini (Fine-tuned/Prompted)
 
-1. 사용자 입력값 + 프로필 → **피처 벡터 생성**
-2. 각 상품에 대한 (유저,옵션) row를 만들어 점수화
-3. 확률 점수 기준으로 내림차순 정렬 → **Top-10 후보 상품** 추출
-4. 후보 상품의 옵션을 로딩하여 Stage 2 입력으로 전달
+- **프로세스:**
 
-### 평가지표
+    1. **옵션 단축:** Top-10 상품의 수많은 옵션 중, 목표 기간과 가장 유사한 옵션들을 1차 필터링
 
-Stage 1은 정답 1개를 맞추는 정확도보다 **추천 후보군 품질**이 중요하기 때문에 Hit@K 활용
+    2. **LLM 추론:** 사용자의 목적(예: "결혼 자금 마련")을 해석하여 금리가 조금 낮더라도 안정적인 상품을 고르거나, 기간이 딱 맞는 상품을 선택
 
-- **Hit@K**: 정답 상품이 Top-K 안에 들어오는 비율 (추천 시스템에서 핵심)
-- **Logloss(mlogloss)**: 확률 예측의 안정성 점검용
+    3. **검증(Hallucination Check):** AI가 선택한 상품이 실제 후보군에 존재하는지 ID 매칭 검증
 
-### 출력
+- **출력**: 최종 상품 ID, 옵션 ID, **추천 사유(Reasons), 유의사항(Warnings)**
 
-**Top-10 상품 리스트**
+### [더 자세한 AI 추천 시스템 설명 보러가기](./docs/AI_recommend_system.md)
 
----
+<br><br>
 
-### 3.3 Stage 2: LLM 의미적 재랭킹(최종 선택)
+## 팀 소개
 
-- **입력**
-    - `user`: 사용자 모델로부터 추출한 프로필 요약(dict)
-        - `age`, `gender`, `credit_score`, `assets`, `salary`, `average_monthly_spend`, `tender`
-    - `goal`: 추천 요청 목표
-        - `purpose`, `target_amount`, `start_amount`, `term_months`
-        - 파생값: `need_amount = max(target-start, 0)`, `need_per_month = need_amount / term_months`
-    - `top10_products`: Stage 1 결과 상위 10개 상품 목록(각 항목에 `product_id` 및 score/prob 포함)
-    - `candidates`: Stage 2에서 최종 선택 가능한 **옵션 후보 리스트**
-        - Top10 상품 각각에 대해 옵션을 최대 `per_product_candidates(기본 3개)`개로 **사전 단축(shortlist)** 하여 구성
-        - 후보 옵션 필드:
-            - `option_id`, `product_id`, `save_trm`, `intr_rate`, `intr_rate2`,
-            - `intr_rate_type_nm`, `rsrv_type_nm`, `join_deny`
-    - `product_texts`: 상품 단위 텍스트/메타 정보
-        - `product_name`, `bank_name`, `product_type`, `join_deny`,
-        - `spcl_cnd`, `etc_note`, `mtrt_int`
-- **프롬프트 구성**
-    - 호출 엔드포인트: `GMS_URL`
-    - 모델: `gpt-5-mini` (`settings.GMS_MODEL` 미지정 시 기본)
-    - 메시지 구성(고정 3개):
-        1. **developer**: `Answer in Korean. 반드시 JSON만 출력하고 다른 텍스트는 출력하지 마세요.`
-        2. **system**: 아래 `SYSTEM_INSTRUCTIONS`로 역할/제약/우선순위/출력 스키마를 강제
-        3. **user**: `payload`를 JSON 문자열로 전달
-    - JSON 추출/파싱:
-        - 모델이 `json 코드블록` 형태로 응답해도 제거 후 `{...}` 구간만 찾아 파싱
-- **의사결정 규칙**
-    - **(0) 후보 옵션 사전 단축(LLM 입력 최적화)**
-        - Top10의 각 상품에 대해 옵션 전체를 다 넣지 않고, 상품별로 최대 3개만 후보로 올립니다.
-        - 단축 기준(정확히 코드 기준):
-            - 1순위: `abs(save_trm - term_months)`가 작은 옵션
-            - 2순위(tie-break): “우대금리 우선” 점수(`intr_rate2`가 있으면 intr_rate2, 없으면 intr_rate)를 더 높은 옵션
-    - **(1) LLM 최종 선택**
-        - LLM은 `SYSTEM_INSTRUCTIONS`에 따라:
-            - `top10_product_ids` 안에서 `product_id` 선택
-            - `candidates` 안에서 `option_id` 1개 선택
-            - 우선순위:
-                1. 목표 `term_months`와 `save_trm`이 같거나 가장 가까운 옵션
-                2. `purpose == YIELD`면 `intr_rate2` 우선(단, 기간이 너무 어긋나면 감점)
-                    
-                    그 외 목적은 기간 최우선 + 금리 tie-break
-                    
-                3. `product_texts`의 `spcl_cnd / etc_note / mtrt_int`에서 리스크/제약을 뽑아 `warnings`에 요약
-    - **(2) 출력 안정화**
-        - `reasons`/`warnings`는 리스트 형태로 강제하고 공백 제거
-        - `reasons`가 2개 미만이면 기본 문구로 보정(서비스 품질 및 형식 안정화)
-        - `reasons` 최대 5개, `warnings` 최대 4개로 길이 제한
-    - **(3) 환각 방지 검증**
-        - LLM이 반환한 `product_id`가 Top10에 없거나,
-        - `option_id`가 candidates에 없으면
-        - **즉시 예외 처리 후 fallback 로직으로 전환**(hallucination 차단)
-- **출력**
-    - 성공(LLM 정상 선택) 시 `Stage2Output`:
-        - `product_id`: 최종 선택 상품 ID
-        - `option_id`: 최종 선택 옵션 ID
-        - `reasons`: 선택 근거 리스트(최소 2개 보장, 최대 5개)
-        - `warnings`: 주의사항 리스트(최대 4개)
-        - `used_fallback = False`
-    - **Fallback(LLM 실패/형식 오류/검증 실패 등 예외 발생)**
-        1. Stage1 1등 상품(`top10_products[0]["product_id"]`)을 `best_pid`로 선택
-        2. 해당 상품에서 옵션 1개만 shortlist(기간 근접 + 금리 기준)하여 선택
-        3. `reasons`는 “기간 근접성”을 포함해 구성하고, 금리 정보가 있으면 추가
-        4. `join_deny` 값이 있으면 가입 제한 경고를 `warnings`에 추가
-        5. `used_fallback = True`
-        - 만약 이 fallback shortlist조차 비어 있으면, 최후에는 `candidates[0]`을 선택하여 서비스가 끊기지 않도록 처리
+### 팀원 및 역할
 
----
+| 박준아 (팀장) | 정환승 (팀원) |
+| :--- | :--- |
+| **PM, Frontend, Integration** | **AI, Backend, Data Engineer** |
+| • 프론트엔드 아키텍처 (Vue3) <br> • UI/UX 디자인 및 컴포넌트 구현 <br> • Axios Interceptor 및 API 연동 <br> • 카카오맵/유튜브 API 활용 기능 <br> • GitHub 관리 | • DB 모델링 (ERD) <br> • API 설계 <br> • AI 추천 시스템 구현 <br> • 금융 데이터 수집 및 전처리 <br> • 기획서 및  발표 자료 |
 
-### 3.4 설계 의사결정 포인트
+<br>
 
-**왜 2-Stage 구조인가?**
+### 팀 회고 (Retrospective)
 
-- **성능/비용/지연 최적화**: 전체 상품(수백)·옵션(수천)을 매번 LLM로 평가하면 비용과 응답 시간이 급증합니다. Stage 1(XGBoost)이 **Top-10 상품으로 후보군을 압축**해 LLM 입력 크기와 호출 비용을 안정적으로 통제합니다.
-- **역할 분리로 품질 향상**: Stage 1은 정형·수치 피처 기반으로 “선택될 가능성이 높은 후보”를 빠르게 추리고, Stage 2는 **정성 텍스트와 목적 맥락**을 반영해 최종 옵션을 결정합니다.
+| 이름 | 회고 및 배운 점 |
+| :---: | :--- |
+| 박준아 | 프론트와 백엔드가 어떻게 데이터를 주고 받는지 확실하게 배웠습니다. 규모가 작은 프로젝트에서는 프론트의 역할과 책임이 훨씬 무겁다고 느꼈습니다. 기능 단위가 가볍기 때문에 백엔드에서 데이터를 생성하고 DB에서 가져오고 조립하는 과정이 복잡하지는 않았습니다. 오히려 RESTful API로 데이터를 주고 받는 과정에서 오류 처리를 어떻게 해야하고, 응답받은 데이터를 화면에 구현하는 과정이 훨씬 어려웠습니다. 기능 단위가 커지고 프로젝트 규모가 커진다면 백엔드 로직이 훨씬 복잡하고 어려워지고, 반면에 프론트엔드의 작업은 프로젝트의 규모와 상관없을 것 같다고 느꼈습니다. <br> 3주만에 기획-개발-테스트를 모두 해냈다는 사실이 무척 뿌듯합니다. 그럼에도 아직 구현하지 못한 기능이 많기 때문에 더 공부해서 도전해보고 싶은 마음입니다. 대표적으로 뱃지를 획득한 경우, django의 signals에서 조건이 충족되면 자동으로 발급되어 DB에 기록됩니다. 하지만 프론트에서 DB의 내용을 가져오려면 API를 호출하는 방법밖에 없습니다. 때문에 뱃지가 발급됨과 동시에 유저에게 알림을 주기 위해서는 polling이나 socket을 도입해야 합니다. 이 기능과 배포까지 완성해보고 싶습니다.|
+| 정환승 | ML 모델을 학습할 때 페이크 데이터 기반으로 진행한 점은 조금 아쉬웠습니다. 실제 사용자 데이터가 있었다면 추천 품질을 더 현실적으로 검증할 수 있었고, 특히 뱃지 같은 리워드/커뮤니티 활동 지표도 유저 성향을 보여주는 좋은 피처가 될 것 같았는데 시간적 제약 때문에 학습 단계에까지 반영해보지 못한 점이 아쉽습니다. 그래도 “사용자 기반 추천시스템”을 직접 설계해보고자 ML 모델로 후보를 좁히는 구조를 만들고, 생성형 AI를 함께 활용해 최종 상품·옵션을 선택하고 근거를 생성하는 흐름까지 구현하면서 추천 시스템을 서비스 관점에서 설계하는 방법을 배울 수 있었습니다. 또한 추천 결과가 실제 기능으로 자연스럽게 이어지도록 REST API를 리소스 단위로 설계·구현하며 인증/권한/정책을 정리하는 과정에서, 단순히 기능을 만드는 것을 넘어 운영 가능한 형태로 구조화하는 경험을 할 수 있었습니다. |
 
----
+<br><br>
 
-## 4. 생성형 AI 활용 내용 (추천 로직)
+## 프로젝트 실행 방법
 
-GMS의 **gpt-5-mini**를 추천 로직(Stage 2)에 적용해, Stage 1에서 추린 Top-10 후보 중에서 사용자 목표·성향과 상품 텍스트 정보(우대조건/유의사항 등)를 함께 고려하여 **최종 상품·옵션 1개를 선택**하고, 선택 이유와 주의사항을 **구조화된 JSON 형태**로 반환하도록 구성했습니다.
+이 프로젝트는 로컬 개발 환경에서 실행할 수 있습니다.
 
----
-
-## 5. 소감
-| 박준아 | 정환승 |
-| --- | --- |
-| 프론트와 백엔드가 어떻게 데이터를 주고 받는지 확실하게 배웠습니다. 규모가 작은 프로젝트에서는 프론트의 역할과 책임이 훨씬 무겁다고 느꼈습니다. 기능 단위가 가볍기 때문에 백엔드에서 데이터를 생성하고 DB에서 가져오고 조립하는 과정이 복잡하지는 않았습니다. 오히려 RESTful API로 데이터를 주고 받는 과정에서 오류 처리를 어떻게 해야하고, 응답받은 데이터를 화면에 구현하는 과정이 훨씬 어려웠습니다. 기능 단위가 커지고 프로젝트 규모가 커진다면 백엔드 로직이 훨씬 복잡하고 어려워지고, 반면에 프론트엔드의 작업은 프로젝트의 규모와 상관없을 것 같다고 느꼈습니다. <br> 3주만에 기획-개발-테스트를 모두 해냈다는 사실이 무척 뿌듯합니다. 그럼에도 아직 구현하지 못한 기능이 많기 때문에 더 공부해서 도전해보고 싶은 마음입니다. 대표적으로 뱃지를 획득한 경우, django의 signals에서 조건이 충족되면 자동으로 발급되어 DB에 기록됩니다. 하지만 프론트에서 DB의 내용을 가져오려면 API를 호출하는 방법밖에 없습니다. 때문에 뱃지가 발급됨과 동시에 유저에게 알림을 주기 위해서는 polling이나 socket을 도입해야 합니다. 이 기능과 배포까지 완성해보고 싶습니다. | ML 모델을 학습할 때 페이크 데이터 기반으로 진행한 점은 조금 아쉬웠습니다. 실제 사용자 데이터가 있었다면 추천 품질을 더 현실적으로 검증할 수 있었고, 특히 뱃지 같은 리워드/커뮤니티 활동 지표도 유저 성향을 보여주는 좋은 피처가 될 것 같았는데 시간적 제약 때문에 학습 단계에까지 반영해보지 못한 점이 아쉽습니다. 그래도 “사용자 기반 추천시스템”을 직접 설계해보고자 ML 모델로 후보를 좁히는 구조를 만들고, 생성형 AI를 함께 활용해 최종 상품·옵션을 선택하고 근거를 생성하는 흐름까지 구현하면서 추천 시스템을 서비스 관점에서 설계하는 방법을 배울 수 있었습니다. 또한 추천 결과가 실제 기능으로 자연스럽게 이어지도록 REST API를 리소스 단위로 설계·구현하며 인증/권한/정책을 정리하는 과정에서, 단순히 기능을 만드는 것을 넘어 운영 가능한 형태로 구조화하는 경험을 할 수 있었습니다. |
-
-
----
-
-## 6. 프로젝트 실행하는 방법
-
-### frontend/.env.local
-
-```
-VITE_API_URL='http://127.0.0.1:8000'
-
-VITE_YOUTUBE_API_KEY=''
-VITE_YOUTUBE_API_URL='https://www.googleapis.com/youtube/v3'
-
-VITE_KAKAO_API_KEY=''
-
-```
-
-### backend/.env
+### 1. Backend Setup (Django)
 
 ```bash
-DJANGO_SECRET_KEY=""
+# 레포지토리 클론
+git clone https://github.com/ajjoona-git/moathon.git
+cd moathon/backend
 
-# 개발 환경에서는 True
-# 운영 환경에서는 반드시 False
-DJANGO_DEBUG=True
-
-# 금감원 api
-FSS_API_KEY=
-
-EMAIL_HOST_USER=ajjoona@gmail.com
-EMAIL_HOST_PASSWORD=
-
-# GMS_KEY
-GMS_KEY=
-
-```
-
----
-
-## 프론트엔드 (Vue.js) 초기 설정
-
-### 서버 실행
-
-```bash
-cd ../frontend
-npm install
-npm run dev
-```
-
----
-
-## 백엔드 (Django) 초기 설정
-
-### 가상환경 설정
-
-```bash
-cd ../backend
+# 가상환경 생성 및 실행
 python -m venv venv
 source venv/Script/activate
+
+# 패키지 설치
 pip install -r requirements.txt
+
+# 환경 변수 설정 (.env 파일 생성)
+# DJANGO_SECRET_KEY, DEBUG=True, API_KEY 등을 설정하세요.
 ```
 
-### DB 설정(데이터 적재)
+#### DB 설정 (데이터 적재)
 
 ```bash
+# 데이터베이스 마이그레이션
 python manage.py makemigrations
 python manage.py migrate
 
@@ -350,10 +250,24 @@ python manage.py loaddata accounts/badge.json
 # 댓글 팔로우 좋아요 뱃지
 python manage.py loaddata accounts/accounts_social.json
 python manage.py loaddata challenges/challenges_social.json
+
+# 서버 실행
+python manage.py runserver
 ```
 
-### 서버 실행
+<br>
+
+### 2. Frontend Setup (Vue.js)
 
 ```bash
-python manage.py runserver
+cd ../frontend
+
+# 의존성 설치
+npm install
+
+# 환경 변수 설정 (.env.local 파일 생성)
+# VITE_API_URL 등 설정
+
+# 개발 서버 실행
+npm run dev
 ```
